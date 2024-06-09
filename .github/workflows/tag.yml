@@ -36,11 +36,11 @@ jobs:
       #- name: Fetch tags
       #  run: git fetch --force --tags
 #
-      #- name: Set up svu
-      #  run: |
-      #    echo 'deb [trusted=yes] https://apt.fury.io/caarlos0/ /' | sudo tee /etc/apt/sources.list.d/caarlos0.list
-      #    sudo apt update
-      #    sudo apt install svu
+      - name: Set up svu
+        run: |
+          echo 'deb [trusted=yes] https://apt.fury.io/caarlos0/ /' | sudo tee /etc/apt/sources.list.d/caarlos0.list
+          sudo apt update
+          sudo apt install svu
 #
       #- name: Tag
       #  run: git tag $(svu next --force-patch-increment)

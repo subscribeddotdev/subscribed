@@ -60,7 +60,7 @@ jobs:
           AWS_ECR_REGISTRY: ${{ secrets.AWS_ECR_REGISTRY }}
           AWS_ECR_REPOSITORY: ${{ secrets.AWS_ECR_REPOSITORY }}
         run: |
-          docker build -t $AWS_ECR_REGISTRY/$AWS_ECR_REPOSITORY:$(svu current) --build-arg $(svu current) .
+          docker build -t $AWS_ECR_REGISTRY/$AWS_ECR_REPOSITORY:$(svu current) --build-arg VERSION=$(svu current) .
           docker push $AWS_ECR_REGISTRY/$AWS_ECR_REPOSITORY:$(svu current)
 
       # Publishes a tag in the following format: v0.0.1

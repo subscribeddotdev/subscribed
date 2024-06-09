@@ -1,8 +1,10 @@
 name: pr
+# on:
+#   push:
+#     branches-ignore:
+#       - main
 on:
-  push:
-    branches-ignore:
-      - main
+  workflow_call:
 
 jobs:
   ci:

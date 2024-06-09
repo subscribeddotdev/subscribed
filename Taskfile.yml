@@ -7,7 +7,7 @@ dotenv:
 tasks:
   run:
     cmds:
-      - task watch -- go run ./cmd/
+      - task watch -- go run ./cmd/service
 
   watch:
     cmds:

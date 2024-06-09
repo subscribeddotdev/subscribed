@@ -1,0 +1,29 @@
+name: deploy-production
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: v0.0.0 (semver)
+        required: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.PAT }}
+          ref: refs/tags/${{ inputs.version }}
+
+      - uses: arduino/setup-task@v1
+        with:
+          version: 3.10.0
+
+      # - uses: superfly/flyctl-actions/setup-flyctl@master
+
+      # - name: Deploy to Production
+      #   run: task deploy:prd -- ${{ inputs.version }}
+      #   env:
+      #     FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}

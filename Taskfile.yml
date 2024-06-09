@@ -1,0 +1,130 @@
+version: 3
+
+dotenv:
+  - ./.env.local
+  - ./.env
+
+tasks:
+  run:
+    cmds:
+      - task watch -- go run ./cmd/
+
+  watch:
+    cmds:
+      - |
+        reflex -r '\.go' -s -- sh -c '{{.CLI_ARGS}}'
+
+  mig:up:
+    cmds:
+      - goose -s -dir ./misc/sql/migrations up
+
+  mig:down:
+    cmds:
+      - goose -s -dir ./misc/sql/migrations down
+
+  mig:create:
+    cmds:
+      - goose -s -dir ./misc/sql/migrations create {{.CLI_ARGS}} sql
+
+  seed:up:
+    cmds:
+      - goose -no-versioning -dir ./misc/sql/seeds up
+
+  seed:down:
+    cmds:
+      - goose -no-versioning -dir ./misc/sql/seeds down
+
+  seed:create:
+    cmds:
+      - goose -no-versioning -dir ./misc/sql/seeds create {{.CLI_ARGS}} sql
+
+  orm:
+    cmds:
+      - task mig:down
+      - task mig:up
+      - sqlboiler psql --wipe --no-tests -o ./internal/adapters/models
+
+  test:all:
+    cmds:
+      - task wait-for -- 8080
+      - task test
+      - task test:components
+
+  test:
+    cmds:
+      - go clean -testcache
+      - go test -v ./internal/...
+
+  test:components:
+    cmds:
+      - go clean -testcache
+      - go test -v ./tests/components/...
+
+  lint:docker:
+    cmds:
+      - docker run --rm -v $(pwd):/app -w /app golangci/golangci-lint:v1.54.0 golangci-lint run -v
+
+  lint:
+    cmds:
+      - golangci-lint run
+
+  lint:fix:
+    cmds:
+      - golangci-lint run --fix
+
+  fmt:
+    cmds:
+      - gofmt -w -s ./
+
+  logs:
+    cmds:
+      - docker-compose logs -f --tail 10
+
+  docker:up:
+    cmds:
+      - docker-compose up -d
+
+  docker:build:
+    cmds:
+      - docker build -t dobermann.dev/backend:latest .
+
+  docker:build-simulator:
+    cmds:
+      - docker build -t dobermann.dev/simulator:latest -f simulator.Dockerfile .
+
+  docker:run:
+    cmds:
+      - docker run --env-file ./.env.local dobermann.dev/backend:latest
+
+  wait-for:
+    cmds:
+      - |
+        echo "Waiting service to launch on {{.CLI_ARGS}}..."
+        
+        while ! nc -z localhost {{.CLI_ARGS}}; do
+          sleep 0.1 # wait for 1/10 of the second before check again
+        done
+        
+        echo "Service launched"
+
+  openapi:
+    cmds:
+      - |
+        oapi-codegen \
+          -package http \
+          -generate server,types,spec \
+          ./api/openapi.yml > ./internal/ports/http/server.gen.go
+
+      - |
+        oapi-codegen \
+          -package client \
+          -generate client,types,spec \
+          ./api/openapi.yml > ./tests/client/client.gen.go
+
+  events:
+    cmds:
+      - |
+        protoc ./events/events.proto \
+        --go_out=./events/go --go_opt=paths=source_relative \
+        --go-grpc_out=./events/go --go-grpc_opt=paths=source_relative \
+        --proto_path=./events

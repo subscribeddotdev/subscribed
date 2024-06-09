@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+option go_package = "github.com/subscribeddotdev/subscribed-backend/events";
+
+import "google/protobuf/timestamp.proto";
+
+message Header {
+  string id = 1;
+  string name = 2;
+  string correlation_id = 3;
+  string publisher_name = 4;
+  google.protobuf.Timestamp published_at = 5;
+}
+
+message SomethingHappened {
+  Header header = 1;
+
+  string id = 2;
+}

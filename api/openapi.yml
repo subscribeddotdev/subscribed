@@ -1,0 +1,71 @@
+openapi: 3.0.3
+info:
+  title: subscribed-backend
+  description: Subscribed's backend
+  termsOfService: https://github.com/subscribeddotdev/subscribed-backend
+  contact:
+    email: firmino.changani@gmail.com
+  license:
+    name: MIT
+    url: https://github.com/subscribeddotdev/subscribed-backend/LICENSE.md
+  version: 0.0.1
+externalDocs:
+  description: https://github.com/subscribeddotdev/subscribed-backend/README.md
+  url: https://github.com/subscribeddotdev/subscribed-backend
+servers:
+  - url: http://localhost:8080
+paths:
+  /hello-world:
+    get:
+      tags:
+        - HelloWorld
+      operationId: getHelloWorld
+      summary: Dummy
+      responses:
+        '201':
+          description: CREATED
+        default:
+          $ref: '#/components/responses/DefaultError'
+components:
+  schemas:
+    GenericResponse:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+    ErrorResponse:
+      type: object
+      required: [error, message]
+      properties:
+        message:
+          type: string
+          description: A description about the error
+        error:
+          type: string
+          description: Error custom error code such as 'email_in_use'
+  responses:
+    UnauthorizedError:
+      description: 'Usually causes by an authentication token missing'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    DefaultSuccess:
+      description: 'Default message when an operation succeeds'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/GenericResponse'
+    DefaultError:
+      description: 'A generic error response'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

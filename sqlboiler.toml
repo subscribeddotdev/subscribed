@@ -1,0 +1,9 @@
+[psql]
+dbname = "postgres"
+blacklist = ["goose_db_version"]
+host    = "localhost"
+port    = 5432
+user    = "postgres"
+pass    = "password"
+sslmode = "disable"
+no-context = "true"

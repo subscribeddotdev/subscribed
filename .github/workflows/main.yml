@@ -11,6 +11,9 @@ jobs:
   tag:
     uses: ./.github/workflows/tag.yml
     needs: ci
+    permissions:
+      id-token: write
+      contents: read
     secrets:
       PAT: ${{ secrets.PAT }}
       AWS_ECR_ROLE: ${{ secrets.AWS_ECR_ROLE }}

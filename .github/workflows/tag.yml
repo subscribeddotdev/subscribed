@@ -1,0 +1,57 @@
+name: tag
+
+on:
+  workflow_call:
+    outputs:
+      version:
+        description: "Version recently released"
+        value: ${{ jobs.tag.outputs.version }}
+    secrets:
+      PAT:
+        required: true
+
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.print_version.outputs.version }}
+    steps:
+      - name: Clone
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.PAT }}
+
+      - name: Setup
+        run: |
+          git config user.name "Subscribed Bot"
+          git config user.email "github@subscribed.dev"
+
+      - name: Fetch tags
+        run: git fetch --force --tags
+
+      - name: Set up svu
+        run: |
+          echo 'deb [trusted=yes] https://apt.fury.io/caarlos0/ /' | sudo tee /etc/apt/sources.list.d/caarlos0.list
+          sudo apt update
+          sudo apt install svu
+
+      - name: Tag
+        run: git tag $(svu next --force-patch-increment)
+
+      # Publishes a tag in the following format: v0.0.1
+      - name: Publish tag
+        run: git push origin $(svu current)
+
+      - name: Create release
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT }}
+        run: gh release create $(svu current) --verify-tag --latest --target=main --notes ""
+
+      # Print version so that other steps are able to automatically read it if needed
+      # for instance to automatically deploy the version to an environment
+      - id: print_version
+        shell: bash
+        run: |
+          version=$(svu current)
+          echo "version=$version" >> $GITHUB_OUTPUT

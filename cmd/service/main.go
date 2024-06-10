@@ -12,6 +12,7 @@ import (
 	"github.com/ThreeDotsLabs/watermill"
 	"github.com/kelseyhightower/envconfig"
 	_ "github.com/lib/pq"
+	"github.com/subscribeddotdev/subscribed-backend/internal/common/clerkhttp"
 	"golang.org/x/sync/errgroup"
 
 	"github.com/subscribeddotdev/subscribed-backend/internal/adapters/events"
@@ -23,11 +24,13 @@ import (
 )
 
 type Config struct {
-	DatabaseUrl       string `envconfig:"DATABASE_URL"`
-	Port              int    `envconfig:"HTTP_PORT"`
-	ProductionMode    bool   `envconfig:"PRODUCTION_MODE"`
-	AllowedCorsOrigin string `envconfig:"HTTP_ALLOWED_CORS"`
-	AmqpUrL           string `envconfig:"AMQP_URL"`
+	DatabaseUrl            string `envconfig:"DATABASE_URL"`
+	Port                   int    `envconfig:"HTTP_PORT"`
+	ProductionMode         bool   `envconfig:"PRODUCTION_MODE"`
+	AllowedCorsOrigin      string `envconfig:"HTTP_ALLOWED_CORS"`
+	AmqpUrL                string `envconfig:"AMQP_URL"`
+	ClerkSecretKey         string `envconfig:"CLERK_SECRET_KEY"`
+	ClerkEmulatorServerURL string `envconfig:"CLERK_EMULATOR_SERVER_URL"`
 }
 
 func main() {
@@ -57,6 +60,11 @@ func run(logger *logs.Logger) error {
 		return err
 	}
 
+	if !config.ProductionMode {
+		logger.Info("[LOGIN PROVIDER] setting up clerk to work with the simulator", "emulator_url", config.ClerkEmulatorServerURL)
+		clerkhttp.SetupClerkForTestingMode(config.ClerkEmulatorServerURL)
+	}
+
 	eventPublisher, err := events.NewPublisher(config.AmqpUrL, watermill.NewStdLogger(!config.ProductionMode, !config.ProductionMode))
 	if err != nil {
 		return err
@@ -76,6 +84,7 @@ func run(logger *logs.Logger) error {
 		Application:       application,
 		Port:              config.Port,
 		IsDebug:           !config.ProductionMode,
+		ClerkSecretKey:    config.ClerkSecretKey,
 		AllowedCorsOrigin: strings.Split(config.AllowedCorsOrigin, ","),
 	})
 	if err != nil {

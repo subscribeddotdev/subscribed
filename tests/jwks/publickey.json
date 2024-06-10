@@ -1,0 +1,8 @@
+{
+  "kty": "RSA",
+  "e": "AQAB",
+  "use": "sig",
+  "kid": "kid-emulators",
+  "alg": "RS256",
+  "n": "tu5KUHQdCoX8ua5jILs8kto6Bz_PMh7ZpRqfGRl6Sg-px2Uj5wKfENgtTLrH-sYIpq-KdkrRT8dG1BZ8YrJJeDRIEuw3t16AomR51nuBd66SqLeW8USxosZuOuekpaoppQ4XwvGiAd4bL-pSN79M2sN5jlBW0CuzhySmWYnxHtbdWr0gCxaTIX7OuWR9mKOfdZGSnmq8lIYefdj8aqgxu1M4xScNUBwYf8LTwB-OsqqXzu8_xlKsTJnH8UBPFhbPDQfGnb7ba6XEwfgmFO0usjOLuhWh7yj-ufQH1FFv_KZ59l8ExsyZ_UeiI3hPHCW93BlgVr4zn5znwiIV1m8pPw"
+}

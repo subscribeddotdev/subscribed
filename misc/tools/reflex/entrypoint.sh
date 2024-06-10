@@ -1,4 +1,4 @@
 #!/bin/bash
 
 cd /usr/app
-task run
+task run:$APP_NAME

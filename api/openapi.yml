@@ -19,6 +19,8 @@ paths:
     get:
       tags:
         - HelloWorld
+      security:
+        - BearerAuth: [ ]
       operationId: getHelloWorld
       summary: Dummy
       responses:

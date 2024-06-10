@@ -11,10 +11,10 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-//go:embed publickey.json
+//go:embed publickey.test.json
 var JwksPublicKey string
 
-//go:embed privatekey.json
+//go:embed privatekey.test.json
 var JwksPrivateKey string
 
 func JwtGenerator(t *testing.T, claims any) string {

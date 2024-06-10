@@ -3,11 +3,16 @@ version: 3
 dotenv:
   - ./.env.local
   - ./.env
+  - ./.env.secrets
 
 tasks:
-  run:
+  run:backend:
     cmds:
       - task watch -- go run ./cmd/service
+
+  run:emulators:
+    cmds:
+      - task watch -- go run ./cmd/emulators
 
   watch:
     cmds:
@@ -62,7 +67,7 @@ tasks:
 
   lint:docker:
     cmds:
-      - docker run --rm -v $(pwd):/app -w /app golangci/golangci-lint:v1.54.0 golangci-lint run -v
+      - docker run --rm -v $(pwd):/app -w /app golangci/golangci-lint:v1.59.1 golangci-lint run -v
 
   lint:
     cmds:
@@ -82,7 +87,7 @@ tasks:
 
   docker:up:
     cmds:
-      - docker-compose up -d
+      - docker-compose up -d {{.CLI_ARGS}}
 
   docker:build:
     cmds:

@@ -13,6 +13,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	oapimiddleware "github.com/oapi-codegen/echo-middleware"
+	"github.com/subscribeddotdev/subscribed-backend/internal/common/clerkhttp"
 
 	"github.com/subscribeddotdev/subscribed-backend/internal/app"
 	"github.com/subscribeddotdev/subscribed-backend/internal/common/logs"
@@ -30,6 +31,7 @@ type Config struct {
 	Logger            *logs.Logger
 	IsDebug           bool
 	Ctx               context.Context
+	ClerkSecretKey    string
 }
 
 func NewServer(config Config) (*Server, error) {
@@ -43,6 +45,7 @@ func NewServer(config Config) (*Server, error) {
 	routerHandlers := &handlers{
 		application: config.Application,
 	}
+
 	registerMiddlewares(router, spec, config)
 	RegisterHandlers(router, routerHandlers)
 
@@ -93,14 +96,13 @@ func registerMiddlewares(router *echo.Echo, spec *openapi3.T, config Config) {
 		},
 	}))
 
+	authMiddleware := clerkhttp.NewEchoOapiAuthMiddleware(config.ClerkSecretKey)
+
 	spec.Servers = nil
 	router.Use(oapimiddleware.OapiRequestValidatorWithOptions(spec, &oapimiddleware.Options{
 		ErrorHandler: nil,
 		Options: openapi3filter.Options{
-			AuthenticationFunc: func(ctx context.Context, input *openapi3filter.AuthenticationInput) error {
-				// bypass jwt validation
-				return nil
-			},
+			AuthenticationFunc: authMiddleware.Middleware(),
 		},
 	}))
 }

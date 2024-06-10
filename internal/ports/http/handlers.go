@@ -9,7 +9,8 @@ type handlers struct {
 	application *app.App
 }
 
-func (h handlers) GetHelloWorld(ctx echo.Context) error {
-	//TODO implement me
-	panic("implement me")
+func (h handlers) GetHelloWorld(c echo.Context) error {
+	return c.JSON(200, map[string]string{
+		"msg": "Hello World",
+	})
 }

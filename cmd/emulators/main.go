@@ -24,7 +24,7 @@ func main() {
 
 	err := router.Start(":8090")
 	if err != nil {
-		logger.Error("emulators crashed", err)
+		logger.Error("emulators crashed", "error", err)
 		os.Exit(1)
 	}
 }

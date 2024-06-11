@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/subscribeddotdev/subscribed-backend/internal/adapters/psql"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 
 	"github.com/subscribeddotdev/subscribed-backend/internal/adapters/events"
@@ -32,7 +33,9 @@ func (p PsqlProvider) Transact(ctx context.Context, f command.TransactFunc) erro
 	}
 
 	adapters := command.TransactableAdapters{
-		EventPublisher: p.eventPublisher,
+		EventPublisher:         p.eventPublisher,
+		MemberRepository:       psql.NewMemberRepository(tx),
+		OrganizationRepository: psql.NewOrganizationRepository(tx),
 	}
 
 	if err = f(adapters); err != nil {

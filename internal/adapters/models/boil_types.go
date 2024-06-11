@@ -50,33 +50,3 @@ func makeCacheKey(cols boil.Columns, nzDefaults []string) string {
 	strmangle.PutBuffer(buf)
 	return str
 }
-
-// Enum values for Bookavailability
-const (
-	BookavailabilityAvailable string = "available"
-	BookavailabilityOnLoan    string = "on_loan"
-	BookavailabilityLost      string = "lost"
-)
-
-func AllBookavailability() []string {
-	return []string{
-		BookavailabilityAvailable,
-		BookavailabilityOnLoan,
-		BookavailabilityLost,
-	}
-}
-
-// Enum values for Bookformat
-const (
-	BookformatHardcover string = "hardcover"
-	BookformatPaperback string = "paperback"
-	BookformatAudiobook string = "audiobook"
-)
-
-func AllBookformat() []string {
-	return []string{
-		BookformatHardcover,
-		BookformatPaperback,
-		BookformatAudiobook,
-	}
-}

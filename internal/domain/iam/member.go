@@ -3,11 +3,16 @@ package iam
 import (
 	"errors"
 	"strings"
+	"time"
 
 	"github.com/subscribeddotdev/subscribed-backend/internal/domain"
 )
 
 type LoginProviderID string
+
+func (i LoginProviderID) String() string {
+	return string(i)
+}
 
 func (i LoginProviderID) Validate() error {
 	if strings.TrimSpace(string(i)) == "" {
@@ -24,6 +29,7 @@ type Member struct {
 	firstName       string
 	lastName        string
 	email           Email
+	createdAt       time.Time
 }
 
 func NewMember(
@@ -52,5 +58,34 @@ func NewMember(
 		firstName:       firstName,
 		lastName:        lastName,
 		email:           email,
+		createdAt:       time.Now().UTC(),
 	}, nil
+}
+
+func (m *Member) Id() domain.ID {
+	return m.id
+}
+
+func (m *Member) OrganizationID() domain.ID {
+	return m.organizationID
+}
+
+func (m *Member) LoginProviderId() LoginProviderID {
+	return m.loginProviderId
+}
+
+func (m *Member) FirstName() string {
+	return m.firstName
+}
+
+func (m *Member) LastName() string {
+	return m.lastName
+}
+
+func (m *Member) Email() Email {
+	return m.email
+}
+
+func (m *Member) CreatedAt() time.Time {
+	return m.createdAt
 }

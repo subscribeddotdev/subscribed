@@ -50,3 +50,11 @@ func MarshallToOrganization(
 func (o *Organization) Id() domain.ID {
 	return o.id
 }
+
+func (o *Organization) CreatedAt() time.Time {
+	return o.createdAt
+}
+
+func (o *Organization) DisabledAt() *time.Time {
+	return o.disabledAt
+}

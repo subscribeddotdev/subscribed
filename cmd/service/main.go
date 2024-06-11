@@ -12,7 +12,9 @@ import (
 	"github.com/ThreeDotsLabs/watermill"
 	"github.com/kelseyhightower/envconfig"
 	_ "github.com/lib/pq"
+	"github.com/subscribeddotdev/subscribed-backend/internal/app/command"
 	"github.com/subscribeddotdev/subscribed-backend/internal/common/clerkhttp"
+	"github.com/subscribeddotdev/subscribed-backend/internal/common/observability"
 	"golang.org/x/sync/errgroup"
 
 	"github.com/subscribeddotdev/subscribed-backend/internal/adapters/events"
@@ -72,10 +74,10 @@ func run(logger *logs.Logger) error {
 
 	txProvider := transaction.NewPsqlProvider(db, eventPublisher, logger)
 
-	fmt.Println(txProvider)
-
 	application := &app.App{
-		Command: app.Command{},
+		Command: app.Command{
+			CreateOrganization: observability.NewCommandDecorator[command.CreateOrganization](command.NewCreateOrganizationHandler(txProvider), logger),
+		},
 	}
 
 	httpserver, err := http.NewServer(http.Config{

@@ -26,3 +26,7 @@ func NewIdFromString(id string) (ID, error) {
 func (i ID) String() string {
 	return i.value.String()
 }
+
+func (i ID) IsEmpty() bool {
+	return i.value.String() == ""
+}

@@ -2,6 +2,8 @@ package app
 
 import (
 	"context"
+
+	"github.com/subscribeddotdev/subscribed-backend/internal/app/command"
 )
 
 type CommandHandler[C any] interface {
@@ -13,6 +15,8 @@ type QueryHandler[Q, R any] interface {
 }
 
 type Command struct {
+	// Iam
+	CreateOrganization CommandHandler[command.CreateOrganization]
 }
 
 type App struct {

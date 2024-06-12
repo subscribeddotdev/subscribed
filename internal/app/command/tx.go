@@ -2,6 +2,8 @@ package command
 
 import (
 	"context"
+
+	"github.com/subscribeddotdev/subscribed-backend/internal/domain/iam"
 )
 
 type TransactFunc func(adapters TransactableAdapters) error
@@ -11,7 +13,9 @@ type TransactionProvider interface {
 }
 
 type TransactableAdapters struct {
-	EventPublisher EventPublisher
+	EventPublisher         EventPublisher
+	MemberRepository       iam.MemberRepository
+	OrganizationRepository iam.OrganizationRepository
 }
 
 type EventPublisher interface {

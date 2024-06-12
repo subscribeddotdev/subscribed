@@ -54,3 +54,7 @@ func getClient(t *testing.T, token string) *client.ClientWithResponses {
 
 	return cli
 }
+
+func toPtr[T any](v T) *T {
+	return &v
+}

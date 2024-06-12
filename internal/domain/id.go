@@ -28,5 +28,5 @@ func (i ID) String() string {
 }
 
 func (i ID) IsEmpty() bool {
-	return i.value.String() == ""
+	return i.value.String() == "" || i.value.String() == "00000000000000000000000000"
 }

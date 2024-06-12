@@ -133,3 +133,9 @@ tasks:
         --go_out=./events/go --go_opt=paths=source_relative \
         --go-grpc_out=./events/go --go-grpc_opt=paths=source_relative \
         --proto_path=./events
+
+  # Proxies the app via NGROK to facilitate testing webhooks
+  # NGROK_URL must be set in your local .env.secrets
+  webhook:
+    cmds:
+      - ngrok http --domain=$NGROK_URL 8080

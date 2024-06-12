@@ -15,6 +15,7 @@ import (
 	"github.com/subscribeddotdev/subscribed-backend/internal/app/command"
 	"github.com/subscribeddotdev/subscribed-backend/internal/common/clerkhttp"
 	"github.com/subscribeddotdev/subscribed-backend/internal/common/observability"
+	svix "github.com/svix/svix-webhooks/go"
 	"golang.org/x/sync/errgroup"
 
 	"github.com/subscribeddotdev/subscribed-backend/internal/adapters/events"
@@ -26,13 +27,14 @@ import (
 )
 
 type Config struct {
-	DatabaseUrl            string `envconfig:"DATABASE_URL"`
-	Port                   int    `envconfig:"HTTP_PORT"`
-	ProductionMode         bool   `envconfig:"PRODUCTION_MODE"`
-	AllowedCorsOrigin      string `envconfig:"HTTP_ALLOWED_CORS"`
-	AmqpUrL                string `envconfig:"AMQP_URL"`
-	ClerkSecretKey         string `envconfig:"CLERK_SECRET_KEY"`
-	ClerkEmulatorServerURL string `envconfig:"CLERK_EMULATOR_SERVER_URL"`
+	DatabaseUrl            string `envconfig:"DATABASE_URL" required:"true"`
+	Port                   int    `envconfig:"HTTP_PORT" required:"true"`
+	ProductionMode         bool   `envconfig:"PRODUCTION_MODE" required:"true"`
+	AllowedCorsOrigin      string `envconfig:"HTTP_ALLOWED_CORS" required:"true"`
+	AmqpUrL                string `envconfig:"AMQP_URL" required:"true"`
+	ClerkSecretKey         string `envconfig:"CLERK_SECRET_KEY" required:"true"`
+	ClerkEmulatorServerURL string `envconfig:"CLERK_EMULATOR_SERVER_URL" required:"true"`
+	ClerkWebhookSecret     string `envconfig:"CLERK_WEBHOOK_SECRET" required:"true"`
 }
 
 func main() {
@@ -80,14 +82,20 @@ func run(logger *logs.Logger) error {
 		},
 	}
 
+	whVerifier, err := svix.NewWebhook(config.ClerkWebhookSecret)
+	if err != nil {
+		return fmt.Errorf("unable to create a webhook verifier: %v", err)
+	}
+
 	httpserver, err := http.NewServer(http.Config{
-		Ctx:               ctx,
-		Logger:            logger,
-		Application:       application,
-		Port:              config.Port,
-		IsDebug:           !config.ProductionMode,
-		ClerkSecretKey:    config.ClerkSecretKey,
-		AllowedCorsOrigin: strings.Split(config.AllowedCorsOrigin, ","),
+		Ctx:                          ctx,
+		Logger:                       logger,
+		Application:                  application,
+		Port:                         config.Port,
+		IsDebug:                      !config.ProductionMode,
+		ClerkSecretKey:               config.ClerkSecretKey,
+		LoginProviderWebhookVerifier: whVerifier,
+		AllowedCorsOrigin:            strings.Split(config.AllowedCorsOrigin, ","),
 	})
 	if err != nil {
 		return err

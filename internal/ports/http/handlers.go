@@ -1,16 +1,16 @@
 package http
 
 import (
-	"github.com/labstack/echo/v4"
+	"net/http"
+
 	"github.com/subscribeddotdev/subscribed-backend/internal/app"
 )
 
 type handlers struct {
-	application *app.App
+	application                  *app.App
+	loginProviderWebhookVerifier loginProviderWebhookVerifier
 }
 
-func (h handlers) GetHelloWorld(c echo.Context) error {
-	return c.JSON(200, map[string]string{
-		"msg": "Hello World",
-	})
+type loginProviderWebhookVerifier interface {
+	Verify(payload []byte, headers http.Header) error
 }

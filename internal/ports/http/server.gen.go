@@ -8,17 +8,118 @@ import (
 	"compress/gzip"
 	"encoding/base64"
 	"fmt"
+	"net/http"
 	"net/url"
 	"path"
 	"strings"
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/labstack/echo/v4"
+	"github.com/oapi-codegen/runtime"
 )
 
-const (
-	BearerAuthScopes = "BearerAuth.Scopes"
-)
+// CreateAccountRequest defines model for CreateAccountRequest.
+type CreateAccountRequest struct {
+	Data *struct {
+		// Birthday User's birthday (empty string if not set)
+		Birthday *string `json:"birthday,omitempty"`
+
+		// CreatedAt Timestamp (epoch milliseconds) representing user creation time
+		CreatedAt      *int `json:"created_at,omitempty"`
+		EmailAddresses *[]struct {
+			// EmailAddress User's email address
+			EmailAddress *string `json:"email_address,omitempty"`
+
+			// Id Unique identifier for the email address
+			Id *string `json:"id,omitempty"`
+
+			// LinkedTo (Array is empty for this event)
+			LinkedTo *[]map[string]interface{} `json:"linked_to,omitempty"`
+
+			// Object Object type (always "email_address" for this event)
+			Object       *string `json:"object,omitempty"`
+			Verification *struct {
+				// Status Verification status (e.g., "verified", "unverified")
+				Status *string `json:"status,omitempty"`
+
+				// Strategy Verification strategy (e.g., "ticket", "link")
+				Strategy *string `json:"strategy,omitempty"`
+			} `json:"verification,omitempty"`
+		} `json:"email_addresses,omitempty"`
+
+		// ExternalAccounts (Array is empty for this event)
+		ExternalAccounts *[]map[string]interface{} `json:"external_accounts,omitempty"`
+
+		// ExternalId User's external identifier
+		ExternalId *string `json:"external_id"`
+
+		// FirstName User's first name
+		FirstName *string `json:"first_name"`
+
+		// Gender User's gender (empty string if not set)
+		Gender *string `json:"gender,omitempty"`
+
+		// Id Unique identifier for the user
+		Id string `json:"id"`
+
+		// ImageUrl User's image URL (may be redacted)
+		ImageUrl *string `json:"image_url,omitempty"`
+
+		// LastName User's last name
+		LastName *string `json:"last_name"`
+
+		// LastSignInAt Timestamp (epoch milliseconds) representing last sign-in time
+		LastSignInAt *int `json:"last_sign_in_at"`
+
+		// Object Object type (always "user" for this event)
+		Object *string `json:"object,omitempty"`
+
+		// PasswordEnabled Whether the user has password authentication enabled
+		PasswordEnabled bool `json:"password_enabled"`
+
+		// PhoneNumbers (Array is empty for this event)
+		PhoneNumbers *[]map[string]interface{} `json:"phone_numbers,omitempty"`
+
+		// PrimaryEmailAddressId Unique identifier for the primary email address
+		PrimaryEmailAddressId *string `json:"primary_email_address_id"`
+
+		// PrimaryPhoneNumberId Unique identifier for the primary phone number (null if not set)
+		PrimaryPhoneNumberId *string `json:"primary_phone_number_id"`
+
+		// PrimaryWeb3WalletId Unique identifier for the primary web3 wallet (null if not set)
+		PrimaryWeb3WalletId *string `json:"primary_web3_wallet_id"`
+
+		// PrivateMetadata User's private metadata (empty object for this event)
+		PrivateMetadata *map[string]interface{} `json:"private_metadata,omitempty"`
+
+		// ProfileImageUrl User's profile image URL (may be redacted)
+		ProfileImageUrl *string `json:"profile_image_url,omitempty"`
+
+		// PublicMetadata User's public metadata (empty object for this event)
+		PublicMetadata *map[string]interface{} `json:"public_metadata,omitempty"`
+
+		// TwoFactorEnabled Whether two-factor authentication is enabled
+		TwoFactorEnabled bool `json:"two_factor_enabled"`
+
+		// UnsafeMetadata User's unsafe metadata (empty object for this event)
+		UnsafeMetadata *map[string]interface{} `json:"unsafe_metadata,omitempty"`
+
+		// UpdatedAt Timestamp (epoch milliseconds) representing user update time
+		UpdatedAt *int `json:"updated_at,omitempty"`
+
+		// Username Username (null if not set)
+		Username *string `json:"username"`
+
+		// Web3Wallets (Array is empty for this event)
+		Web3Wallets *[]map[string]interface{} `json:"web3_wallets,omitempty"`
+	} `json:"data,omitempty"`
+
+	// Object Event type (always "user.created" for this event)
+	Object *string `json:"object,omitempty"`
+
+	// Type Event type (always "user.created" for this event)
+	Type *string `json:"type,omitempty"`
+}
 
 // ErrorResponse defines model for ErrorResponse.
 type ErrorResponse struct {
@@ -32,11 +133,21 @@ type ErrorResponse struct {
 // DefaultError defines model for DefaultError.
 type DefaultError = ErrorResponse
 
+// CreateAccountParams defines parameters for CreateAccount.
+type CreateAccountParams struct {
+	SvixId        string `json:"svix-id"`
+	SvixTimestamp string `json:"svix-timestamp"`
+	SvixSignature string `json:"svix-signature"`
+}
+
+// CreateAccountJSONRequestBody defines body for CreateAccount for application/json ContentType.
+type CreateAccountJSONRequestBody = CreateAccountRequest
+
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
-	// Dummy
-	// (GET /hello-world)
-	GetHelloWorld(ctx echo.Context) error
+	// Creates a new account
+	// (POST /webhooks/account)
+	CreateAccount(ctx echo.Context, params CreateAccountParams) error
 }
 
 // ServerInterfaceWrapper converts echo contexts to parameters.
@@ -44,14 +155,68 @@ type ServerInterfaceWrapper struct {
 	Handler ServerInterface
 }
 
-// GetHelloWorld converts echo context to params.
-func (w *ServerInterfaceWrapper) GetHelloWorld(ctx echo.Context) error {
+// CreateAccount converts echo context to params.
+func (w *ServerInterfaceWrapper) CreateAccount(ctx echo.Context) error {
 	var err error
 
-	ctx.Set(BearerAuthScopes, []string{})
+	// Parameter object where we will unmarshal all parameters from the context
+	var params CreateAccountParams
+
+	headers := ctx.Request().Header
+	// ------------- Required header parameter "svix-id" -------------
+	if valueList, found := headers[http.CanonicalHeaderKey("svix-id")]; found {
+		var SvixId string
+		n := len(valueList)
+		if n != 1 {
+			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Expected one value for svix-id, got %d", n))
+		}
+
+		err = runtime.BindStyledParameterWithLocation("simple", false, "svix-id", runtime.ParamLocationHeader, valueList[0], &SvixId)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter svix-id: %s", err))
+		}
+
+		params.SvixId = SvixId
+	} else {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Header parameter svix-id is required, but not found"))
+	}
+	// ------------- Required header parameter "svix-timestamp" -------------
+	if valueList, found := headers[http.CanonicalHeaderKey("svix-timestamp")]; found {
+		var SvixTimestamp string
+		n := len(valueList)
+		if n != 1 {
+			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Expected one value for svix-timestamp, got %d", n))
+		}
+
+		err = runtime.BindStyledParameterWithLocation("simple", false, "svix-timestamp", runtime.ParamLocationHeader, valueList[0], &SvixTimestamp)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter svix-timestamp: %s", err))
+		}
+
+		params.SvixTimestamp = SvixTimestamp
+	} else {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Header parameter svix-timestamp is required, but not found"))
+	}
+	// ------------- Required header parameter "svix-signature" -------------
+	if valueList, found := headers[http.CanonicalHeaderKey("svix-signature")]; found {
+		var SvixSignature string
+		n := len(valueList)
+		if n != 1 {
+			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Expected one value for svix-signature, got %d", n))
+		}
+
+		err = runtime.BindStyledParameterWithLocation("simple", false, "svix-signature", runtime.ParamLocationHeader, valueList[0], &SvixSignature)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter svix-signature: %s", err))
+		}
+
+		params.SvixSignature = SvixSignature
+	} else {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Header parameter svix-signature is required, but not found"))
+	}
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.GetHelloWorld(ctx)
+	err = w.Handler.CreateAccount(ctx, params)
 	return err
 }
 
@@ -83,23 +248,35 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 		Handler: si,
 	}
 
-	router.GET(baseURL+"/hello-world", wrapper.GetHelloWorld)
+	router.POST(baseURL+"/webhooks/account", wrapper.CreateAccount)
 
 }
 
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
+	"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",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

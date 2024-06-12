@@ -25,13 +25,14 @@ type Server struct {
 }
 
 type Config struct {
-	Application       *app.App
-	Port              int
-	AllowedCorsOrigin []string
-	Logger            *logs.Logger
-	IsDebug           bool
-	Ctx               context.Context
-	ClerkSecretKey    string
+	Application                  *app.App
+	Port                         int
+	AllowedCorsOrigin            []string
+	Logger                       *logs.Logger
+	IsDebug                      bool
+	Ctx                          context.Context
+	ClerkSecretKey               string
+	LoginProviderWebhookVerifier loginProviderWebhookVerifier
 }
 
 func NewServer(config Config) (*Server, error) {
@@ -43,7 +44,8 @@ func NewServer(config Config) (*Server, error) {
 	}
 
 	routerHandlers := &handlers{
-		application: config.Application,
+		loginProviderWebhookVerifier: config.LoginProviderWebhookVerifier,
+		application:                  config.Application,
 	}
 
 	registerMiddlewares(router, spec, config)

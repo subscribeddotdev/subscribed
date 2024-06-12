@@ -14,6 +14,18 @@ type CreateOrganization struct {
 	LoginProviderID iam.LoginProviderID
 }
 
+func (o CreateOrganization) validate() error {
+	if err := o.LoginProviderID.Validate(); err != nil {
+		return err
+	}
+
+	if o.Email.IsEmpty() {
+		return fmt.Errorf("email is empty")
+	}
+
+	return nil
+}
+
 type CreateOrganizationHandler struct {
 	txProvider TransactionProvider
 }
@@ -25,10 +37,24 @@ func NewCreateOrganizationHandler(txProvider TransactionProvider) CreateOrganiza
 }
 
 func (c CreateOrganizationHandler) Execute(ctx context.Context, cmd CreateOrganization) error {
+	if err := cmd.validate(); err != nil {
+		return err
+	}
+
 	return c.txProvider.Transact(ctx, func(adapters TransactableAdapters) error {
+		exists, err := adapters.MemberRepository.ExistsByOr(ctx, cmd.Email, cmd.LoginProviderID)
+		if err != nil {
+			return err
+		}
+
+		if exists {
+			// idempotent-friendliness
+			return nil
+		}
+
 		org := iam.NewOrganization()
 
-		err := adapters.OrganizationRepository.Insert(ctx, org)
+		err = adapters.OrganizationRepository.Insert(ctx, org)
 		if err != nil {
 			return fmt.Errorf("unable to save organization: %v", err)
 		}

@@ -8,4 +8,6 @@ type OrganizationRepository interface {
 
 type MemberRepository interface {
 	Insert(ctx context.Context, member *Member) error
+
+	ExistsByOr(ctx context.Context, email Email, loginProviderID LoginProviderID) (bool, error)
 }

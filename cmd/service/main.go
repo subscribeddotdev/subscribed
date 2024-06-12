@@ -82,9 +82,14 @@ func run(logger *logs.Logger) error {
 		},
 	}
 
-	whVerifier, err := svix.NewWebhook(config.ClerkWebhookSecret)
-	if err != nil {
-		return fmt.Errorf("unable to create a webhook verifier: %v", err)
+	var webhookVerifier http.LoginProviderWebhookVerifier
+	if config.ProductionMode {
+		webhookVerifier, err = svix.NewWebhook(config.ClerkWebhookSecret)
+		if err != nil {
+			return fmt.Errorf("unable to create a webhook verifier: %v", err)
+		}
+	} else {
+		webhookVerifier = &clerkhttp.MockWebHookVerifier{}
 	}
 
 	httpserver, err := http.NewServer(http.Config{
@@ -94,7 +99,7 @@ func run(logger *logs.Logger) error {
 		Port:                         config.Port,
 		IsDebug:                      !config.ProductionMode,
 		ClerkSecretKey:               config.ClerkSecretKey,
-		LoginProviderWebhookVerifier: whVerifier,
+		LoginProviderWebhookVerifier: webhookVerifier,
 		AllowedCorsOrigin:            strings.Split(config.AllowedCorsOrigin, ","),
 	})
 	if err != nil {

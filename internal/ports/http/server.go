@@ -32,7 +32,7 @@ type Config struct {
 	IsDebug                      bool
 	Ctx                          context.Context
 	ClerkSecretKey               string
-	LoginProviderWebhookVerifier loginProviderWebhookVerifier
+	LoginProviderWebhookVerifier LoginProviderWebhookVerifier
 }
 
 func NewServer(config Config) (*Server, error) {

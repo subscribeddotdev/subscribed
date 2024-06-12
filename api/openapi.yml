@@ -50,131 +50,136 @@ paths:
           $ref: '#/components/responses/DefaultError'
 components:
   schemas:
+    ClerkWebhookEmailAddress:
+      required: [email_address, id, linked_to]
+      properties:
+        email_address:
+          type: string
+          description: User's email address
+        id:
+          type: string
+          description: Unique identifier for the email address
+        linked_to:
+          type: array
+          description: (Array is empty for this event)
+          nullable: true
+          items:
+            type: object
+            # Add properties for linked objects if needed
+        object:
+          type: string
+          description: Object type (always "email_address" for this event)
+        verification:
+          type: object
+          properties:
+            status:
+              type: string
+              description: Verification status (e.g., "verified", "unverified")
+            strategy:
+              type: string
+              description: Verification strategy (e.g., "ticket", "link")
+    ClerkWebhookUserCreatedData:
+      required: [ id, password_enabled, two_factor_enabled, created_at, email_addresses ]
+      properties:
+        birthday:
+          type: string
+          description: User's birthday (empty string if not set)
+        created_at:
+          type: integer
+          description: Timestamp (epoch milliseconds) representing user creation time
+        email_addresses:
+          type: array
+          items:
+            $ref: '#/components/schemas/ClerkWebhookEmailAddress'
+        external_accounts:
+          type: array
+          description: (Array is empty for this event)
+          items:
+            type: object
+            # Add properties for external accounts if needed
+        external_id:
+          type: string
+          nullable: true
+          description: User's external identifier
+        first_name:
+          type: string
+          nullable: true
+          description: User's first name
+        gender:
+          type: string
+          description: User's gender (empty string if not set)
+        id:
+          type: string
+          description: Unique identifier for the user
+        image_url:
+          type: string
+          description: User's image URL (may be redacted)
+        last_name:
+          type: string
+          nullable: true
+          description: User's last name
+        last_sign_in_at:
+          type: integer
+          nullable: true
+          description: Timestamp (epoch milliseconds) representing last sign-in time
+        object:
+          type: string
+          description: Object type (always "user" for this event)
+        password_enabled:
+          type: boolean
+          description: Whether the user has password authentication enabled
+        phone_numbers:
+          type: array
+          description: (Array is empty for this event)
+          items:
+            type: object
+            # Add properties for phone numbers if needed
+        primary_email_address_id:
+          type: string
+          nullable: true
+          description: Unique identifier for the primary email address
+        primary_phone_number_id:
+          type: string
+          nullable: true
+          description: Unique identifier for the primary phone number (null if not set)
+        primary_web3_wallet_id:
+          type: string
+          nullable: true
+          description: Unique identifier for the primary web3 wallet (null if not set)
+        private_metadata:
+          type: object
+          description: User's private metadata (empty object for this event)
+        profile_image_url:
+          type: string
+          description: User's profile image URL (may be redacted)
+        public_metadata:
+          type: object
+          description: User's public metadata (empty object for this event)
+        two_factor_enabled:
+          type: boolean
+          description: Whether two-factor authentication is enabled
+        unsafe_metadata:
+          type: object
+          description: User's unsafe metadata (empty object for this event)
+        updated_at:
+          type: integer
+          description: Timestamp (epoch milliseconds) representing user update time
+        username:
+          type: string
+          nullable: true
+          description: Username (null if not set)
+        web3_wallets:
+          type: array
+          description: (Array is empty for this event)
+          items:
+            type: object
+            # Add properties for web3 wallets if needed
     CreateAccountRequest:
+      required: [data, object, type]
       type: object
       properties:
         data:
-          type: object
-          required: [ id, password_enabled, two_factor_enabled ]
-          properties:
-            birthday:
-              type: string
-              description: User's birthday (empty string if not set)
-            created_at:
-              type: integer
-              description: Timestamp (epoch milliseconds) representing user creation time
-            email_addresses:
-              type: array
-              items:
-                type: object
-                properties:
-                  email_address:
-                    type: string
-                    description: User's email address
-                  id:
-                    type: string
-                    description: Unique identifier for the email address
-                  linked_to:
-                    type: array
-                    description: (Array is empty for this event)
-                    items:
-                      type: object
-                      # Add properties for linked objects if needed
-                  object:
-                    type: string
-                    description: Object type (always "email_address" for this event)
-                  verification:
-                    type: object
-                    properties:
-                      status:
-                        type: string
-                        description: Verification status (e.g., "verified", "unverified")
-                      strategy:
-                        type: string
-                        description: Verification strategy (e.g., "ticket", "link")
-            external_accounts:
-              type: array
-              description: (Array is empty for this event)
-              items:
-                type: object
-                # Add properties for external accounts if needed
-            external_id:
-              type: string
-              nullable: true
-              description: User's external identifier
-            first_name:
-              type: string
-              nullable: true
-              description: User's first name
-            gender:
-              type: string
-              description: User's gender (empty string if not set)
-            id:
-              type: string
-              description: Unique identifier for the user
-            image_url:
-              type: string
-              description: User's image URL (may be redacted)
-            last_name:
-              type: string
-              nullable: true
-              description: User's last name
-            last_sign_in_at:
-              type: integer
-              nullable: true
-              description: Timestamp (epoch milliseconds) representing last sign-in time
-            object:
-              type: string
-              description: Object type (always "user" for this event)
-            password_enabled:
-              type: boolean
-              description: Whether the user has password authentication enabled
-            phone_numbers:
-              type: array
-              description: (Array is empty for this event)
-              items:
-                type: object
-                # Add properties for phone numbers if needed
-            primary_email_address_id:
-              type: string
-              nullable: true
-              description: Unique identifier for the primary email address
-            primary_phone_number_id:
-              type: string
-              nullable: true
-              description: Unique identifier for the primary phone number (null if not set)
-            primary_web3_wallet_id:
-              type: string
-              nullable: true
-              description: Unique identifier for the primary web3 wallet (null if not set)
-            private_metadata:
-              type: object
-              description: User's private metadata (empty object for this event)
-            profile_image_url:
-              type: string
-              description: User's profile image URL (may be redacted)
-            public_metadata:
-              type: object
-              description: User's public metadata (empty object for this event)
-            two_factor_enabled:
-              type: boolean
-              description: Whether two-factor authentication is enabled
-            unsafe_metadata:
-              type: object
-              description: User's unsafe metadata (empty object for this event)
-            updated_at:
-              type: integer
-              description: Timestamp (epoch milliseconds) representing user update time
-            username:
-              type: string
-              nullable: true
-              description: Username (null if not set)
-            web3_wallets:
-              type: array
-              description: (Array is empty for this event)
-              items:
-                type: object
-                # Add properties for web3 wallets if needed
+          $ref: '#/components/schemas/ClerkWebhookUserCreatedData'
         object:
           type: string
           description: Event type (always "user.created" for this event)

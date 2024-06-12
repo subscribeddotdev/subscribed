@@ -12,3 +12,9 @@ func SetupClerkForTestingMode(serverAddress string) {
 		URL:        &serverAddress,
 	}))
 }
+
+type MockWebHookVerifier struct{}
+
+func (m MockWebHookVerifier) Verify(payload []byte, headers http.Header) error {
+	return nil
+}

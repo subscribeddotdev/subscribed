@@ -8,9 +8,9 @@ import (
 
 type handlers struct {
 	application                  *app.App
-	loginProviderWebhookVerifier loginProviderWebhookVerifier
+	loginProviderWebhookVerifier LoginProviderWebhookVerifier
 }
 
-type loginProviderWebhookVerifier interface {
+type LoginProviderWebhookVerifier interface {
 	Verify(payload []byte, headers http.Header) error
 }

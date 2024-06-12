@@ -18,107 +18,113 @@ import (
 	"github.com/oapi-codegen/runtime"
 )
 
-// CreateAccountRequest defines model for CreateAccountRequest.
-type CreateAccountRequest struct {
-	Data *struct {
-		// Birthday User's birthday (empty string if not set)
-		Birthday *string `json:"birthday,omitempty"`
+// ClerkWebhookEmailAddress defines model for ClerkWebhookEmailAddress.
+type ClerkWebhookEmailAddress struct {
+	// EmailAddress User's email address
+	EmailAddress string `json:"email_address"`
 
-		// CreatedAt Timestamp (epoch milliseconds) representing user creation time
-		CreatedAt      *int `json:"created_at,omitempty"`
-		EmailAddresses *[]struct {
-			// EmailAddress User's email address
-			EmailAddress *string `json:"email_address,omitempty"`
+	// Id Unique identifier for the email address
+	Id string `json:"id"`
 
-			// Id Unique identifier for the email address
-			Id *string `json:"id,omitempty"`
+	// LinkedTo (Array is empty for this event)
+	LinkedTo *[]map[string]interface{} `json:"linked_to"`
 
-			// LinkedTo (Array is empty for this event)
-			LinkedTo *[]map[string]interface{} `json:"linked_to,omitempty"`
+	// Object Object type (always "email_address" for this event)
+	Object       *string `json:"object,omitempty"`
+	Verification *struct {
+		// Status Verification status (e.g., "verified", "unverified")
+		Status *string `json:"status,omitempty"`
 
-			// Object Object type (always "email_address" for this event)
-			Object       *string `json:"object,omitempty"`
-			Verification *struct {
-				// Status Verification status (e.g., "verified", "unverified")
-				Status *string `json:"status,omitempty"`
+		// Strategy Verification strategy (e.g., "ticket", "link")
+		Strategy *string `json:"strategy,omitempty"`
+	} `json:"verification,omitempty"`
+}
 
-				// Strategy Verification strategy (e.g., "ticket", "link")
-				Strategy *string `json:"strategy,omitempty"`
-			} `json:"verification,omitempty"`
-		} `json:"email_addresses,omitempty"`
+// ClerkWebhookUserCreatedData defines model for ClerkWebhookUserCreatedData.
+type ClerkWebhookUserCreatedData struct {
+	// Birthday User's birthday (empty string if not set)
+	Birthday *string `json:"birthday,omitempty"`
 
-		// ExternalAccounts (Array is empty for this event)
-		ExternalAccounts *[]map[string]interface{} `json:"external_accounts,omitempty"`
+	// CreatedAt Timestamp (epoch milliseconds) representing user creation time
+	CreatedAt      int                        `json:"created_at"`
+	EmailAddresses []ClerkWebhookEmailAddress `json:"email_addresses"`
 
-		// ExternalId User's external identifier
-		ExternalId *string `json:"external_id"`
+	// ExternalAccounts (Array is empty for this event)
+	ExternalAccounts *[]map[string]interface{} `json:"external_accounts,omitempty"`
 
-		// FirstName User's first name
-		FirstName *string `json:"first_name"`
+	// ExternalId User's external identifier
+	ExternalId *string `json:"external_id"`
 
-		// Gender User's gender (empty string if not set)
-		Gender *string `json:"gender,omitempty"`
+	// FirstName User's first name
+	FirstName *string `json:"first_name"`
 
-		// Id Unique identifier for the user
-		Id string `json:"id"`
+	// Gender User's gender (empty string if not set)
+	Gender *string `json:"gender,omitempty"`
 
-		// ImageUrl User's image URL (may be redacted)
-		ImageUrl *string `json:"image_url,omitempty"`
+	// Id Unique identifier for the user
+	Id string `json:"id"`
 
-		// LastName User's last name
-		LastName *string `json:"last_name"`
+	// ImageUrl User's image URL (may be redacted)
+	ImageUrl *string `json:"image_url,omitempty"`
 
-		// LastSignInAt Timestamp (epoch milliseconds) representing last sign-in time
-		LastSignInAt *int `json:"last_sign_in_at"`
+	// LastName User's last name
+	LastName *string `json:"last_name"`
 
-		// Object Object type (always "user" for this event)
-		Object *string `json:"object,omitempty"`
+	// LastSignInAt Timestamp (epoch milliseconds) representing last sign-in time
+	LastSignInAt *int `json:"last_sign_in_at"`
 
-		// PasswordEnabled Whether the user has password authentication enabled
-		PasswordEnabled bool `json:"password_enabled"`
-
-		// PhoneNumbers (Array is empty for this event)
-		PhoneNumbers *[]map[string]interface{} `json:"phone_numbers,omitempty"`
-
-		// PrimaryEmailAddressId Unique identifier for the primary email address
-		PrimaryEmailAddressId *string `json:"primary_email_address_id"`
-
-		// PrimaryPhoneNumberId Unique identifier for the primary phone number (null if not set)
-		PrimaryPhoneNumberId *string `json:"primary_phone_number_id"`
-
-		// PrimaryWeb3WalletId Unique identifier for the primary web3 wallet (null if not set)
-		PrimaryWeb3WalletId *string `json:"primary_web3_wallet_id"`
-
-		// PrivateMetadata User's private metadata (empty object for this event)
-		PrivateMetadata *map[string]interface{} `json:"private_metadata,omitempty"`
-
-		// ProfileImageUrl User's profile image URL (may be redacted)
-		ProfileImageUrl *string `json:"profile_image_url,omitempty"`
-
-		// PublicMetadata User's public metadata (empty object for this event)
-		PublicMetadata *map[string]interface{} `json:"public_metadata,omitempty"`
-
-		// TwoFactorEnabled Whether two-factor authentication is enabled
-		TwoFactorEnabled bool `json:"two_factor_enabled"`
-
-		// UnsafeMetadata User's unsafe metadata (empty object for this event)
-		UnsafeMetadata *map[string]interface{} `json:"unsafe_metadata,omitempty"`
-
-		// UpdatedAt Timestamp (epoch milliseconds) representing user update time
-		UpdatedAt *int `json:"updated_at,omitempty"`
-
-		// Username Username (null if not set)
-		Username *string `json:"username"`
-
-		// Web3Wallets (Array is empty for this event)
-		Web3Wallets *[]map[string]interface{} `json:"web3_wallets,omitempty"`
-	} `json:"data,omitempty"`
-
-	// Object Event type (always "user.created" for this event)
+	// Object Object type (always "user" for this event)
 	Object *string `json:"object,omitempty"`
 
+	// PasswordEnabled Whether the user has password authentication enabled
+	PasswordEnabled bool `json:"password_enabled"`
+
+	// PhoneNumbers (Array is empty for this event)
+	PhoneNumbers *[]map[string]interface{} `json:"phone_numbers,omitempty"`
+
+	// PrimaryEmailAddressId Unique identifier for the primary email address
+	PrimaryEmailAddressId *string `json:"primary_email_address_id"`
+
+	// PrimaryPhoneNumberId Unique identifier for the primary phone number (null if not set)
+	PrimaryPhoneNumberId *string `json:"primary_phone_number_id"`
+
+	// PrimaryWeb3WalletId Unique identifier for the primary web3 wallet (null if not set)
+	PrimaryWeb3WalletId *string `json:"primary_web3_wallet_id"`
+
+	// PrivateMetadata User's private metadata (empty object for this event)
+	PrivateMetadata *map[string]interface{} `json:"private_metadata,omitempty"`
+
+	// ProfileImageUrl User's profile image URL (may be redacted)
+	ProfileImageUrl *string `json:"profile_image_url,omitempty"`
+
+	// PublicMetadata User's public metadata (empty object for this event)
+	PublicMetadata *map[string]interface{} `json:"public_metadata,omitempty"`
+
+	// TwoFactorEnabled Whether two-factor authentication is enabled
+	TwoFactorEnabled bool `json:"two_factor_enabled"`
+
+	// UnsafeMetadata User's unsafe metadata (empty object for this event)
+	UnsafeMetadata *map[string]interface{} `json:"unsafe_metadata,omitempty"`
+
+	// UpdatedAt Timestamp (epoch milliseconds) representing user update time
+	UpdatedAt *int `json:"updated_at,omitempty"`
+
+	// Username Username (null if not set)
+	Username *string `json:"username"`
+
+	// Web3Wallets (Array is empty for this event)
+	Web3Wallets *[]map[string]interface{} `json:"web3_wallets,omitempty"`
+}
+
+// CreateAccountRequest defines model for CreateAccountRequest.
+type CreateAccountRequest struct {
+	Data ClerkWebhookUserCreatedData `json:"data"`
+
+	// Object Event type (always "user.created" for this event)
+	Object string `json:"object"`
+
 	// Type Event type (always "user.created" for this event)
-	Type *string `json:"type,omitempty"`
+	Type string `json:"type"`
 }
 
 // ErrorResponse defines model for ErrorResponse.
@@ -255,28 +261,29 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
+	"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",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

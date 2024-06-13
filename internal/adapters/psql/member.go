@@ -40,7 +40,11 @@ func (o MemberRepository) Insert(ctx context.Context, member *iam.Member) error 
 	return nil
 }
 
-func (o MemberRepository) ExistsByOr(ctx context.Context, email iam.Email, loginProviderID iam.LoginProviderID) (bool, error) {
+func (o MemberRepository) ExistsByOr(
+	ctx context.Context,
+	email iam.Email,
+	loginProviderID iam.LoginProviderID,
+) (bool, error) {
 	exists, err := models.Members(
 		models.MemberWhere.Email.EQ(email.String()),
 		qm.Or2(models.MemberWhere.LoginProviderID.EQ(loginProviderID.String())),

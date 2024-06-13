@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/subscribeddotdev/subscribed-backend/internal/domain"
 	"github.com/subscribeddotdev/subscribed-backend/internal/domain/iam"
+	"github.com/subscribeddotdev/subscribed-backend/tests"
 )
 
 func TestNewEmail(t *testing.T) {
@@ -28,7 +29,7 @@ func TestNewEmail(t *testing.T) {
 			loginProviderId: iam.LoginProviderID(gofakeit.UUID()),
 			firstName:       gofakeit.FirstName(),
 			lastName:        gofakeit.LastName(),
-			email:           mustEmail(t, gofakeit.Email()),
+			email:           tests.MustEmail(t, gofakeit.Email()),
 		},
 		{
 			name:            "error_empty_organization_id",
@@ -37,7 +38,7 @@ func TestNewEmail(t *testing.T) {
 			loginProviderId: iam.LoginProviderID(gofakeit.UUID()),
 			firstName:       gofakeit.FirstName(),
 			lastName:        gofakeit.LastName(),
-			email:           mustEmail(t, gofakeit.Email()),
+			email:           tests.MustEmail(t, gofakeit.Email()),
 		},
 		{
 			name:            "error_empty_email_address",
@@ -55,7 +56,7 @@ func TestNewEmail(t *testing.T) {
 			loginProviderId: iam.LoginProviderID(""),
 			firstName:       gofakeit.FirstName(),
 			lastName:        gofakeit.LastName(),
-			email:           mustEmail(t, gofakeit.Email()),
+			email:           tests.MustEmail(t, gofakeit.Email()),
 		},
 	}
 
@@ -81,10 +82,4 @@ func TestNewEmail(t *testing.T) {
 			assert.Equal(t, tc.email, member.Email())
 		})
 	}
-}
-
-func mustEmail(t *testing.T, address string) iam.Email {
-	email, err := iam.NewEmail(gofakeit.Email())
-	require.NoError(t, err)
-	return email
 }

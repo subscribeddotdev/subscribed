@@ -7,8 +7,8 @@ terraform {
   }
 
   backend "s3" {
-    bucket = "subscribed-backend-prd"
-    key    = "state"
+    bucket = "subscribed-tf-infra"
+    key    = "subscribed-backend"
     region = "eu-west-1"
   }
 }

@@ -3,6 +3,7 @@ package http
 import (
 	"net/http"
 
+	"github.com/labstack/echo/v4"
 	"github.com/subscribeddotdev/subscribed-backend/internal/app"
 )
 
@@ -13,4 +14,8 @@ type handlers struct {
 
 type LoginProviderWebhookVerifier interface {
 	Verify(payload []byte, headers http.Header) error
+}
+
+func (h handlers) HealthCheck(c echo.Context) error {
+	return c.String(http.StatusOK, "ok")
 }

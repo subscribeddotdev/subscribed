@@ -15,6 +15,16 @@ externalDocs:
 servers:
   - url: http://localhost:8080
 paths:
+  /health:
+    get:
+      tags:
+        - Health
+      operationId: healthCheck
+      responses:
+        '201':
+          description: CREATED
+        default:
+          $ref: '#/components/responses/DefaultError'
   /webhooks/account:
     post:
       tags:

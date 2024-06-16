@@ -50,3 +50,16 @@ func makeCacheKey(cols boil.Columns, nzDefaults []string) string {
 	strmangle.PutBuffer(buf)
 	return str
 }
+
+// Enum values for Envtype
+const (
+	EnvtypeProduction  string = "production"
+	EnvtypeDevelopment string = "development"
+)
+
+func AllEnvtype() []string {
+	return []string{
+		EnvtypeProduction,
+		EnvtypeDevelopment,
+	}
+}

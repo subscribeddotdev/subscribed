@@ -36,6 +36,7 @@ func (p PsqlProvider) Transact(ctx context.Context, f command.TransactFunc) erro
 		EventPublisher:         p.eventPublisher,
 		MemberRepository:       psql.NewMemberRepository(tx),
 		OrganizationRepository: psql.NewOrganizationRepository(tx),
+		EnvironmentRepository:  psql.NewEnvironmentRepository(tx),
 	}
 
 	if err = f(adapters); err != nil {

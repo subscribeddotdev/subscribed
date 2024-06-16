@@ -27,6 +27,10 @@ tasks:
     cmds:
       - goose -s -dir ./misc/sql/migrations down
 
+  mig:reset:
+    cmds:
+      - goose -s -dir ./misc/sql/migrations reset
+
   mig:create:
     cmds:
       - goose -s -dir ./misc/sql/migrations create {{.CLI_ARGS}} sql

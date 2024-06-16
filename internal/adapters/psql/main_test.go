@@ -7,12 +7,14 @@ import (
 	"testing"
 	"time"
 
+	"github.com/subscribeddotdev/subscribed-backend/internal/adapters/psql"
 	"github.com/subscribeddotdev/subscribed-backend/internal/common/postgres"
 )
 
 var (
-	db  *sql.DB
-	ctx context.Context
+	db              *sql.DB
+	ctx             context.Context
+	environmentRepo *psql.EnvironmentRepository
 )
 
 // Set up file
@@ -31,6 +33,8 @@ func TestMain(m *testing.M) {
 	if err != nil {
 		panic(err)
 	}
+
+	environmentRepo = psql.NewEnvironmentRepository(db)
 
 	os.Exit(m.Run())
 }

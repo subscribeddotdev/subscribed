@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/subscribeddotdev/subscribed-backend/internal/domain"
 	"github.com/subscribeddotdev/subscribed-backend/internal/domain/iam"
 )
 
@@ -59,6 +60,18 @@ func (c CreateOrganizationHandler) Execute(ctx context.Context, cmd CreateOrgani
 			return fmt.Errorf("unable to save organization: %v", err)
 		}
 
+		defaultEnvironments, err := getDefaultEnvironments(org.Id())
+		if err != nil {
+			return fmt.Errorf("unable to generate the default environments: %v", err)
+		}
+
+		for _, env := range defaultEnvironments {
+			err = adapters.EnvironmentRepository.Insert(ctx, env)
+			if err != nil {
+				return fmt.Errorf("unable to save the env '%s' due to the error: %v", env.Name(), err)
+			}
+		}
+
 		member, err := iam.NewMember(org.Id(), cmd.LoginProviderID, cmd.FirstName, cmd.LastName, cmd.Email)
 		if err != nil {
 			return err
@@ -71,4 +84,18 @@ func (c CreateOrganizationHandler) Execute(ctx context.Context, cmd CreateOrgani
 
 		return nil
 	})
+}
+
+func getDefaultEnvironments(orgID domain.ID) ([]*domain.Environment, error) {
+	prod, err := domain.NewEnvironment("Production", orgID, domain.EnvTypeProduction)
+	if err != nil {
+		return nil, err
+	}
+
+	dev, err := domain.NewEnvironment("Development", orgID, domain.EnvTypeDevelopment)
+	if err != nil {
+		return nil, err
+	}
+
+	return []*domain.Environment{prod, dev}, nil
 }

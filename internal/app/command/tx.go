@@ -3,6 +3,7 @@ package command
 import (
 	"context"
 
+	"github.com/subscribeddotdev/subscribed-backend/internal/domain"
 	"github.com/subscribeddotdev/subscribed-backend/internal/domain/iam"
 )
 
@@ -16,6 +17,7 @@ type TransactableAdapters struct {
 	EventPublisher         EventPublisher
 	MemberRepository       iam.MemberRepository
 	OrganizationRepository iam.OrganizationRepository
+	EnvironmentRepository  domain.EnvironmentRepository
 }
 
 type EventPublisher interface {

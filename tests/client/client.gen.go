@@ -20,6 +20,10 @@ import (
 	"github.com/oapi-codegen/runtime"
 )
 
+const (
+	ApiKeyAuthScopes = "ApiKeyAuth.Scopes"
+)
+
 // ClerkWebhookEmailAddress defines model for ClerkWebhookEmailAddress.
 type ClerkWebhookEmailAddress struct {
 	// EmailAddress User's email address
@@ -129,6 +133,11 @@ type CreateAccountRequest struct {
 	Type string `json:"type"`
 }
 
+// CreateApplicationRequest defines model for CreateApplicationRequest.
+type CreateApplicationRequest struct {
+	Name string `json:"name"`
+}
+
 // ErrorResponse defines model for ErrorResponse.
 type ErrorResponse struct {
 	// Error Error custom error code such as 'email_in_use'
@@ -147,6 +156,9 @@ type CreateAccountParams struct {
 	SvixTimestamp string `json:"svix-timestamp"`
 	SvixSignature string `json:"svix-signature"`
 }
+
+// CreateApplicationJSONRequestBody defines body for CreateApplication for application/json ContentType.
+type CreateApplicationJSONRequestBody = CreateApplicationRequest
 
 // CreateAccountJSONRequestBody defines body for CreateAccount for application/json ContentType.
 type CreateAccountJSONRequestBody = CreateAccountRequest
@@ -224,6 +236,11 @@ func WithRequestEditorFn(fn RequestEditorFn) ClientOption {
 
 // The interface specification for the client above.
 type ClientInterface interface {
+	// CreateApplicationWithBody request with any body
+	CreateApplicationWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	CreateApplication(ctx context.Context, body CreateApplicationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// HealthCheck request
 	HealthCheck(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -231,6 +248,30 @@ type ClientInterface interface {
 	CreateAccountWithBody(ctx context.Context, params *CreateAccountParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	CreateAccount(ctx context.Context, params *CreateAccountParams, body CreateAccountJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+}
+
+func (c *Client) CreateApplicationWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCreateApplicationRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) CreateApplication(ctx context.Context, body CreateApplicationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCreateApplicationRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
 }
 
 func (c *Client) HealthCheck(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -267,6 +308,46 @@ func (c *Client) CreateAccount(ctx context.Context, params *CreateAccountParams,
 		return nil, err
 	}
 	return c.Client.Do(req)
+}
+
+// NewCreateApplicationRequest calls the generic CreateApplication builder with application/json body
+func NewCreateApplicationRequest(server string, body CreateApplicationJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewCreateApplicationRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewCreateApplicationRequestWithBody generates requests for CreateApplication with any type of body
+func NewCreateApplicationRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/applications")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
 }
 
 // NewHealthCheckRequest generates requests for HealthCheck
@@ -410,6 +491,11 @@ func WithBaseURL(baseURL string) ClientOption {
 
 // ClientWithResponsesInterface is the interface specification for the client with responses above.
 type ClientWithResponsesInterface interface {
+	// CreateApplicationWithBodyWithResponse request with any body
+	CreateApplicationWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateApplicationResponse, error)
+
+	CreateApplicationWithResponse(ctx context.Context, body CreateApplicationJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateApplicationResponse, error)
+
 	// HealthCheckWithResponse request
 	HealthCheckWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*HealthCheckResponse, error)
 
@@ -417,6 +503,28 @@ type ClientWithResponsesInterface interface {
 	CreateAccountWithBodyWithResponse(ctx context.Context, params *CreateAccountParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateAccountResponse, error)
 
 	CreateAccountWithResponse(ctx context.Context, params *CreateAccountParams, body CreateAccountJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateAccountResponse, error)
+}
+
+type CreateApplicationResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSONDefault  *DefaultError
+}
+
+// Status returns HTTPResponse.Status
+func (r CreateApplicationResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r CreateApplicationResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
 }
 
 type HealthCheckResponse struct {
@@ -463,6 +571,23 @@ func (r CreateAccountResponse) StatusCode() int {
 	return 0
 }
 
+// CreateApplicationWithBodyWithResponse request with arbitrary body returning *CreateApplicationResponse
+func (c *ClientWithResponses) CreateApplicationWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateApplicationResponse, error) {
+	rsp, err := c.CreateApplicationWithBody(ctx, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCreateApplicationResponse(rsp)
+}
+
+func (c *ClientWithResponses) CreateApplicationWithResponse(ctx context.Context, body CreateApplicationJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateApplicationResponse, error) {
+	rsp, err := c.CreateApplication(ctx, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCreateApplicationResponse(rsp)
+}
+
 // HealthCheckWithResponse request returning *HealthCheckResponse
 func (c *ClientWithResponses) HealthCheckWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*HealthCheckResponse, error) {
 	rsp, err := c.HealthCheck(ctx, reqEditors...)
@@ -487,6 +612,32 @@ func (c *ClientWithResponses) CreateAccountWithResponse(ctx context.Context, par
 		return nil, err
 	}
 	return ParseCreateAccountResponse(rsp)
+}
+
+// ParseCreateApplicationResponse parses an HTTP response from a CreateApplicationWithResponse call
+func ParseCreateApplicationResponse(rsp *http.Response) (*CreateApplicationResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &CreateApplicationResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest DefaultError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
 }
 
 // ParseHealthCheckResponse parses an HTTP response from a HealthCheckWithResponse call
@@ -544,30 +695,31 @@ func ParseCreateAccountResponse(rsp *http.Response) (*CreateAccountResponse, err
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"H4sIAAAAAAAC/7xYW2/bOhL+KwR3gbqAY6Xbl8JP6yZebA/aUyBJTx8aQxhRY4mNRKrkyK5R+L8fkJR8",
-	"k5w4l543Uxx/c+E3wxn+4kKXlVaoyPLxL27QVlpZ9ItLnENd0NQYbdxaaEWoyP2EqiqkAJJaRd+tVu6b",
-	"FTmW4H792+Ccj/m/oi14FHZt5NGuGjV8vV4PeYpWGFk5MD7mE5ahQiMFQyfKzFZ22Ojw1l0UaO6+YpJr",
-	"fTctQRaTNDVo/V5ldIWGZPAD3W4M2+19hV8smleWeSnWSg05rSrkY27JSJXx9ZDLtOe/Sv6okckUFcm5",
-	"RMPm2jDK8WG4Qqo7TGPSXdTBxBhYMemMqmjVYLrlAhW95kMuCUvvSgOrk+8oyMGquiggKZCPydS40QsO",
-	"0e03kh2dn/135sTZAIolrCy73Q/dLe+xpOPXAo2cN9zonoUloLrnEP7a+RcLQmyAo2w0ZLcNJKa33K1q",
-	"tV33WmDJAGG2elBLENvqISnukIIWdzy9+OvhYdDXQ27wRy0Npnz87YBunje7pz1bD/e46+h3YRAI00sg",
-	"6IYskYbyFFZHmdsKsEGgS7CUyTlTmpjF/nMSQWcMPWS4kSVagrJiA6y0yFkpi0JaFFql9jUzWBm0jvIq",
-	"Y7VFwzyYCyrJErfapCLM0Dh1e1EJjm1IfF+9OJrm6y638SehUVDEIISum5L2cql1VF1vZWiqSiOzUyL4",
-	"0STdHs5cGkuxghKPInsR5kVOAMxQpWiOgoXtxxHocfXQ0aQXpYQM49oUR23zEuzL1Uc2KGHFEmQGUxCE",
-	"aa9ZBTwUOSdxcuA8nJWZiqV6dq54zQ7sTG5S5YgFO6nzuJLtAn1apa7A2qU2aYzKGdBznF9zpBy3B8hy",
-	"sKz9G4OacudYU09blI2mROsCQXlVuVYYq7pM0PzmrKyMLMGs4r2CEz+OrA1G5xJ/kC2t8l1/n6jbQ7AA",
-	"wQZO80FCnmzMEpO38RKKAumJtjgEFhCebMoCCOMSCdLmluvNzUaQtYJtSQrnfZzVWz5URs9lgfHDhaWR",
-	"fGyBqeqkkOIEV7zcMzyhpY7nIEibEzJ0qc+C7GFaOhX3ZGatLMxPOJgg9wxv6ip9uX4jgB3vNpzQ8TvA",
-	"7TyNxzup9FvL2EFL6VvITrnuZcheY9dtu3z36QUmoUe6wh81Wuq2nS0bTm3ODvvYey6uqQtH3701amw/",
-	"7f4KH34L+EH8fSw2/jTSsx6S70+33Um0HaUPTPaDrqgt6bKZeoVOkdla5AwsexVOUaq4tviqLxQlWgtZ",
-	"TzQmbGfNINE1hfHUW/KQ361UCz/rm30sitpIWl07UgQ/3yMYNJOacj/A+NX/tCld7vM/vt7wZpL3tcjv",
-	"bk3JiarwLtD2zpda9CSbk7PjKMok5XUyErqMbJ04iQTTVFOKi50PZwmIO1RpdDWdXH6ajkqXKf5yeCKQ",
-	"713VXLcPIxCI7k+Kj10DX0qlRyIHlYGS/83chgPnnReP6w24G+YaeDcyCmxYFEoZ//Th5plWRx8/XEz/",
-	"vPb+uwxCU9rP82s0Cynw6bEYcpJUeCL1bS7Q2ODq+eh89MaXhgoVVJKP+dvR+eitL2+U+2OOcoQiMCdD",
-	"H1SXQv4y+5DyMf+/377IUdzx4f6L1X/O33SJcnE1ndxML0Pc/YvWsbK2wYr2nr78yA+ZdRkRlPOZ+xYt",
-	"Q+WzUTNv+oTXtsfmvZLrnTVQIvlm+NsvLj2hEdIwHYbTtgv588xX/m1Khmtp+9LWSd/7sKi9ZV8O0s0y",
-	"QLXBR0HOgjBaeq/T1Ys9Lfbea+v9muZMW/9jrLF16frnDQEsA6ZwyWBDhJZXvlbO1qGemkVLjG2uj6Oo",
-	"0AKKXFsavzt/d87Xs/XfAQAA//8/S54MvxUAAA==",
+	"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",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

@@ -30,6 +30,15 @@ CREATE TABLE environments (
     CONSTRAINT pk_env_belongs_to_an_org FOREIGN KEY (organization_id) REFERENCES organizations (id)
 );
 
+CREATE TABLE applications (
+    id VARCHAR(26) NOT NULL PRIMARY KEY,
+    environment_id VARCHAR(26) NOT NULL,
+    name TEXT NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL,
+
+    CONSTRAINT pk_app_belongs_to_an_env FOREIGN KEY (environment_id) REFERENCES environments (id)
+);
+
 -- +goose StatementEnd
 
 -- +goose Down

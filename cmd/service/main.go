@@ -12,6 +12,7 @@ import (
 	"github.com/ThreeDotsLabs/watermill"
 	"github.com/kelseyhightower/envconfig"
 	_ "github.com/lib/pq"
+	"github.com/subscribeddotdev/subscribed-backend/internal/adapters/psql"
 	"github.com/subscribeddotdev/subscribed-backend/internal/app/command"
 	"github.com/subscribeddotdev/subscribed-backend/internal/common/clerkhttp"
 	"github.com/subscribeddotdev/subscribed-backend/internal/common/observability"
@@ -69,6 +70,7 @@ func run(logger *logs.Logger) error {
 		clerkhttp.SetupClerkForTestingMode(config.ClerkEmulatorServerURL)
 	}
 
+	applicationRepo := psql.NewApplicationRepository(db)
 	eventPublisher, err := events.NewPublisher(config.AmqpUrL, watermill.NewStdLogger(!config.ProductionMode, !config.ProductionMode))
 	if err != nil {
 		return err
@@ -79,6 +81,7 @@ func run(logger *logs.Logger) error {
 	application := &app.App{
 		Command: app.Command{
 			CreateOrganization: observability.NewCommandDecorator[command.CreateOrganization](command.NewCreateOrganizationHandler(txProvider), logger),
+			CreateApplication:  observability.NewCommandDecorator[command.CreateApplication](command.NewCreateApplicationHandler(applicationRepo), logger),
 		},
 	}
 

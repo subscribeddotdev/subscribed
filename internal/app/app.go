@@ -15,6 +15,9 @@ type QueryHandler[Q, R any] interface {
 }
 
 type Command struct {
+	// Application
+	CreateApplication CommandHandler[command.CreateApplication]
+
 	// Iam
 	CreateOrganization CommandHandler[command.CreateOrganization]
 }

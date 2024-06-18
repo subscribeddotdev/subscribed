@@ -1,12 +1,38 @@
 package domain
 
-import "time"
+import (
+	"errors"
+	"strings"
+	"time"
+)
 
 type Application struct {
 	id        ID
 	name      string
+	envID     ID
 	createdAt time.Time
-	endpoints []Endpoint
+}
+
+func NewApplication(name string, envID ID) (*Application, error) {
+	name = strings.TrimSpace(name)
+	if name == "" {
+		return nil, errors.New("name cannot be empty")
+	}
+
+	if envID.IsEmpty() {
+		return nil, errors.New("envID cannot be empty")
+	}
+
+	return &Application{
+		id:        NewID(),
+		name:      name,
+		envID:     envID,
+		createdAt: time.Now().UTC(),
+	}, nil
+}
+
+func (a *Application) EnvID() ID {
+	return a.envID
 }
 
 func (a *Application) Id() ID {
@@ -19,8 +45,4 @@ func (a *Application) Name() string {
 
 func (a *Application) CreatedAt() time.Time {
 	return a.createdAt
-}
-
-func (a *Application) Endpoints() []Endpoint {
-	return a.endpoints
 }

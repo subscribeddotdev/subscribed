@@ -19,3 +19,7 @@ type LoginProviderWebhookVerifier interface {
 func (h handlers) HealthCheck(c echo.Context) error {
 	return c.String(http.StatusOK, "ok")
 }
+
+func (h handlers) CreateApplication(c echo.Context) error {
+	return c.NoContent(http.StatusCreated)
+}

@@ -25,6 +25,25 @@ paths:
           description: CREATED
         default:
           $ref: '#/components/responses/DefaultError'
+  /applications:
+    post:
+      tags:
+        - Auth
+      operationId: createApplication
+      summary: Creates a new application
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateApplicationRequest'
+      responses:
+        '201':
+          description: CREATED
+        default:
+          $ref: '#/components/responses/DefaultError'
   /webhooks/account:
     post:
       tags:
@@ -196,6 +215,12 @@ components:
         type:
           type: string
           description: Event type (always "user.created" for this event)
+    # Applications
+    CreateApplicationRequest:
+      required: [ name ]
+      properties:
+        name:
+          type: string
     GenericResponse:
       type: object
       required:
@@ -237,4 +262,8 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: Authorization
 

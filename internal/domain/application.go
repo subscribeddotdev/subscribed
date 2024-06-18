@@ -1,10 +1,9 @@
 package domain
 
 import (
+	"errors"
 	"strings"
 	"time"
-
-	"github.com/friendsofgo/errors"
 )
 
 type Application struct {
@@ -12,7 +11,6 @@ type Application struct {
 	name      string
 	envID     ID
 	createdAt time.Time
-	endpoints []Endpoint
 }
 
 func NewApplication(name string, envID ID) (*Application, error) {
@@ -30,7 +28,6 @@ func NewApplication(name string, envID ID) (*Application, error) {
 		name:      name,
 		envID:     envID,
 		createdAt: time.Now().UTC(),
-		endpoints: nil,
 	}, nil
 }
 
@@ -48,8 +45,4 @@ func (a *Application) Name() string {
 
 func (a *Application) CreatedAt() time.Time {
 	return a.createdAt
-}
-
-func (a *Application) Endpoints() []Endpoint {
-	return a.endpoints
 }

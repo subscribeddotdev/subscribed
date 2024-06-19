@@ -29,7 +29,7 @@ func (c AddEndpointHandler) Execute(ctx context.Context, cmd AddEndpoint) error 
 		return err
 	}
 
-	endpoint, err := domain.NewEndpoint(endpointURL, cmd.Description, cmd.EventTypesSubscribedTo)
+	endpoint, err := domain.NewEndpoint(endpointURL, cmd.ApplicationID, cmd.Description, cmd.EventTypesSubscribedTo)
 	if err != nil {
 		return err
 	}

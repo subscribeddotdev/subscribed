@@ -15,6 +15,8 @@ var (
 	db              *sql.DB
 	ctx             context.Context
 	environmentRepo *psql.EnvironmentRepository
+	applicationRepo *psql.ApplicationRepository
+	endpointRepo    *psql.EndpointRepository
 )
 
 // Set up file
@@ -35,6 +37,8 @@ func TestMain(m *testing.M) {
 	}
 
 	environmentRepo = psql.NewEnvironmentRepository(db)
+	applicationRepo = psql.NewApplicationRepository(db)
+	endpointRepo = psql.NewEndpointRepository(db)
 
 	os.Exit(m.Run())
 }

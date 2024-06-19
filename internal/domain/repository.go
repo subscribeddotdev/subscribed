@@ -9,3 +9,7 @@ type EnvironmentRepository interface {
 type ApplicationRepository interface {
 	Insert(ctx context.Context, application *Application) error
 }
+
+type EndpointRepository interface {
+	Insert(ctx context.Context, endpoint *Endpoint) error
+}

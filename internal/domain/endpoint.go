@@ -10,11 +10,16 @@ import (
 // SigningSecret TODO: pending implementation
 type SigningSecret string
 
+func (s SigningSecret) String() string {
+	return string(s)
+}
+
 type Headers map[string]string
 
 type Endpoint struct {
 	id                     ID
 	url                    EndpointURL
+	applicationID          ID
 	description            string
 	headers                Headers
 	eventTypesSubscribedTo []EventType
@@ -25,6 +30,7 @@ type Endpoint struct {
 
 func NewEndpoint(
 	endpointURL EndpointURL,
+	applicationID ID,
 	description string,
 	eventTypesSubscribedTo []EventType,
 ) (*Endpoint, error) {
@@ -32,9 +38,14 @@ func NewEndpoint(
 		return nil, errors.New("endpointURL cannot be empty")
 	}
 
+	if applicationID.IsEmpty() {
+		return nil, errors.New("applicationID cannot be empty")
+	}
+
 	return &Endpoint{
 		id:                     NewID(),
 		url:                    endpointURL,
+		applicationID:          applicationID,
 		description:            description,
 		eventTypesSubscribedTo: eventTypesSubscribedTo,
 		createdAt:              time.Now().UTC(),
@@ -74,4 +85,8 @@ func (e *Endpoint) SigningSecret() SigningSecret {
 
 func (e *Endpoint) Headers() map[string]string {
 	return e.headers
+}
+
+func (e *Endpoint) ApplicationID() ID {
+	return e.applicationID
 }

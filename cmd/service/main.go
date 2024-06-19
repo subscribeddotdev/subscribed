@@ -71,6 +71,7 @@ func run(logger *logs.Logger) error {
 	}
 
 	applicationRepo := psql.NewApplicationRepository(db)
+	endpointRepo := psql.NewEndpointRepository(db)
 	eventPublisher, err := events.NewPublisher(config.AmqpUrL, watermill.NewStdLogger(!config.ProductionMode, !config.ProductionMode))
 	if err != nil {
 		return err
@@ -82,6 +83,7 @@ func run(logger *logs.Logger) error {
 		Command: app.Command{
 			CreateOrganization: observability.NewCommandDecorator[command.CreateOrganization](command.NewCreateOrganizationHandler(txProvider), logger),
 			CreateApplication:  observability.NewCommandDecorator[command.CreateApplication](command.NewCreateApplicationHandler(applicationRepo), logger),
+			AddEndpoint:        observability.NewCommandDecorator[command.AddEndpoint](command.NewAddEndpointHandler(endpointRepo), logger),
 		},
 	}
 

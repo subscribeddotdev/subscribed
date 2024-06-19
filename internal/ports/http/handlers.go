@@ -12,6 +12,11 @@ type handlers struct {
 	loginProviderWebhookVerifier LoginProviderWebhookVerifier
 }
 
+func (h handlers) AddEndpoint(ctx echo.Context, applicationID string) error {
+	//TODO implement me
+	panic("implement me")
+}
+
 type LoginProviderWebhookVerifier interface {
 	Verify(payload []byte, headers http.Header) error
 }

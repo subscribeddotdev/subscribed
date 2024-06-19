@@ -28,7 +28,7 @@ paths:
   /applications:
     post:
       tags:
-        - Auth
+        - Applications
       operationId: createApplication
       summary: Creates a new application
       security:
@@ -39,6 +39,31 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/CreateApplicationRequest'
+      responses:
+        '201':
+          description: CREATED
+        default:
+          $ref: '#/components/responses/DefaultError'
+  /applications/{applicationID}/endpoints:
+    post:
+      tags:
+        - Endpoints
+      operationId: addEndpoint
+      summary: Adds an endpoint to an application
+      security:
+        - BearerAuth: [ ]
+      parameters:
+        - name: applicationID
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddEndpointRequest'
       responses:
         '201':
           description: CREATED
@@ -215,6 +240,18 @@ components:
         type:
           type: string
           description: Event type (always "user.created" for this event)
+    # Endpoints
+    AddEndpointRequest:
+      required: [ url ]
+      properties:
+        url:
+          type: string
+        description:
+          type: string
+        event_types_subscribed_to:
+          type: array
+          items:
+            type: string
     # Applications
     CreateApplicationRequest:
       required: [ name ]

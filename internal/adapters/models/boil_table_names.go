@@ -5,11 +5,13 @@ package models
 
 var TableNames = struct {
 	Applications  string
+	Endpoints     string
 	Environments  string
 	Members       string
 	Organizations string
 }{
 	Applications:  "applications",
+	Endpoints:     "endpoints",
 	Environments:  "environments",
 	Members:       "members",
 	Organizations: "organizations",

@@ -39,10 +39,24 @@ CREATE TABLE applications (
     CONSTRAINT pk_app_belongs_to_an_env FOREIGN KEY (environment_id) REFERENCES environments (id)
 );
 
+CREATE TABLE endpoints (
+    id VARCHAR(26) NOT NULL PRIMARY KEY,
+    application_id VARCHAR(26) NOT NULL,
+    url TEXT NOT NULL,
+    description TEXT,
+    signing_secret TEXT NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    CONSTRAINT pk_endpoint_belongs_to_an_app FOREIGN KEY (application_id) REFERENCES applications (id)
+);
+
 -- +goose StatementEnd
 
 -- +goose Down
 -- +goose StatementBegin
+DROP TABLE endpoints;
+DROP TABLE applications;
 DROP TABLE members;
 DROP TABLE environments;
 DROP TABLE organizations;

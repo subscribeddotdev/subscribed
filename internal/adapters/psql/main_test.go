@@ -12,11 +12,12 @@ import (
 )
 
 var (
-	db              *sql.DB
-	ctx             context.Context
-	environmentRepo *psql.EnvironmentRepository
-	applicationRepo *psql.ApplicationRepository
-	endpointRepo    *psql.EndpointRepository
+	db               *sql.DB
+	ctx              context.Context
+	environmentRepo  *psql.EnvironmentRepository
+	applicationRepo  *psql.ApplicationRepository
+	endpointRepo     *psql.EndpointRepository
+	organizationRepo *psql.OrganizationRepository
 )
 
 // Set up file
@@ -39,6 +40,7 @@ func TestMain(m *testing.M) {
 	environmentRepo = psql.NewEnvironmentRepository(db)
 	applicationRepo = psql.NewApplicationRepository(db)
 	endpointRepo = psql.NewEndpointRepository(db)
+	organizationRepo = psql.NewOrganizationRepository(db)
 
 	os.Exit(m.Run())
 }

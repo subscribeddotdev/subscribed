@@ -21,7 +21,7 @@ func TestNewEndpoint(t *testing.T) {
 		eventTypesSubscribedTo []domain.EventType
 	}{
 		{
-			name:                   "create_new_application",
+			name:                   "create_new_endpoint",
 			expectedErr:            "",
 			applicationID:          domain.NewID(),
 			endpointUrl:            mustEndpointURL(t, gofakeit.URL()),

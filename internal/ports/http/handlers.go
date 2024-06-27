@@ -55,3 +55,8 @@ func (h handlers) HealthCheck(c echo.Context) error {
 func (h handlers) CreateApplication(c echo.Context) error {
 	return c.NoContent(http.StatusCreated)
 }
+
+func (h handlers) SendMessage(ctx echo.Context, applicationID string) error {
+	//TODO implement me
+	panic("implement me")
+}

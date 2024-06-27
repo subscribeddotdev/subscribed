@@ -16,6 +16,7 @@ type QueryHandler[Q, R any] interface {
 
 type Command struct {
 	AddEndpoint        CommandHandler[command.AddEndpoint]
+	SendMessage        CommandHandler[command.SendMessage]
 	CreateApplication  CommandHandler[command.CreateApplication]
 	CreateOrganization CommandHandler[command.CreateOrganization]
 }

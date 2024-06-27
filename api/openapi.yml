@@ -49,9 +49,34 @@ paths:
       tags:
         - Endpoints
       operationId: addEndpoint
-      summary: Adds an endpoint to an application
+      summary: Add an endpoint to an application
       security:
         - BearerAuth: [ ]
+      parameters:
+        - name: applicationID
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddEndpointRequest'
+      responses:
+        '201':
+          description: CREATED
+        default:
+          $ref: '#/components/responses/DefaultError'
+  /applications/{applicationID}/messages:
+    post:
+      tags:
+        - Messages
+      operationId: sendMessage
+      summary: Send a message to an application
+      security:
+        - BearerAuth: [ ] #TODO: replace with the API Key
       parameters:
         - name: applicationID
           in: path
@@ -257,6 +282,14 @@ components:
       required: [ name ]
       properties:
         name:
+          type: string
+    # Messages
+    SendMessageRequest:
+      required: [ event_type_id, payload ]
+      properties:
+        event_type_id:
+          type: string
+        payload:
           type: string
     GenericResponse:
       type: object

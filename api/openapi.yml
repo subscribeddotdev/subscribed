@@ -75,8 +75,8 @@ paths:
         - Messages
       operationId: sendMessage
       summary: Send a message to an application
-      security:
-        - BearerAuth: [ ] #TODO: replace with the API Key
+      #security:
+        #- BearerAuth: [ ] #TODO: replace with the API Key
       parameters:
         - name: applicationID
           in: path
@@ -88,7 +88,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/AddEndpointRequest'
+              $ref: '#/components/schemas/SendMessageRequest'
       responses:
         '201':
           description: CREATED

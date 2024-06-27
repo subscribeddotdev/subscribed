@@ -13,3 +13,7 @@ type ApplicationRepository interface {
 type EndpointRepository interface {
 	Insert(ctx context.Context, endpoint *Endpoint) error
 }
+
+type MessageRepository interface {
+	Insert(ctx context.Context, message *Message) error
+}

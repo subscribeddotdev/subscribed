@@ -9,7 +9,7 @@ import (
 type Message struct {
 	id           ID
 	eventTypeID  ID
-	createdAt    time.Time
+	sentAt       time.Time
 	payload      string
 	sendAttempts []MessageSendAttempt
 }
@@ -26,7 +26,7 @@ func NewMessage(eventTypeID ID, payload string) (*Message, error) {
 	return &Message{
 		id:           NewID(),
 		eventTypeID:  eventTypeID,
-		createdAt:    time.Now().UTC(),
+		sentAt:       time.Now().UTC(),
 		payload:      payload,
 		sendAttempts: nil,
 	}, nil
@@ -41,7 +41,7 @@ func (m *Message) EventTypeID() ID {
 }
 
 func (m *Message) CreatedAt() time.Time {
-	return m.createdAt
+	return m.sentAt
 }
 
 func (m *Message) Payload() string {

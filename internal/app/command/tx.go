@@ -18,6 +18,7 @@ type TransactableAdapters struct {
 	MemberRepository       iam.MemberRepository
 	OrganizationRepository iam.OrganizationRepository
 	EnvironmentRepository  domain.EnvironmentRepository
+	MessageRepository      domain.MessageRepository
 }
 
 type EventPublisher interface {

@@ -29,7 +29,12 @@ func (c SendMessageHandler) Execute(ctx context.Context, cmd SendMessage) error 
 		return err
 	}
 
-	message, err := domain.NewMessage(eventTypeID, cmd.Payload)
+	applicationID, err := domain.NewIdFromString(cmd.ApplicationID)
+	if err != nil {
+		return err
+	}
+
+	message, err := domain.NewMessage(eventTypeID, applicationID, cmd.Payload)
 	if err != nil {
 		return err
 	}

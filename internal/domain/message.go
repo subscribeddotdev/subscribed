@@ -7,16 +7,21 @@ import (
 )
 
 type Message struct {
-	id           ID
-	eventTypeID  ID
-	sentAt       time.Time
-	payload      string
-	sendAttempts []MessageSendAttempt
+	id            ID
+	eventTypeID   ID
+	applicationID ID
+	sentAt        time.Time
+	payload       string
+	sendAttempts  []MessageSendAttempt
 }
 
-func NewMessage(eventTypeID ID, payload string) (*Message, error) {
+func NewMessage(eventTypeID, applicationID ID, payload string) (*Message, error) {
 	if eventTypeID.IsEmpty() {
 		return nil, errors.New("eventTypeID cannot be empty")
+	}
+
+	if applicationID.IsEmpty() {
+		return nil, errors.New("applicationID cannot be empty")
 	}
 
 	if strings.TrimSpace(payload) == "" {
@@ -24,11 +29,12 @@ func NewMessage(eventTypeID ID, payload string) (*Message, error) {
 	}
 
 	return &Message{
-		id:           NewID(),
-		eventTypeID:  eventTypeID,
-		sentAt:       time.Now().UTC(),
-		payload:      payload,
-		sendAttempts: nil,
+		id:            NewID(),
+		eventTypeID:   eventTypeID,
+		applicationID: applicationID,
+		sentAt:        time.Now().UTC(),
+		payload:       payload,
+		sendAttempts:  nil,
 	}, nil
 }
 
@@ -40,7 +46,11 @@ func (m *Message) EventTypeID() ID {
 	return m.eventTypeID
 }
 
-func (m *Message) CreatedAt() time.Time {
+func (m *Message) ApplicationID() ID {
+	return m.applicationID
+}
+
+func (m *Message) SentAt() time.Time {
 	return m.sentAt
 }
 

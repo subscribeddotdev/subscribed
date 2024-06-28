@@ -19,6 +19,7 @@ type Command struct {
 	SendMessage        CommandHandler[command.SendMessage]
 	CreateApplication  CommandHandler[command.CreateApplication]
 	CreateOrganization CommandHandler[command.CreateOrganization]
+	CreateEventType    CommandHandler[command.CreateEventType]
 }
 
 type App struct {

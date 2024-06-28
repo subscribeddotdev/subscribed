@@ -8,11 +8,13 @@ var TableNames = struct {
 	Endpoints     string
 	Environments  string
 	Members       string
+	Messages      string
 	Organizations string
 }{
 	Applications:  "applications",
 	Endpoints:     "endpoints",
 	Environments:  "environments",
 	Members:       "members",
+	Messages:      "messages",
 	Organizations: "organizations",
 }

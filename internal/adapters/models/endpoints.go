@@ -203,7 +203,7 @@ var (
 )
 
 var (
-	// Force time package dependency for automated UpdatedAt/CreatedAt.
+	// Force time package dependency for automated UpdatedAt/SentAt.
 	_ = time.Second
 	// Force qmhelper dependency for where clause generation (which doesn't
 	// always happen)

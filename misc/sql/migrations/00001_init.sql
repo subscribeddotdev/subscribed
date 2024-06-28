@@ -51,10 +51,21 @@ CREATE TABLE endpoints (
     CONSTRAINT pk_endpoint_belongs_to_an_app FOREIGN KEY (application_id) REFERENCES applications (id)
 );
 
+CREATE TABLE messages (
+    id VARCHAR(26) NOT NULL PRIMARY KEY,
+    application_id VARCHAR(26) NOT NULL,
+    event_type_id VARCHAR(26) NOT NULL,
+    payload TEXT NOT NULL,
+    sent_at TIMESTAMPTZ NOT NULL
+
+    --TODO: add fk constraint to the application_id and event_type_id columns
+);
+
 -- +goose StatementEnd
 
 -- +goose Down
 -- +goose StatementBegin
+DROP TABLE messages;
 DROP TABLE endpoints;
 DROP TABLE applications;
 DROP TABLE members;

@@ -55,3 +55,22 @@ func (h handlers) HealthCheck(c echo.Context) error {
 func (h handlers) CreateApplication(c echo.Context) error {
 	return c.NoContent(http.StatusCreated)
 }
+
+func (h handlers) SendMessage(c echo.Context, applicationID string) error {
+	var body SendMessageRequest
+	err := c.Bind(&body)
+	if err != nil {
+		return NewHandlerErrorWithStatus(err, "error-parsing-the-body", http.StatusBadRequest)
+	}
+
+	err = h.application.Command.SendMessage.Execute(c.Request().Context(), command.SendMessage{
+		ApplicationID: applicationID,
+		EventTypeID:   body.EventTypeId,
+		Payload:       body.Payload,
+	})
+	if err != nil {
+		return NewHandlerError(err, "unable-to-send-message")
+	}
+
+	return c.NoContent(http.StatusCreated)
+}

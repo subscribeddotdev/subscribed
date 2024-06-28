@@ -1,29 +1,61 @@
 package domain
 
-import "time"
+import (
+	"errors"
+	"strings"
+	"time"
+)
 
 type Message struct {
-	id           ID
-	eventType    EventType
-	createdAt    time.Time
-	content      string
-	sendAttempts []MessageSendAttempt
+	id            ID
+	eventTypeID   ID
+	applicationID ID
+	sentAt        time.Time
+	payload       string
+	sendAttempts  []MessageSendAttempt
+}
+
+func NewMessage(eventTypeID, applicationID ID, payload string) (*Message, error) {
+	if eventTypeID.IsEmpty() {
+		return nil, errors.New("eventTypeID cannot be empty")
+	}
+
+	if applicationID.IsEmpty() {
+		return nil, errors.New("applicationID cannot be empty")
+	}
+
+	if strings.TrimSpace(payload) == "" {
+		return nil, errors.New("payload cannot be empty")
+	}
+
+	return &Message{
+		id:            NewID(),
+		eventTypeID:   eventTypeID,
+		applicationID: applicationID,
+		sentAt:        time.Now().UTC(),
+		payload:       payload,
+		sendAttempts:  nil,
+	}, nil
 }
 
 func (m *Message) Id() ID {
 	return m.id
 }
 
-func (m *Message) EventType() EventType {
-	return m.eventType
+func (m *Message) EventTypeID() ID {
+	return m.eventTypeID
 }
 
-func (m *Message) CreatedAt() time.Time {
-	return m.createdAt
+func (m *Message) ApplicationID() ID {
+	return m.applicationID
 }
 
-func (m *Message) Content() string {
-	return m.content
+func (m *Message) SentAt() time.Time {
+	return m.sentAt
+}
+
+func (m *Message) Payload() string {
+	return m.payload
 }
 
 func (m *Message) SendAttempts() []MessageSendAttempt {

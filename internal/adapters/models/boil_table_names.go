@@ -7,6 +7,7 @@ var TableNames = struct {
 	Applications  string
 	Endpoints     string
 	Environments  string
+	EventTypes    string
 	Members       string
 	Messages      string
 	Organizations string
@@ -14,6 +15,7 @@ var TableNames = struct {
 	Applications:  "applications",
 	Endpoints:     "endpoints",
 	Environments:  "environments",
+	EventTypes:    "event_types",
 	Members:       "members",
 	Messages:      "messages",
 	Organizations: "organizations",

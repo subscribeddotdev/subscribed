@@ -1,15 +1,46 @@
 package domain
 
-import "time"
+import (
+	"strings"
+	"time"
+
+	"errors"
+)
 
 type EventType struct {
 	id          ID
+	orgID       ID
 	name        string
 	description string
 	//TODO: JSON http://json-schema.org
 	schema        string
 	schemaExample string
 	archivedAt    *time.Time
+}
+
+func NewEventType(orgID ID, name, description string) (*EventType, error) {
+	if orgID.IsEmpty() {
+		return nil, errors.New("orgID cannot be empty")
+	}
+
+	name = strings.TrimSpace(name)
+	if name == "" {
+		return nil, errors.New("name cannot be empty")
+	}
+
+	return &EventType{
+		id:            NewID(),
+		orgID:         orgID,
+		name:          name,
+		description:   description,
+		schema:        "",
+		schemaExample: "",
+		archivedAt:    nil,
+	}, nil
+}
+
+func (e *EventType) OrgID() ID {
+	return e.orgID
 }
 
 func (e *EventType) Id() ID {

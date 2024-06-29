@@ -1,15 +1,15 @@
 package http
 
 import (
-	"fmt"
 	"net/http"
 
-	"github.com/clerk/clerk-sdk-go/v2"
 	"github.com/friendsofgo/errors"
 	"github.com/labstack/echo/v4"
 	"github.com/subscribeddotdev/subscribed-backend/internal/app"
 	"github.com/subscribeddotdev/subscribed-backend/internal/app/command"
+	"github.com/subscribeddotdev/subscribed-backend/internal/common/clerkhttp"
 	"github.com/subscribeddotdev/subscribed-backend/internal/domain"
+	"github.com/subscribeddotdev/subscribed-backend/internal/domain/iam"
 )
 
 type handlers struct {
@@ -79,14 +79,13 @@ func (h handlers) SendMessage(c echo.Context, applicationID string) error {
 }
 
 func (h handlers) CreateEventType(c echo.Context) error {
-	claims, ok := clerk.SessionClaimsFromContext(c.Request().Context())
-	fmt.Println(claims)
-	if !ok {
-		return NewHandlerErrorWithStatus(errors.New("unauthorized"), "unauthorized", http.StatusUnauthorized)
+	member, err := h.resolveMemberFromCtx(c)
+	if err != nil {
+		return err
 	}
 
 	var body CreateEventTypeRequest
-	err := c.Bind(&body)
+	err = c.Bind(&body)
 	if err != nil {
 		return NewHandlerErrorWithStatus(err, "error-parsing-the-body", http.StatusBadRequest)
 	}
@@ -108,7 +107,7 @@ func (h handlers) CreateEventType(c echo.Context) error {
 	}
 
 	err = h.application.Command.CreateEventType.Execute(c.Request().Context(), command.CreateEventType{
-		OrgID:         "",
+		OrgID:         member.OrganizationID().String(),
 		Name:          body.Name,
 		Description:   description,
 		Schema:        schema,
@@ -119,4 +118,22 @@ func (h handlers) CreateEventType(c echo.Context) error {
 	}
 
 	return c.NoContent(http.StatusCreated)
+}
+
+func (h handlers) resolveMemberFromCtx(c echo.Context) (*iam.Member, error) {
+	claims, ok := clerkhttp.SessionClaimsFromContext(c)
+	if !ok {
+		return nil, NewHandlerErrorWithStatus(errors.New("unauthorized"), "unauthorized", http.StatusUnauthorized)
+	}
+
+	m, err := h.application.Authorization.ResolveMemberByLoginProviderID(c.Request().Context(), claims.Subject)
+	if errors.Is(err, iam.ErrMemberNotFound) {
+		return nil, NewHandlerErrorWithStatus(errors.New("forbidden"), "member-not-found", http.StatusForbidden)
+	}
+
+	if err != nil {
+		return nil, NewHandlerErrorWithStatus(errors.New("unauthorized"), "unauthorized", http.StatusForbidden)
+	}
+
+	return m, nil
 }

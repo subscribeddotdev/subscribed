@@ -13,6 +13,7 @@ import (
 	"github.com/kelseyhightower/envconfig"
 	_ "github.com/lib/pq"
 	"github.com/subscribeddotdev/subscribed-backend/internal/adapters/psql"
+	"github.com/subscribeddotdev/subscribed-backend/internal/app/auth"
 	"github.com/subscribeddotdev/subscribed-backend/internal/app/command"
 	"github.com/subscribeddotdev/subscribed-backend/internal/common/clerkhttp"
 	"github.com/subscribeddotdev/subscribed-backend/internal/common/observability"
@@ -73,6 +74,7 @@ func run(logger *logs.Logger) error {
 	applicationRepo := psql.NewApplicationRepository(db)
 	endpointRepo := psql.NewEndpointRepository(db)
 	eventTypeRepo := psql.NewEventTypeRepository(db)
+	memberRepo := psql.NewMemberRepository(db)
 	eventPublisher, err := events.NewPublisher(config.AmqpUrL, watermill.NewStdLogger(!config.ProductionMode, !config.ProductionMode))
 	if err != nil {
 		return err
@@ -81,6 +83,7 @@ func run(logger *logs.Logger) error {
 	txProvider := transaction.NewPsqlProvider(db, eventPublisher, logger)
 
 	application := &app.App{
+		Authorization: auth.NewService(memberRepo),
 		Command: app.Command{
 			CreateOrganization: observability.NewCommandDecorator[command.CreateOrganization](command.NewCreateOrganizationHandler(txProvider), logger),
 			CreateApplication:  observability.NewCommandDecorator[command.CreateApplication](command.NewCreateApplicationHandler(applicationRepo), logger),

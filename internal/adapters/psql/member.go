@@ -2,8 +2,10 @@ package psql
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 
+	"github.com/friendsofgo/errors"
 	"github.com/subscribeddotdev/subscribed-backend/internal/adapters/models"
 	"github.com/subscribeddotdev/subscribed-backend/internal/domain/iam"
 	"github.com/volatiletech/null/v8"
@@ -54,4 +56,27 @@ func (o MemberRepository) ExistsByOr(
 	}
 
 	return exists, nil
+}
+
+func (o MemberRepository) ByLoginProviderID(ctx context.Context, lpi iam.LoginProviderID) (*iam.Member, error) {
+	model, err := models.Members(
+		models.MemberWhere.LoginProviderID.EQ(lpi.String()),
+	).One(ctx, o.db)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, iam.ErrMemberNotFound
+	}
+	
+	if err != nil {
+		return nil, fmt.Errorf("error querying member via login provider id '%s': %v", lpi, err)
+	}
+
+	return iam.UnMarshallMember(
+		model.ID,
+		model.OrganizationID,
+		iam.LoginProviderID(model.LoginProviderID),
+		model.FirstName.String,
+		model.LastName.String,
+		model.Email,
+		model.CreatedAt,
+	)
 }

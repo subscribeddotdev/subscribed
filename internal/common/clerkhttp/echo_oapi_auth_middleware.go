@@ -13,8 +13,11 @@ import (
 	"github.com/clerk/clerk-sdk-go/v2/jwt"
 	"github.com/friendsofgo/errors"
 	"github.com/getkin/kin-openapi/openapi3filter"
+	"github.com/labstack/echo/v4"
 	oapimiddleware "github.com/oapi-codegen/echo-middleware"
 )
+
+const ctxJwtUserClaims = "clerk_jwt_user_claims"
 
 // EchoOapiAuthMiddleware Implemented based on https://github.com/clerk/clerk-sdk-go/blob/v2/http/middleware.go
 // with the goal of working with OAPI Codegen authenticator helper:
@@ -58,7 +61,7 @@ func (e *EchoOapiAuthMiddleware) Middleware() openapi3filter.AuthenticationFunc 
 
 		// Token was verified. Add the session claims to the request context.
 		echoCtx := oapimiddleware.GetEchoContext(ctx)
-		clerk.ContextWithSessionClaims(echoCtx.Request().Context(), claims)
+		echoCtx.Set(ctxJwtUserClaims, claims)
 
 		return nil
 	}
@@ -165,4 +168,9 @@ func getCache() *jwkCache {
 		}
 	})
 	return cache
+}
+
+func SessionClaimsFromContext(c echo.Context) (*clerk.SessionClaims, bool) {
+	value, ok := c.Get(ctxJwtUserClaims).(*clerk.SessionClaims)
+	return value, ok
 }

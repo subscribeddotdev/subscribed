@@ -1,6 +1,13 @@
 package iam
 
-import "context"
+import (
+	"context"
+	"errors"
+)
+
+var (
+	ErrMemberNotFound = errors.New("member not found")
+)
 
 type OrganizationRepository interface {
 	Insert(ctx context.Context, org *Organization) error
@@ -8,6 +15,6 @@ type OrganizationRepository interface {
 
 type MemberRepository interface {
 	Insert(ctx context.Context, member *Member) error
-
+	ByLoginProviderID(ctx context.Context, lpi LoginProviderID) (*Member, error)
 	ExistsByOr(ctx context.Context, email Email, loginProviderID LoginProviderID) (bool, error)
 }

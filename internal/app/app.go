@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 
+	"github.com/subscribeddotdev/subscribed-backend/internal/app/auth"
 	"github.com/subscribeddotdev/subscribed-backend/internal/app/command"
 )
 
@@ -23,5 +24,6 @@ type Command struct {
 }
 
 type App struct {
-	Command Command
+	Authorization *auth.Service
+	Command       Command
 }

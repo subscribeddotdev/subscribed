@@ -3,10 +3,13 @@ package http
 import (
 	"net/http"
 
+	"github.com/friendsofgo/errors"
 	"github.com/labstack/echo/v4"
 	"github.com/subscribeddotdev/subscribed-backend/internal/app"
 	"github.com/subscribeddotdev/subscribed-backend/internal/app/command"
+	"github.com/subscribeddotdev/subscribed-backend/internal/common/clerkhttp"
 	"github.com/subscribeddotdev/subscribed-backend/internal/domain"
+	"github.com/subscribeddotdev/subscribed-backend/internal/domain/iam"
 )
 
 type handlers struct {
@@ -73,4 +76,64 @@ func (h handlers) SendMessage(c echo.Context, applicationID string) error {
 	}
 
 	return c.NoContent(http.StatusCreated)
+}
+
+func (h handlers) CreateEventType(c echo.Context) error {
+	member, err := h.resolveMemberFromCtx(c)
+	if err != nil {
+		return err
+	}
+
+	var body CreateEventTypeRequest
+	err = c.Bind(&body)
+	if err != nil {
+		return NewHandlerErrorWithStatus(err, "error-parsing-the-body", http.StatusBadRequest)
+	}
+
+	var schema string
+	var description string
+	var schemaExample string
+
+	if body.Description != nil {
+		description = *body.Description
+	}
+
+	if body.Schema != nil {
+		schema = *body.Schema
+	}
+
+	if body.SchemaExample != nil {
+		schemaExample = *body.SchemaExample
+	}
+
+	err = h.application.Command.CreateEventType.Execute(c.Request().Context(), command.CreateEventType{
+		OrgID:         member.OrganizationID().String(),
+		Name:          body.Name,
+		Description:   description,
+		Schema:        schema,
+		SchemaExample: schemaExample,
+	})
+	if err != nil {
+		return NewHandlerError(err, "unable-to-send-message")
+	}
+
+	return c.NoContent(http.StatusCreated)
+}
+
+func (h handlers) resolveMemberFromCtx(c echo.Context) (*iam.Member, error) {
+	claims, ok := clerkhttp.SessionClaimsFromContext(c)
+	if !ok {
+		return nil, NewHandlerErrorWithStatus(errors.New("unauthorized"), "unauthorized", http.StatusUnauthorized)
+	}
+
+	m, err := h.application.Authorization.ResolveMemberByLoginProviderID(c.Request().Context(), claims.Subject)
+	if errors.Is(err, iam.ErrMemberNotFound) {
+		return nil, NewHandlerErrorWithStatus(errors.New("forbidden"), "member-not-found", http.StatusForbidden)
+	}
+
+	if err != nil {
+		return nil, NewHandlerErrorWithStatus(errors.New("unauthorized"), "unauthorized", http.StatusForbidden)
+	}
+
+	return m, nil
 }

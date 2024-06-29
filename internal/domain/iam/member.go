@@ -2,6 +2,7 @@ package iam
 
 import (
 	"errors"
+	"fmt"
 	"strings"
 	"time"
 
@@ -88,4 +89,39 @@ func (m *Member) Email() Email {
 
 func (m *Member) CreatedAt() time.Time {
 	return m.createdAt
+}
+
+func UnMarshallMember(id, orgID string, lpi LoginProviderID, firstName, lastName, email string, createdAt time.Time) (*Member, error) {
+	mID, err := domain.NewIdFromString(id)
+	if err != nil {
+		return nil, err
+	}
+
+	oID, err := domain.NewIdFromString(orgID)
+	if err != nil {
+		return nil, err
+	}
+
+	if err = lpi.Validate(); err != nil {
+		return nil, err
+	}
+
+	mEmail, err := NewEmail(email)
+	if err != nil {
+		return nil, err
+	}
+
+	if time.Now().Before(createdAt) {
+		return nil, fmt.Errorf("createdAt '%s' is set in the future", createdAt)
+	}
+
+	return &Member{
+		id:              mID,
+		organizationID:  oID,
+		loginProviderId: lpi,
+		firstName:       firstName,
+		lastName:        lastName,
+		email:           mEmail,
+		createdAt:       createdAt.UTC(),
+	}, nil
 }

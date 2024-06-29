@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 
+	"github.com/subscribeddotdev/subscribed-backend/internal/app/auth"
 	"github.com/subscribeddotdev/subscribed-backend/internal/app/command"
 )
 
@@ -19,8 +20,10 @@ type Command struct {
 	SendMessage        CommandHandler[command.SendMessage]
 	CreateApplication  CommandHandler[command.CreateApplication]
 	CreateOrganization CommandHandler[command.CreateOrganization]
+	CreateEventType    CommandHandler[command.CreateEventType]
 }
 
 type App struct {
-	Command Command
+	Authorization *auth.Service
+	Command       Command
 }

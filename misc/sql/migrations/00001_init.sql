@@ -51,6 +51,19 @@ CREATE TABLE endpoints (
     CONSTRAINT pk_endpoint_belongs_to_an_app FOREIGN KEY (application_id) REFERENCES applications (id)
 );
 
+CREATE TABLE event_types (
+    id VARCHAR(26) NOT NULL PRIMARY KEY,
+    org_id VARCHAR(26) NOT NULL,
+    name TEXT NOT NULL,
+    description TEXT,
+    schema TEXT,
+    schema_example TEXT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    archived_at TIMESTAMPTZ,
+
+    CONSTRAINT pk_event_type_belongs_to_org FOREIGN KEY (org_id) REFERENCES organizations (id)
+);
+
 CREATE TABLE messages (
     id VARCHAR(26) NOT NULL PRIMARY KEY,
     application_id VARCHAR(26) NOT NULL,
@@ -66,6 +79,7 @@ CREATE TABLE messages (
 -- +goose Down
 -- +goose StatementBegin
 DROP TABLE messages;
+DROP TABLE event_types;
 DROP TABLE endpoints;
 DROP TABLE applications;
 DROP TABLE members;

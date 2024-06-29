@@ -65,7 +65,7 @@ func (o MemberRepository) ByLoginProviderID(ctx context.Context, lpi iam.LoginPr
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, iam.ErrMemberNotFound
 	}
-	
+
 	if err != nil {
 		return nil, fmt.Errorf("error querying member via login provider id '%s': %v", lpi, err)
 	}

@@ -23,22 +23,20 @@ func TestEventTypes(t *testing.T) {
 	}
 	require.NoError(t, orgModel.Insert(ctx, db, boil.Infer()))
 
-	// TODO: finish writing the test
 	memberModel := models.Member{
 		ID:              domain.NewID().String(),
 		FirstName:       null.StringFrom(gofakeit.FirstName()),
 		LastName:        null.StringFrom(gofakeit.LastName()),
 		Email:           gofakeit.Email(),
-		LoginProviderID: fmt.Sprintf(""),
-		OrganizationID:  "",
-		CreatedAt:       time.Time{},
-		R:               nil,
-		L:               ,
+		LoginProviderID: fmt.Sprintf("user_%s", domain.NewID().String()),
+		OrganizationID:  orgModel.ID,
+		CreatedAt:       time.Now(),
 	}
+	require.NoError(t, memberModel.Insert(ctx, db, boil.Infer()))
 
 	token := jwks.JwtGenerator(t, map[string]any{
 		"sid": "sess_123",
-		"sub": "user_123",
+		"sub": memberModel.LoginProviderID,
 		"iss": "https://clerk.com",
 	})
 

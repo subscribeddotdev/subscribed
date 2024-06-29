@@ -1,8 +1,11 @@
 package http
 
 import (
+	"fmt"
 	"net/http"
 
+	"github.com/clerk/clerk-sdk-go/v2"
+	"github.com/friendsofgo/errors"
 	"github.com/labstack/echo/v4"
 	"github.com/subscribeddotdev/subscribed-backend/internal/app"
 	"github.com/subscribeddotdev/subscribed-backend/internal/app/command"
@@ -67,6 +70,49 @@ func (h handlers) SendMessage(c echo.Context, applicationID string) error {
 		ApplicationID: applicationID,
 		EventTypeID:   body.EventTypeId,
 		Payload:       body.Payload,
+	})
+	if err != nil {
+		return NewHandlerError(err, "unable-to-send-message")
+	}
+
+	return c.NoContent(http.StatusCreated)
+}
+
+func (h handlers) CreateEventType(c echo.Context) error {
+	claims, ok := clerk.SessionClaimsFromContext(c.Request().Context())
+	fmt.Println(claims)
+	if !ok {
+		return NewHandlerErrorWithStatus(errors.New("unauthorized"), "unauthorized", http.StatusUnauthorized)
+	}
+
+	var body CreateEventTypeRequest
+	err := c.Bind(&body)
+	if err != nil {
+		return NewHandlerErrorWithStatus(err, "error-parsing-the-body", http.StatusBadRequest)
+	}
+
+	var schema string
+	var description string
+	var schemaExample string
+
+	if body.Description != nil {
+		description = *body.Description
+	}
+
+	if body.Schema != nil {
+		schema = *body.Schema
+	}
+
+	if body.SchemaExample != nil {
+		schemaExample = *body.SchemaExample
+	}
+
+	err = h.application.Command.CreateEventType.Execute(c.Request().Context(), command.CreateEventType{
+		OrgID:         "",
+		Name:          body.Name,
+		Description:   description,
+		Schema:        schema,
+		SchemaExample: schemaExample,
 	})
 	if err != nil {
 		return NewHandlerError(err, "unable-to-send-message")

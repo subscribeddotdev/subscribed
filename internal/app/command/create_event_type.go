@@ -7,6 +7,11 @@ import (
 )
 
 type CreateEventType struct {
+	OrgID         string
+	Name          string
+	Description   string
+	Schema        string
+	SchemaExample string
 }
 
 type CreateEventTypeHandler struct {
@@ -20,5 +25,15 @@ func NewCreateEventTypeHandler(repo domain.EventTypeRepository) CreateEventTypeH
 }
 
 func (c CreateEventTypeHandler) Execute(ctx context.Context, cmd CreateEventType) error {
-	return nil
+	orgID, err := domain.NewIdFromString(cmd.OrgID)
+	if err != nil {
+		return err
+	}
+
+	eventType, err := domain.NewEventType(orgID, cmd.Name, cmd.Description, cmd.Schema, cmd.SchemaExample)
+	if err != nil {
+		return err
+	}
+
+	return c.repo.Insert(ctx, eventType)
 }

@@ -15,10 +15,11 @@ type EventType struct {
 	//TODO: JSON http://json-schema.org
 	schema        string
 	schemaExample string
+	createdAt     time.Time
 	archivedAt    *time.Time
 }
 
-func NewEventType(orgID ID, name, description string) (*EventType, error) {
+func NewEventType(orgID ID, name, description, schema, schemaExample string) (*EventType, error) {
 	if orgID.IsEmpty() {
 		return nil, errors.New("orgID cannot be empty")
 	}
@@ -33,9 +34,10 @@ func NewEventType(orgID ID, name, description string) (*EventType, error) {
 		orgID:         orgID,
 		name:          name,
 		description:   description,
-		schema:        "",
-		schemaExample: "",
+		schema:        schema,
+		schemaExample: schemaExample,
 		archivedAt:    nil,
+		createdAt:     time.Now().UTC(),
 	}, nil
 }
 
@@ -65,4 +67,8 @@ func (e *EventType) SchemaExample() string {
 
 func (e *EventType) ArchivedAt() *time.Time {
 	return e.archivedAt
+}
+
+func (e *EventType) CreatedAt() time.Time {
+	return e.createdAt
 }

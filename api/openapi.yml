@@ -94,6 +94,25 @@ paths:
           description: CREATED
         default:
           $ref: '#/components/responses/DefaultError'
+  /event-types:
+    post:
+      tags:
+        - EventTypes
+      operationId: createEventType
+      summary: Creates a new event type
+      security:
+      - BearerAuth: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateEventTypeRequest'
+      responses:
+        '201':
+          description: CREATED
+        default:
+          $ref: '#/components/responses/DefaultError'
   /webhooks/account:
     post:
       tags:
@@ -290,6 +309,18 @@ components:
         event_type_id:
           type: string
         payload:
+          type: string
+    # Event types
+    CreateEventTypeRequest:
+      required: [name]
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        schema:
+          type: string
+        schema_example:
           type: string
     GenericResponse:
       type: object

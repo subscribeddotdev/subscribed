@@ -4,42 +4,21 @@ import (
 	"testing"
 	"time"
 
-	"github.com/brianvoe/gofakeit/v6"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/subscribeddotdev/subscribed-backend/internal/adapters/models"
 	"github.com/subscribeddotdev/subscribed-backend/internal/domain"
-	"github.com/subscribeddotdev/subscribed-backend/tests"
+	"github.com/subscribeddotdev/subscribed-backend/tests/fixture"
 )
 
 func TestEnvironmentRepository_Insert(t *testing.T) {
-	org := fixtureAndSaveOrganization(t)
-	env0 := fixtureEnvironment(t, org.ID)
-	err := environmentRepo.Insert(ctx, env0)
+	ff := fixture.NewFactory(t, ctx, db)
+	org := ff.NewOrganization().Save()
+	env := ff.NewEnvironment().WithOrganizationID(org.ID).NewDomainModel()
+	err := environmentRepo.Insert(ctx, env)
+
 	require.NoError(t, err)
-	assertEnvironment(t, env0)
-}
-
-func fixtureEnvironment(t *testing.T, orgID string) *domain.Environment {
-	environments := []struct {
-		name    string
-		envType domain.EnvType
-	}{
-		{
-			name:    "Development",
-			envType: domain.EnvTypeDevelopment,
-		}, {
-			name:    "Production",
-			envType: domain.EnvTypeProduction,
-		},
-	}
-
-	env := environments[gofakeit.IntRange(0, len(environments)-1)]
-
-	newEnv, err := domain.NewEnvironment(env.name, tests.MustID(t, orgID), env.envType)
-	require.NoError(t, err)
-
-	return newEnv
+	assertEnvironment(t, env)
 }
 
 func assertEnvironment(t *testing.T, env *domain.Environment) {

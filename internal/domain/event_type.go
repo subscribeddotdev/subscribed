@@ -72,3 +72,21 @@ func (e *EventType) ArchivedAt() *time.Time {
 func (e *EventType) CreatedAt() time.Time {
 	return e.createdAt
 }
+
+func UnMarshallEventType(
+	id, orgID ID,
+	name, description, schema, schemaExample string,
+	createdAt time.Time,
+	archivedAt *time.Time,
+) *EventType {
+	return &EventType{
+		id:            id,
+		orgID:         orgID,
+		name:          name,
+		description:   description,
+		schema:        schema,
+		schemaExample: schemaExample,
+		createdAt:     createdAt.UTC(),
+		archivedAt:    archivedAt,
+	}
+}

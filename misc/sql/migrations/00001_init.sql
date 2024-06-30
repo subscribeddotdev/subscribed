@@ -15,7 +15,7 @@ CREATE TABLE members (
     organization_id VARCHAR(26) NOT NULL,
     created_at TIMESTAMPTZ NOT NULL,
 
-    CONSTRAINT pk_member_belongs_to_an_org FOREIGN KEY (organization_id) REFERENCES organizations (id)
+    CONSTRAINT fk_member_belongs_to_an_org FOREIGN KEY (organization_id) REFERENCES organizations (id)
 );
 
 CREATE TYPE EnvType AS ENUM('production', 'development');
@@ -27,7 +27,7 @@ CREATE TABLE environments (
     env_type EnvType NOT NULL DEFAULT 'development',
     created_at TIMESTAMPTZ NOT NULL,
     archived_at TIMESTAMPTZ,
-    CONSTRAINT pk_env_belongs_to_an_org FOREIGN KEY (organization_id) REFERENCES organizations (id)
+    CONSTRAINT fk_env_belongs_to_an_org FOREIGN KEY (organization_id) REFERENCES organizations (id)
 );
 
 CREATE TABLE applications (
@@ -36,7 +36,7 @@ CREATE TABLE applications (
     name TEXT NOT NULL,
     created_at TIMESTAMPTZ NOT NULL,
 
-    CONSTRAINT pk_app_belongs_to_an_env FOREIGN KEY (environment_id) REFERENCES environments (id)
+    CONSTRAINT fk_app_belongs_to_an_env FOREIGN KEY (environment_id) REFERENCES environments (id)
 );
 
 CREATE TABLE endpoints (
@@ -48,7 +48,7 @@ CREATE TABLE endpoints (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 
-    CONSTRAINT pk_endpoint_belongs_to_an_app FOREIGN KEY (application_id) REFERENCES applications (id)
+    CONSTRAINT fk_endpoint_belongs_to_an_app FOREIGN KEY (application_id) REFERENCES applications (id)
 );
 
 CREATE TABLE event_types (
@@ -61,7 +61,8 @@ CREATE TABLE event_types (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     archived_at TIMESTAMPTZ,
 
-    CONSTRAINT pk_event_type_belongs_to_org FOREIGN KEY (org_id) REFERENCES organizations (id)
+    CONSTRAINT un_event_name_per_org UNIQUE (name, org_id),
+    CONSTRAINT fk_event_type_belongs_to_org FOREIGN KEY (org_id) REFERENCES organizations (id)
 );
 
 CREATE TABLE messages (
@@ -69,9 +70,10 @@ CREATE TABLE messages (
     application_id VARCHAR(26) NOT NULL,
     event_type_id VARCHAR(26) NOT NULL,
     payload TEXT NOT NULL,
-    sent_at TIMESTAMPTZ NOT NULL
+    sent_at TIMESTAMPTZ NOT NULL,
 
-    --TODO: add fk constraint to the application_id and event_type_id columns
+    CONSTRAINT fk_message_belongs_to_application FOREIGN KEY (application_id) REFERENCES applications (id),
+    CONSTRAINT fk_message_is_of_event_type FOREIGN KEY (event_type_id) REFERENCES event_types (id)
 );
 
 -- +goose StatementEnd

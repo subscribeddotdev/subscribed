@@ -79,15 +79,36 @@ var MessageWhere = struct {
 
 // MessageRels is where relationship names are stored.
 var MessageRels = struct {
-}{}
+	Application string
+	EventType   string
+}{
+	Application: "Application",
+	EventType:   "EventType",
+}
 
 // messageR is where relationships are stored.
 type messageR struct {
+	Application *Application `boil:"Application" json:"Application" toml:"Application" yaml:"Application"`
+	EventType   *EventType   `boil:"EventType" json:"EventType" toml:"EventType" yaml:"EventType"`
 }
 
 // NewStruct creates a new relationship struct
 func (*messageR) NewStruct() *messageR {
 	return &messageR{}
+}
+
+func (r *messageR) GetApplication() *Application {
+	if r == nil {
+		return nil
+	}
+	return r.Application
+}
+
+func (r *messageR) GetEventType() *EventType {
+	if r == nil {
+		return nil
+	}
+	return r.EventType
 }
 
 // messageL is where Load methods for each relationship are stored.
@@ -377,6 +398,362 @@ func (q messageQuery) Exists(ctx context.Context, exec boil.ContextExecutor) (bo
 	}
 
 	return count > 0, nil
+}
+
+// Application pointed to by the foreign key.
+func (o *Message) Application(mods ...qm.QueryMod) applicationQuery {
+	queryMods := []qm.QueryMod{
+		qm.Where("\"id\" = ?", o.ApplicationID),
+	}
+
+	queryMods = append(queryMods, mods...)
+
+	return Applications(queryMods...)
+}
+
+// EventType pointed to by the foreign key.
+func (o *Message) EventType(mods ...qm.QueryMod) eventTypeQuery {
+	queryMods := []qm.QueryMod{
+		qm.Where("\"id\" = ?", o.EventTypeID),
+	}
+
+	queryMods = append(queryMods, mods...)
+
+	return EventTypes(queryMods...)
+}
+
+// LoadApplication allows an eager lookup of values, cached into the
+// loaded structs of the objects. This is for an N-1 relationship.
+func (messageL) LoadApplication(ctx context.Context, e boil.ContextExecutor, singular bool, maybeMessage interface{}, mods queries.Applicator) error {
+	var slice []*Message
+	var object *Message
+
+	if singular {
+		var ok bool
+		object, ok = maybeMessage.(*Message)
+		if !ok {
+			object = new(Message)
+			ok = queries.SetFromEmbeddedStruct(&object, &maybeMessage)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeMessage))
+			}
+		}
+	} else {
+		s, ok := maybeMessage.(*[]*Message)
+		if ok {
+			slice = *s
+		} else {
+			ok = queries.SetFromEmbeddedStruct(&slice, maybeMessage)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeMessage))
+			}
+		}
+	}
+
+	args := make([]interface{}, 0, 1)
+	if singular {
+		if object.R == nil {
+			object.R = &messageR{}
+		}
+		args = append(args, object.ApplicationID)
+
+	} else {
+	Outer:
+		for _, obj := range slice {
+			if obj.R == nil {
+				obj.R = &messageR{}
+			}
+
+			for _, a := range args {
+				if a == obj.ApplicationID {
+					continue Outer
+				}
+			}
+
+			args = append(args, obj.ApplicationID)
+
+		}
+	}
+
+	if len(args) == 0 {
+		return nil
+	}
+
+	query := NewQuery(
+		qm.From(`applications`),
+		qm.WhereIn(`applications.id in ?`, args...),
+	)
+	if mods != nil {
+		mods.Apply(query)
+	}
+
+	results, err := query.QueryContext(ctx, e)
+	if err != nil {
+		return errors.Wrap(err, "failed to eager load Application")
+	}
+
+	var resultSlice []*Application
+	if err = queries.Bind(results, &resultSlice); err != nil {
+		return errors.Wrap(err, "failed to bind eager loaded slice Application")
+	}
+
+	if err = results.Close(); err != nil {
+		return errors.Wrap(err, "failed to close results of eager load for applications")
+	}
+	if err = results.Err(); err != nil {
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for applications")
+	}
+
+	if len(applicationAfterSelectHooks) != 0 {
+		for _, obj := range resultSlice {
+			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
+				return err
+			}
+		}
+	}
+
+	if len(resultSlice) == 0 {
+		return nil
+	}
+
+	if singular {
+		foreign := resultSlice[0]
+		object.R.Application = foreign
+		if foreign.R == nil {
+			foreign.R = &applicationR{}
+		}
+		foreign.R.Messages = append(foreign.R.Messages, object)
+		return nil
+	}
+
+	for _, local := range slice {
+		for _, foreign := range resultSlice {
+			if local.ApplicationID == foreign.ID {
+				local.R.Application = foreign
+				if foreign.R == nil {
+					foreign.R = &applicationR{}
+				}
+				foreign.R.Messages = append(foreign.R.Messages, local)
+				break
+			}
+		}
+	}
+
+	return nil
+}
+
+// LoadEventType allows an eager lookup of values, cached into the
+// loaded structs of the objects. This is for an N-1 relationship.
+func (messageL) LoadEventType(ctx context.Context, e boil.ContextExecutor, singular bool, maybeMessage interface{}, mods queries.Applicator) error {
+	var slice []*Message
+	var object *Message
+
+	if singular {
+		var ok bool
+		object, ok = maybeMessage.(*Message)
+		if !ok {
+			object = new(Message)
+			ok = queries.SetFromEmbeddedStruct(&object, &maybeMessage)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeMessage))
+			}
+		}
+	} else {
+		s, ok := maybeMessage.(*[]*Message)
+		if ok {
+			slice = *s
+		} else {
+			ok = queries.SetFromEmbeddedStruct(&slice, maybeMessage)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeMessage))
+			}
+		}
+	}
+
+	args := make([]interface{}, 0, 1)
+	if singular {
+		if object.R == nil {
+			object.R = &messageR{}
+		}
+		args = append(args, object.EventTypeID)
+
+	} else {
+	Outer:
+		for _, obj := range slice {
+			if obj.R == nil {
+				obj.R = &messageR{}
+			}
+
+			for _, a := range args {
+				if a == obj.EventTypeID {
+					continue Outer
+				}
+			}
+
+			args = append(args, obj.EventTypeID)
+
+		}
+	}
+
+	if len(args) == 0 {
+		return nil
+	}
+
+	query := NewQuery(
+		qm.From(`event_types`),
+		qm.WhereIn(`event_types.id in ?`, args...),
+	)
+	if mods != nil {
+		mods.Apply(query)
+	}
+
+	results, err := query.QueryContext(ctx, e)
+	if err != nil {
+		return errors.Wrap(err, "failed to eager load EventType")
+	}
+
+	var resultSlice []*EventType
+	if err = queries.Bind(results, &resultSlice); err != nil {
+		return errors.Wrap(err, "failed to bind eager loaded slice EventType")
+	}
+
+	if err = results.Close(); err != nil {
+		return errors.Wrap(err, "failed to close results of eager load for event_types")
+	}
+	if err = results.Err(); err != nil {
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for event_types")
+	}
+
+	if len(eventTypeAfterSelectHooks) != 0 {
+		for _, obj := range resultSlice {
+			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
+				return err
+			}
+		}
+	}
+
+	if len(resultSlice) == 0 {
+		return nil
+	}
+
+	if singular {
+		foreign := resultSlice[0]
+		object.R.EventType = foreign
+		if foreign.R == nil {
+			foreign.R = &eventTypeR{}
+		}
+		foreign.R.Messages = append(foreign.R.Messages, object)
+		return nil
+	}
+
+	for _, local := range slice {
+		for _, foreign := range resultSlice {
+			if local.EventTypeID == foreign.ID {
+				local.R.EventType = foreign
+				if foreign.R == nil {
+					foreign.R = &eventTypeR{}
+				}
+				foreign.R.Messages = append(foreign.R.Messages, local)
+				break
+			}
+		}
+	}
+
+	return nil
+}
+
+// SetApplication of the message to the related item.
+// Sets o.R.Application to related.
+// Adds o to related.R.Messages.
+func (o *Message) SetApplication(ctx context.Context, exec boil.ContextExecutor, insert bool, related *Application) error {
+	var err error
+	if insert {
+		if err = related.Insert(ctx, exec, boil.Infer()); err != nil {
+			return errors.Wrap(err, "failed to insert into foreign table")
+		}
+	}
+
+	updateQuery := fmt.Sprintf(
+		"UPDATE \"messages\" SET %s WHERE %s",
+		strmangle.SetParamNames("\"", "\"", 1, []string{"application_id"}),
+		strmangle.WhereClause("\"", "\"", 2, messagePrimaryKeyColumns),
+	)
+	values := []interface{}{related.ID, o.ID}
+
+	if boil.IsDebug(ctx) {
+		writer := boil.DebugWriterFrom(ctx)
+		fmt.Fprintln(writer, updateQuery)
+		fmt.Fprintln(writer, values)
+	}
+	if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
+		return errors.Wrap(err, "failed to update local table")
+	}
+
+	o.ApplicationID = related.ID
+	if o.R == nil {
+		o.R = &messageR{
+			Application: related,
+		}
+	} else {
+		o.R.Application = related
+	}
+
+	if related.R == nil {
+		related.R = &applicationR{
+			Messages: MessageSlice{o},
+		}
+	} else {
+		related.R.Messages = append(related.R.Messages, o)
+	}
+
+	return nil
+}
+
+// SetEventType of the message to the related item.
+// Sets o.R.EventType to related.
+// Adds o to related.R.Messages.
+func (o *Message) SetEventType(ctx context.Context, exec boil.ContextExecutor, insert bool, related *EventType) error {
+	var err error
+	if insert {
+		if err = related.Insert(ctx, exec, boil.Infer()); err != nil {
+			return errors.Wrap(err, "failed to insert into foreign table")
+		}
+	}
+
+	updateQuery := fmt.Sprintf(
+		"UPDATE \"messages\" SET %s WHERE %s",
+		strmangle.SetParamNames("\"", "\"", 1, []string{"event_type_id"}),
+		strmangle.WhereClause("\"", "\"", 2, messagePrimaryKeyColumns),
+	)
+	values := []interface{}{related.ID, o.ID}
+
+	if boil.IsDebug(ctx) {
+		writer := boil.DebugWriterFrom(ctx)
+		fmt.Fprintln(writer, updateQuery)
+		fmt.Fprintln(writer, values)
+	}
+	if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
+		return errors.Wrap(err, "failed to update local table")
+	}
+
+	o.EventTypeID = related.ID
+	if o.R == nil {
+		o.R = &messageR{
+			EventType: related,
+		}
+	} else {
+		o.R.EventType = related
+	}
+
+	if related.R == nil {
+		related.R = &eventTypeR{
+			Messages: MessageSlice{o},
+		}
+	} else {
+		related.R.Messages = append(related.R.Messages, o)
+	}
+
+	return nil
 }
 
 // Messages retrieves all the records using an executor.

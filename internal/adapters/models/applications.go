@@ -122,15 +122,18 @@ var ApplicationWhere = struct {
 var ApplicationRels = struct {
 	Environment string
 	Endpoints   string
+	Messages    string
 }{
 	Environment: "Environment",
 	Endpoints:   "Endpoints",
+	Messages:    "Messages",
 }
 
 // applicationR is where relationships are stored.
 type applicationR struct {
 	Environment *Environment  `boil:"Environment" json:"Environment" toml:"Environment" yaml:"Environment"`
 	Endpoints   EndpointSlice `boil:"Endpoints" json:"Endpoints" toml:"Endpoints" yaml:"Endpoints"`
+	Messages    MessageSlice  `boil:"Messages" json:"Messages" toml:"Messages" yaml:"Messages"`
 }
 
 // NewStruct creates a new relationship struct
@@ -150,6 +153,13 @@ func (r *applicationR) GetEndpoints() EndpointSlice {
 		return nil
 	}
 	return r.Endpoints
+}
+
+func (r *applicationR) GetMessages() MessageSlice {
+	if r == nil {
+		return nil
+	}
+	return r.Messages
 }
 
 // applicationL is where Load methods for each relationship are stored.
@@ -466,6 +476,20 @@ func (o *Application) Endpoints(mods ...qm.QueryMod) endpointQuery {
 	return Endpoints(queryMods...)
 }
 
+// Messages retrieves all the message's Messages with an executor.
+func (o *Application) Messages(mods ...qm.QueryMod) messageQuery {
+	var queryMods []qm.QueryMod
+	if len(mods) != 0 {
+		queryMods = append(queryMods, mods...)
+	}
+
+	queryMods = append(queryMods,
+		qm.Where("\"messages\".\"application_id\"=?", o.ID),
+	)
+
+	return Messages(queryMods...)
+}
+
 // LoadEnvironment allows an eager lookup of values, cached into the
 // loaded structs of the objects. This is for an N-1 relationship.
 func (applicationL) LoadEnvironment(ctx context.Context, e boil.ContextExecutor, singular bool, maybeApplication interface{}, mods queries.Applicator) error {
@@ -700,6 +724,120 @@ func (applicationL) LoadEndpoints(ctx context.Context, e boil.ContextExecutor, s
 	return nil
 }
 
+// LoadMessages allows an eager lookup of values, cached into the
+// loaded structs of the objects. This is for a 1-M or N-M relationship.
+func (applicationL) LoadMessages(ctx context.Context, e boil.ContextExecutor, singular bool, maybeApplication interface{}, mods queries.Applicator) error {
+	var slice []*Application
+	var object *Application
+
+	if singular {
+		var ok bool
+		object, ok = maybeApplication.(*Application)
+		if !ok {
+			object = new(Application)
+			ok = queries.SetFromEmbeddedStruct(&object, &maybeApplication)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeApplication))
+			}
+		}
+	} else {
+		s, ok := maybeApplication.(*[]*Application)
+		if ok {
+			slice = *s
+		} else {
+			ok = queries.SetFromEmbeddedStruct(&slice, maybeApplication)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeApplication))
+			}
+		}
+	}
+
+	args := make([]interface{}, 0, 1)
+	if singular {
+		if object.R == nil {
+			object.R = &applicationR{}
+		}
+		args = append(args, object.ID)
+	} else {
+	Outer:
+		for _, obj := range slice {
+			if obj.R == nil {
+				obj.R = &applicationR{}
+			}
+
+			for _, a := range args {
+				if a == obj.ID {
+					continue Outer
+				}
+			}
+
+			args = append(args, obj.ID)
+		}
+	}
+
+	if len(args) == 0 {
+		return nil
+	}
+
+	query := NewQuery(
+		qm.From(`messages`),
+		qm.WhereIn(`messages.application_id in ?`, args...),
+	)
+	if mods != nil {
+		mods.Apply(query)
+	}
+
+	results, err := query.QueryContext(ctx, e)
+	if err != nil {
+		return errors.Wrap(err, "failed to eager load messages")
+	}
+
+	var resultSlice []*Message
+	if err = queries.Bind(results, &resultSlice); err != nil {
+		return errors.Wrap(err, "failed to bind eager loaded slice messages")
+	}
+
+	if err = results.Close(); err != nil {
+		return errors.Wrap(err, "failed to close results in eager load on messages")
+	}
+	if err = results.Err(); err != nil {
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for messages")
+	}
+
+	if len(messageAfterSelectHooks) != 0 {
+		for _, obj := range resultSlice {
+			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
+				return err
+			}
+		}
+	}
+	if singular {
+		object.R.Messages = resultSlice
+		for _, foreign := range resultSlice {
+			if foreign.R == nil {
+				foreign.R = &messageR{}
+			}
+			foreign.R.Application = object
+		}
+		return nil
+	}
+
+	for _, foreign := range resultSlice {
+		for _, local := range slice {
+			if local.ID == foreign.ApplicationID {
+				local.R.Messages = append(local.R.Messages, foreign)
+				if foreign.R == nil {
+					foreign.R = &messageR{}
+				}
+				foreign.R.Application = local
+				break
+			}
+		}
+	}
+
+	return nil
+}
+
 // SetEnvironment of the application to the related item.
 // Sets o.R.Environment to related.
 // Adds o to related.R.Applications.
@@ -791,6 +929,59 @@ func (o *Application) AddEndpoints(ctx context.Context, exec boil.ContextExecuto
 	for _, rel := range related {
 		if rel.R == nil {
 			rel.R = &endpointR{
+				Application: o,
+			}
+		} else {
+			rel.R.Application = o
+		}
+	}
+	return nil
+}
+
+// AddMessages adds the given related objects to the existing relationships
+// of the application, optionally inserting them as new records.
+// Appends related to o.R.Messages.
+// Sets related.R.Application appropriately.
+func (o *Application) AddMessages(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*Message) error {
+	var err error
+	for _, rel := range related {
+		if insert {
+			rel.ApplicationID = o.ID
+			if err = rel.Insert(ctx, exec, boil.Infer()); err != nil {
+				return errors.Wrap(err, "failed to insert into foreign table")
+			}
+		} else {
+			updateQuery := fmt.Sprintf(
+				"UPDATE \"messages\" SET %s WHERE %s",
+				strmangle.SetParamNames("\"", "\"", 1, []string{"application_id"}),
+				strmangle.WhereClause("\"", "\"", 2, messagePrimaryKeyColumns),
+			)
+			values := []interface{}{o.ID, rel.ID}
+
+			if boil.IsDebug(ctx) {
+				writer := boil.DebugWriterFrom(ctx)
+				fmt.Fprintln(writer, updateQuery)
+				fmt.Fprintln(writer, values)
+			}
+			if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
+				return errors.Wrap(err, "failed to update foreign table")
+			}
+
+			rel.ApplicationID = o.ID
+		}
+	}
+
+	if o.R == nil {
+		o.R = &applicationR{
+			Messages: related,
+		}
+	} else {
+		o.R.Messages = append(o.R.Messages, related...)
+	}
+
+	for _, rel := range related {
+		if rel.R == nil {
+			rel.R = &messageR{
 				Application: o,
 			}
 		} else {

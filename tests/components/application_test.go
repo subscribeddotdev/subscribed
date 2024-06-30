@@ -8,11 +8,17 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/subscribeddotdev/subscribed-backend/internal/adapters/models"
-	"github.com/subscribeddotdev/subscribed-backend/internal/domain"
 	"github.com/subscribeddotdev/subscribed-backend/tests/client"
+	"github.com/subscribeddotdev/subscribed-backend/tests/fixture"
 )
 
-func TestApplicationLifecycle(t *testing.T) {
+func TestApplication_Lifecycle(t *testing.T) {
+	ff := fixture.NewFactory(t, ctx, db)
+	org := ff.NewOrganization().Save()
+	env := ff.NewEnvironment().WithOrganizationID(org.ID).Save()
+	app := ff.NewApplication().WithEnvironmentID(env.ID).Save()
+	eventType := ff.NewEventType().WithOrgID(org.ID).Save()
+
 	t.Run("send_message", func(t *testing.T) {
 		payload, err := gofakeit.JSON(&gofakeit.JSONOptions{
 			Type: "object",
@@ -23,17 +29,15 @@ func TestApplicationLifecycle(t *testing.T) {
 		})
 		require.NoError(t, err)
 
-		appID := domain.NewID().String()
-		eventTypeID := domain.NewID().String()
-		resp, err := getClient(t, "").SendMessage(ctx, appID, client.SendMessageRequest{
-			EventTypeId: eventTypeID, //TODO: replace this with an existing eventTypeID
+		resp, err := getClient(t, "").SendMessage(ctx, app.ID, client.SendMessageRequest{
+			EventTypeId: eventType.ID,
 			Payload:     string(payload),
 		})
 		require.NoError(t, err)
 		assert.Equal(t, http.StatusCreated, resp.StatusCode)
 		msg, err := models.Messages(
-			models.MessageWhere.ApplicationID.EQ(appID),
-			models.MessageWhere.EventTypeID.EQ(eventTypeID),
+			models.MessageWhere.ApplicationID.EQ(app.ID),
+			models.MessageWhere.EventTypeID.EQ(eventType.ID),
 		).One(ctx, db)
 		require.NoError(t, err)
 

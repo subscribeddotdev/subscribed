@@ -76,3 +76,13 @@ func (f *Factory) NewApplication() *Application {
 		},
 	}
 }
+
+func (f *Factory) NewEventType() *EventType {
+	return &EventType{
+		factory: f,
+		model: models.EventType{
+			ID:   domain.NewID().String(),
+			Name: gofakeit.Verb(),
+		},
+	}
+}

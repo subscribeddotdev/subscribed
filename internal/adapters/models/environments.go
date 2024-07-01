@@ -69,30 +69,6 @@ var EnvironmentTableColumns = struct {
 
 // Generated where
 
-type whereHelpernull_Time struct{ field string }
-
-func (w whereHelpernull_Time) EQ(x null.Time) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, false, x)
-}
-func (w whereHelpernull_Time) NEQ(x null.Time) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, true, x)
-}
-func (w whereHelpernull_Time) LT(x null.Time) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LT, x)
-}
-func (w whereHelpernull_Time) LTE(x null.Time) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LTE, x)
-}
-func (w whereHelpernull_Time) GT(x null.Time) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GT, x)
-}
-func (w whereHelpernull_Time) GTE(x null.Time) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GTE, x)
-}
-
-func (w whereHelpernull_Time) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
-func (w whereHelpernull_Time) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
-
 var EnvironmentWhere = struct {
 	ID             whereHelperstring
 	OrganizationID whereHelperstring
@@ -112,15 +88,18 @@ var EnvironmentWhere = struct {
 // EnvironmentRels is where relationship names are stored.
 var EnvironmentRels = struct {
 	Organization string
+	APIKeys      string
 	Applications string
 }{
 	Organization: "Organization",
+	APIKeys:      "APIKeys",
 	Applications: "Applications",
 }
 
 // environmentR is where relationships are stored.
 type environmentR struct {
 	Organization *Organization    `boil:"Organization" json:"Organization" toml:"Organization" yaml:"Organization"`
+	APIKeys      APIKeySlice      `boil:"APIKeys" json:"APIKeys" toml:"APIKeys" yaml:"APIKeys"`
 	Applications ApplicationSlice `boil:"Applications" json:"Applications" toml:"Applications" yaml:"Applications"`
 }
 
@@ -134,6 +113,13 @@ func (r *environmentR) GetOrganization() *Organization {
 		return nil
 	}
 	return r.Organization
+}
+
+func (r *environmentR) GetAPIKeys() APIKeySlice {
+	if r == nil {
+		return nil
+	}
+	return r.APIKeys
 }
 
 func (r *environmentR) GetApplications() ApplicationSlice {
@@ -443,6 +429,20 @@ func (o *Environment) Organization(mods ...qm.QueryMod) organizationQuery {
 	return Organizations(queryMods...)
 }
 
+// APIKeys retrieves all the api_key's APIKeys with an executor.
+func (o *Environment) APIKeys(mods ...qm.QueryMod) apiKeyQuery {
+	var queryMods []qm.QueryMod
+	if len(mods) != 0 {
+		queryMods = append(queryMods, mods...)
+	}
+
+	queryMods = append(queryMods,
+		qm.Where("\"api_keys\".\"environment_id\"=?", o.ID),
+	)
+
+	return APIKeys(queryMods...)
+}
+
 // Applications retrieves all the application's Applications with an executor.
 func (o *Environment) Applications(mods ...qm.QueryMod) applicationQuery {
 	var queryMods []qm.QueryMod
@@ -569,6 +569,120 @@ func (environmentL) LoadOrganization(ctx context.Context, e boil.ContextExecutor
 					foreign.R = &organizationR{}
 				}
 				foreign.R.Environments = append(foreign.R.Environments, local)
+				break
+			}
+		}
+	}
+
+	return nil
+}
+
+// LoadAPIKeys allows an eager lookup of values, cached into the
+// loaded structs of the objects. This is for a 1-M or N-M relationship.
+func (environmentL) LoadAPIKeys(ctx context.Context, e boil.ContextExecutor, singular bool, maybeEnvironment interface{}, mods queries.Applicator) error {
+	var slice []*Environment
+	var object *Environment
+
+	if singular {
+		var ok bool
+		object, ok = maybeEnvironment.(*Environment)
+		if !ok {
+			object = new(Environment)
+			ok = queries.SetFromEmbeddedStruct(&object, &maybeEnvironment)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeEnvironment))
+			}
+		}
+	} else {
+		s, ok := maybeEnvironment.(*[]*Environment)
+		if ok {
+			slice = *s
+		} else {
+			ok = queries.SetFromEmbeddedStruct(&slice, maybeEnvironment)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeEnvironment))
+			}
+		}
+	}
+
+	args := make([]interface{}, 0, 1)
+	if singular {
+		if object.R == nil {
+			object.R = &environmentR{}
+		}
+		args = append(args, object.ID)
+	} else {
+	Outer:
+		for _, obj := range slice {
+			if obj.R == nil {
+				obj.R = &environmentR{}
+			}
+
+			for _, a := range args {
+				if a == obj.ID {
+					continue Outer
+				}
+			}
+
+			args = append(args, obj.ID)
+		}
+	}
+
+	if len(args) == 0 {
+		return nil
+	}
+
+	query := NewQuery(
+		qm.From(`api_keys`),
+		qm.WhereIn(`api_keys.environment_id in ?`, args...),
+	)
+	if mods != nil {
+		mods.Apply(query)
+	}
+
+	results, err := query.QueryContext(ctx, e)
+	if err != nil {
+		return errors.Wrap(err, "failed to eager load api_keys")
+	}
+
+	var resultSlice []*APIKey
+	if err = queries.Bind(results, &resultSlice); err != nil {
+		return errors.Wrap(err, "failed to bind eager loaded slice api_keys")
+	}
+
+	if err = results.Close(); err != nil {
+		return errors.Wrap(err, "failed to close results in eager load on api_keys")
+	}
+	if err = results.Err(); err != nil {
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for api_keys")
+	}
+
+	if len(apiKeyAfterSelectHooks) != 0 {
+		for _, obj := range resultSlice {
+			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
+				return err
+			}
+		}
+	}
+	if singular {
+		object.R.APIKeys = resultSlice
+		for _, foreign := range resultSlice {
+			if foreign.R == nil {
+				foreign.R = &apiKeyR{}
+			}
+			foreign.R.Environment = object
+		}
+		return nil
+	}
+
+	for _, foreign := range resultSlice {
+		for _, local := range slice {
+			if local.ID == foreign.EnvironmentID {
+				local.R.APIKeys = append(local.R.APIKeys, foreign)
+				if foreign.R == nil {
+					foreign.R = &apiKeyR{}
+				}
+				foreign.R.Environment = local
 				break
 			}
 		}
@@ -735,6 +849,59 @@ func (o *Environment) SetOrganization(ctx context.Context, exec boil.ContextExec
 		related.R.Environments = append(related.R.Environments, o)
 	}
 
+	return nil
+}
+
+// AddAPIKeys adds the given related objects to the existing relationships
+// of the environment, optionally inserting them as new records.
+// Appends related to o.R.APIKeys.
+// Sets related.R.Environment appropriately.
+func (o *Environment) AddAPIKeys(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*APIKey) error {
+	var err error
+	for _, rel := range related {
+		if insert {
+			rel.EnvironmentID = o.ID
+			if err = rel.Insert(ctx, exec, boil.Infer()); err != nil {
+				return errors.Wrap(err, "failed to insert into foreign table")
+			}
+		} else {
+			updateQuery := fmt.Sprintf(
+				"UPDATE \"api_keys\" SET %s WHERE %s",
+				strmangle.SetParamNames("\"", "\"", 1, []string{"environment_id"}),
+				strmangle.WhereClause("\"", "\"", 2, apiKeyPrimaryKeyColumns),
+			)
+			values := []interface{}{o.ID, rel.SecretKey}
+
+			if boil.IsDebug(ctx) {
+				writer := boil.DebugWriterFrom(ctx)
+				fmt.Fprintln(writer, updateQuery)
+				fmt.Fprintln(writer, values)
+			}
+			if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
+				return errors.Wrap(err, "failed to update foreign table")
+			}
+
+			rel.EnvironmentID = o.ID
+		}
+	}
+
+	if o.R == nil {
+		o.R = &environmentR{
+			APIKeys: related,
+		}
+	} else {
+		o.R.APIKeys = append(o.R.APIKeys, related...)
+	}
+
+	for _, rel := range related {
+		if rel.R == nil {
+			rel.R = &apiKeyR{
+				Environment: o,
+			}
+		} else {
+			rel.R.Environment = o
+		}
+	}
 	return nil
 }
 

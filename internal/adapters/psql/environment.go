@@ -2,6 +2,9 @@ package psql
 
 import (
 	"context"
+	"database/sql"
+	"errors"
+	"fmt"
 
 	"github.com/subscribeddotdev/subscribed-backend/internal/adapters/models"
 	"github.com/subscribeddotdev/subscribed-backend/internal/domain"
@@ -35,4 +38,24 @@ func (o EnvironmentRepository) Insert(ctx context.Context, env *domain.Environme
 	}
 
 	return nil
+}
+
+func (o EnvironmentRepository) ByID(ctx context.Context, id domain.ID) (*domain.Environment, error) {
+	model, err := models.FindEnvironment(ctx, o.db, id.String())
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, domain.ErrEnvironmentNotFound
+	}
+
+	if err != nil {
+		return nil, fmt.Errorf("error querying the environment by its id '%s': %v", id, err)
+	}
+
+	return domain.UnMarshallEnvironment(
+		model.ID,
+		model.OrganizationID,
+		model.Name,
+		model.EnvType,
+		model.CreatedAt,
+		model.ArchivedAt.Ptr(),
+	)
 }

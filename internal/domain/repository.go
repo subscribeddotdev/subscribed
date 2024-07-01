@@ -1,8 +1,17 @@
 package domain
 
-import "context"
+import (
+	"context"
+	"errors"
+)
+
+var (
+	ErrApiKeyExists        = errors.New("the api key already exists")
+	ErrEnvironmentNotFound = errors.New("environment not found")
+)
 
 type EnvironmentRepository interface {
+	ByID(ctx context.Context, id ID) (*Environment, error)
 	Insert(ctx context.Context, env *Environment) error
 }
 
@@ -20,4 +29,8 @@ type EndpointRepository interface {
 
 type MessageRepository interface {
 	Insert(ctx context.Context, message *Message) error
+}
+
+type ApiKeyRepository interface {
+	Insert(ctx context.Context, apiKey *ApiKey) error
 }

@@ -21,6 +21,7 @@ type Command struct {
 	CreateApplication  CommandHandler[command.CreateApplication]
 	CreateOrganization CommandHandler[command.CreateOrganization]
 	CreateEventType    CommandHandler[command.CreateEventType]
+	CreateApiKey       CommandHandler[command.CreateApiKey]
 }
 
 type App struct {

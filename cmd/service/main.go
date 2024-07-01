@@ -75,6 +75,9 @@ func run(logger *logs.Logger) error {
 	endpointRepo := psql.NewEndpointRepository(db)
 	eventTypeRepo := psql.NewEventTypeRepository(db)
 	memberRepo := psql.NewMemberRepository(db)
+	apiKeyRepo := psql.NewApiKeyRepository(db)
+	envRepo := psql.NewEnvironmentRepository(db)
+
 	eventPublisher, err := events.NewPublisher(config.AmqpUrL, watermill.NewStdLogger(!config.ProductionMode, !config.ProductionMode))
 	if err != nil {
 		return err
@@ -90,6 +93,7 @@ func run(logger *logs.Logger) error {
 			AddEndpoint:        observability.NewCommandDecorator[command.AddEndpoint](command.NewAddEndpointHandler(endpointRepo), logger),
 			SendMessage:        observability.NewCommandDecorator[command.SendMessage](command.NewSendMessageHandler(txProvider), logger),
 			CreateEventType:    observability.NewCommandDecorator[command.CreateEventType](command.NewCreateEventTypeHandler(eventTypeRepo), logger),
+			CreateApiKey:       observability.NewCommandDecorator[command.CreateApiKey](command.NewCreateApiKeyHandler(apiKeyRepo, envRepo), logger),
 		},
 	}
 

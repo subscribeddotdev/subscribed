@@ -19,3 +19,7 @@ func MustID(t *testing.T, id string) domain.ID {
 	require.NoError(t, err)
 	return ID
 }
+
+func ToPtr[T any](v T) *T {
+	return &v
+}

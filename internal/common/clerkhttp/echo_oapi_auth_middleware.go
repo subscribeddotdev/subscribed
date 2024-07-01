@@ -99,7 +99,7 @@ type AuthorizationParams struct {
 	// and 401 Unauthorized status.
 	AuthorizationFailureHandler http.Handler
 	// JWKSClient is the jwks.Client that will be used to fetch the
-	// JSON Web Key Set. A default client will be used if none is
+	// JSON Web SecretKey Set. A default client will be used if none is
 	// provided.
 	JWKSClient *jwks.Client
 }
@@ -129,7 +129,7 @@ func (c *jwkCache) IsValid(key string, t time.Time) bool {
 	return ok && entry != nil && entry.expiresAt.After(t)
 }
 
-// Get fetches the JSON Web Key for the provided key, unless the
+// Get fetches the JSON Web SecretKey for the provided key, unless the
 // entry has expired.
 func (c *jwkCache) Get(key string) *clerk.JSONWebKey {
 	c.mu.RLock()
@@ -141,7 +141,7 @@ func (c *jwkCache) Get(key string) *clerk.JSONWebKey {
 	return entry.value
 }
 
-// Set stores the JSON Web Key in the provided key and sets the
+// Set stores the JSON Web SecretKey in the provided key and sets the
 // expiration date.
 func (c *jwkCache) Set(key string, value *clerk.JSONWebKey, expiresAt time.Time) {
 	c.mu.Lock()

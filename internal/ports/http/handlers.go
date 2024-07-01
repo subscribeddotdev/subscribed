@@ -120,6 +120,25 @@ func (h handlers) CreateEventType(c echo.Context) error {
 	return c.NoContent(http.StatusCreated)
 }
 
+func (h handlers) CreateApiKey(c echo.Context, params CreateApiKeyParams) error {
+	var body CreateApiKeyRequest
+	err := c.Bind(&body)
+	if err != nil {
+		return NewHandlerErrorWithStatus(err, "error-parsing-the-body", http.StatusBadRequest)
+	}
+
+	err = h.application.Command.CreateApiKey.Execute(c.Request().Context(), command.CreateApiKey{
+		Name:          body.Name,
+		ExpiresAt:     body.ExpiresAt,
+		EnvironmentID: params.EnvironmentId,
+	})
+	if err != nil {
+		return NewHandlerError(err, "unable-to-create-api-key")
+	}
+
+	return c.NoContent(http.StatusCreated)
+}
+
 func (h handlers) resolveMemberFromCtx(c echo.Context) (*iam.Member, error) {
 	claims, ok := clerkhttp.SessionClaimsFromContext(c)
 	if !ok {

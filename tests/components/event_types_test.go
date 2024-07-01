@@ -16,12 +16,7 @@ func TestEventTypes(t *testing.T) {
 	factory := fixture.NewFactory(t, ctx, db)
 	org := factory.NewOrganization().Save()
 	member := factory.NewMember().WithOrganizationID(org.ID).Save()
-
-	token := jwks.JwtGenerator(t, map[string]any{
-		"sid": "sess_123",
-		"sub": member.LoginProviderID,
-		"iss": "https://clerk.com",
-	})
+	token := jwks.JwtGenerator(t, member.LoginProviderID)
 
 	resp, err := getClient(t, token).CreateEventType(ctx, client.CreateEventTypeRequest{
 		Name:        gofakeit.AppName(),

@@ -17,8 +17,14 @@ var JwksPublicKey string
 //go:embed privatekey.test.json
 var JwksPrivateKey string
 
-func JwtGenerator(t *testing.T, claims any) string {
+func JwtGenerator(t *testing.T, loginProviderID string) string {
 	t.Helper()
+
+	claims := map[string]any{
+		"sid": "sess_123",
+		"sub": loginProviderID,
+		"iss": "https://clerk.com",
+	}
 
 	parsedPrivateKey, err := jwkclient.ParseKey([]byte(JwksPrivateKey))
 	require.NoError(t, err)

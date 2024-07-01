@@ -94,6 +94,31 @@ paths:
           description: CREATED
         default:
           $ref: '#/components/responses/DefaultError'
+  /api-keys:
+    post:
+      tags:
+        - ApiKeys
+      operationId: createApiKey
+      summary: Create a new api key
+      security:
+        - BearerAuth: [ ]
+      parameters:
+        - name: environment_id
+          in: header
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateApiKeyRequest'
+      responses:
+        '201':
+          description: CREATED
+        default:
+          $ref: '#/components/responses/DefaultError'
   /event-types:
     post:
       tags:
@@ -322,6 +347,15 @@ components:
           type: string
         schema_example:
           type: string
+    # API Keys
+    CreateApiKeyRequest:
+      required: [name]
+      properties:
+        name:
+          type: string
+        expires_at:
+          type: string
+          format: date-time
     GenericResponse:
       type: object
       required:

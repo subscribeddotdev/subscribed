@@ -15,6 +15,7 @@ import (
 	"net/url"
 	"path"
 	"strings"
+	"time"
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/oapi-codegen/runtime"
@@ -141,6 +142,12 @@ type CreateAccountRequest struct {
 	Type string `json:"type"`
 }
 
+// CreateApiKeyRequest defines model for CreateApiKeyRequest.
+type CreateApiKeyRequest struct {
+	ExpiresAt *time.Time `json:"expires_at,omitempty"`
+	Name      string     `json:"name"`
+}
+
 // CreateApplicationRequest defines model for CreateApplicationRequest.
 type CreateApplicationRequest struct {
 	Name string `json:"name"`
@@ -172,12 +179,20 @@ type SendMessageRequest struct {
 // DefaultError defines model for DefaultError.
 type DefaultError = ErrorResponse
 
+// CreateApiKeyParams defines parameters for CreateApiKey.
+type CreateApiKeyParams struct {
+	EnvironmentId string `json:"environment_id"`
+}
+
 // CreateAccountParams defines parameters for CreateAccount.
 type CreateAccountParams struct {
 	SvixId        string `json:"svix-id"`
 	SvixTimestamp string `json:"svix-timestamp"`
 	SvixSignature string `json:"svix-signature"`
 }
+
+// CreateApiKeyJSONRequestBody defines body for CreateApiKey for application/json ContentType.
+type CreateApiKeyJSONRequestBody = CreateApiKeyRequest
 
 // CreateApplicationJSONRequestBody defines body for CreateApplication for application/json ContentType.
 type CreateApplicationJSONRequestBody = CreateApplicationRequest
@@ -267,6 +282,11 @@ func WithRequestEditorFn(fn RequestEditorFn) ClientOption {
 
 // The interface specification for the client above.
 type ClientInterface interface {
+	// CreateApiKeyWithBody request with any body
+	CreateApiKeyWithBody(ctx context.Context, params *CreateApiKeyParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	CreateApiKey(ctx context.Context, params *CreateApiKeyParams, body CreateApiKeyJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// CreateApplicationWithBody request with any body
 	CreateApplicationWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -294,6 +314,30 @@ type ClientInterface interface {
 	CreateAccountWithBody(ctx context.Context, params *CreateAccountParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	CreateAccount(ctx context.Context, params *CreateAccountParams, body CreateAccountJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+}
+
+func (c *Client) CreateApiKeyWithBody(ctx context.Context, params *CreateApiKeyParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCreateApiKeyRequestWithBody(c.Server, params, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) CreateApiKey(ctx context.Context, params *CreateApiKeyParams, body CreateApiKeyJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCreateApiKeyRequest(c.Server, params, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
 }
 
 func (c *Client) CreateApplicationWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -426,6 +470,59 @@ func (c *Client) CreateAccount(ctx context.Context, params *CreateAccountParams,
 		return nil, err
 	}
 	return c.Client.Do(req)
+}
+
+// NewCreateApiKeyRequest calls the generic CreateApiKey builder with application/json body
+func NewCreateApiKeyRequest(server string, params *CreateApiKeyParams, body CreateApiKeyJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewCreateApiKeyRequestWithBody(server, params, "application/json", bodyReader)
+}
+
+// NewCreateApiKeyRequestWithBody generates requests for CreateApiKey with any type of body
+func NewCreateApiKeyRequestWithBody(server string, params *CreateApiKeyParams, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/api-keys")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	if params != nil {
+
+		var headerParam0 string
+
+		headerParam0, err = runtime.StyleParamWithLocation("simple", false, "environment_id", runtime.ParamLocationHeader, params.EnvironmentId)
+		if err != nil {
+			return nil, err
+		}
+
+		req.Header.Set("environment_id", headerParam0)
+
+	}
+
+	return req, nil
 }
 
 // NewCreateApplicationRequest calls the generic CreateApplication builder with application/json body
@@ -743,6 +840,11 @@ func WithBaseURL(baseURL string) ClientOption {
 
 // ClientWithResponsesInterface is the interface specification for the client with responses above.
 type ClientWithResponsesInterface interface {
+	// CreateApiKeyWithBodyWithResponse request with any body
+	CreateApiKeyWithBodyWithResponse(ctx context.Context, params *CreateApiKeyParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateApiKeyResponse, error)
+
+	CreateApiKeyWithResponse(ctx context.Context, params *CreateApiKeyParams, body CreateApiKeyJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateApiKeyResponse, error)
+
 	// CreateApplicationWithBodyWithResponse request with any body
 	CreateApplicationWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateApplicationResponse, error)
 
@@ -770,6 +872,28 @@ type ClientWithResponsesInterface interface {
 	CreateAccountWithBodyWithResponse(ctx context.Context, params *CreateAccountParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateAccountResponse, error)
 
 	CreateAccountWithResponse(ctx context.Context, params *CreateAccountParams, body CreateAccountJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateAccountResponse, error)
+}
+
+type CreateApiKeyResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSONDefault  *DefaultError
+}
+
+// Status returns HTTPResponse.Status
+func (r CreateApiKeyResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r CreateApiKeyResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
 }
 
 type CreateApplicationResponse struct {
@@ -904,6 +1028,23 @@ func (r CreateAccountResponse) StatusCode() int {
 	return 0
 }
 
+// CreateApiKeyWithBodyWithResponse request with arbitrary body returning *CreateApiKeyResponse
+func (c *ClientWithResponses) CreateApiKeyWithBodyWithResponse(ctx context.Context, params *CreateApiKeyParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateApiKeyResponse, error) {
+	rsp, err := c.CreateApiKeyWithBody(ctx, params, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCreateApiKeyResponse(rsp)
+}
+
+func (c *ClientWithResponses) CreateApiKeyWithResponse(ctx context.Context, params *CreateApiKeyParams, body CreateApiKeyJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateApiKeyResponse, error) {
+	rsp, err := c.CreateApiKey(ctx, params, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCreateApiKeyResponse(rsp)
+}
+
 // CreateApplicationWithBodyWithResponse request with arbitrary body returning *CreateApplicationResponse
 func (c *ClientWithResponses) CreateApplicationWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateApplicationResponse, error) {
 	rsp, err := c.CreateApplicationWithBody(ctx, contentType, body, reqEditors...)
@@ -996,6 +1137,32 @@ func (c *ClientWithResponses) CreateAccountWithResponse(ctx context.Context, par
 		return nil, err
 	}
 	return ParseCreateAccountResponse(rsp)
+}
+
+// ParseCreateApiKeyResponse parses an HTTP response from a CreateApiKeyWithResponse call
+func ParseCreateApiKeyResponse(rsp *http.Response) (*CreateApiKeyResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &CreateApiKeyResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest DefaultError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
 }
 
 // ParseCreateApplicationResponse parses an HTTP response from a CreateApplicationWithResponse call
@@ -1157,35 +1324,36 @@ func ParseCreateAccountResponse(rsp *http.Response) (*CreateAccountResponse, err
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
-	"kDwTSk9+O/vtDG8eNv8NAAD//wYCFooeHwAA",
+	"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",
+	"spRLNfp0/ukcrx/W/w0AAP//KhFRtnQhAAA=",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

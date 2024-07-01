@@ -1,8 +1,6 @@
 package domain_test
 
 import (
-	"crypto/rand"
-	"encoding/base64"
 	"testing"
 	"time"
 
@@ -92,19 +90,4 @@ func TestNewApiKey(t *testing.T) {
 			}
 		})
 	}
-}
-
-func TestDemo(t *testing.T) {
-	keyBytes := make([]byte, 16)
-	_, err := rand.Read(keyBytes)
-	require.NoError(t, err)
-
-	encoder := base64.NewEncoding("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_.")
-
-	key := base64.StdEncoding.WithPadding(base64.NoPadding).EncodeToString(keyBytes)
-	key2 := encoder.WithPadding(base64.NoPadding).EncodeToString(keyBytes)
-
-	t.Logf("%x", keyBytes)
-	t.Logf("%s", key)
-	t.Logf("%s", key2)
 }

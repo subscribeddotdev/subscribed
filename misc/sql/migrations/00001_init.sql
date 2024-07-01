@@ -76,6 +76,17 @@ CREATE TABLE messages (
     CONSTRAINT fk_message_is_of_event_type FOREIGN KEY (event_type_id) REFERENCES event_types (id)
 );
 
+CREATE TABLE api_keys (
+    secret_key TEXT NOT NULL PRIMARY KEY,
+    suffix TEXT NOT NULL,
+    environment_id VARCHAR(26) NOT NULL,
+    name TEXT NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    expires_at TIMESTAMPTZ,
+
+    CONSTRAINT fk_api_key_belongs_to_an_env FOREIGN KEY (environment_id) REFERENCES environments (id)
+);
+
 -- +goose StatementEnd
 
 -- +goose Down
@@ -83,6 +94,7 @@ CREATE TABLE messages (
 DROP TABLE messages;
 DROP TABLE event_types;
 DROP TABLE endpoints;
+DROP TABLE api_keys;
 DROP TABLE applications;
 DROP TABLE members;
 DROP TABLE environments;

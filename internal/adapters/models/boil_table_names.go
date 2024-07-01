@@ -4,6 +4,7 @@
 package models
 
 var TableNames = struct {
+	APIKeys       string
 	Applications  string
 	Endpoints     string
 	Environments  string
@@ -12,6 +13,7 @@ var TableNames = struct {
 	Messages      string
 	Organizations string
 }{
+	APIKeys:       "api_keys",
 	Applications:  "applications",
 	Endpoints:     "endpoints",
 	Environments:  "environments",

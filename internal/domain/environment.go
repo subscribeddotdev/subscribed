@@ -65,6 +65,36 @@ func (e *Environment) Type() EnvType {
 	return e.envType
 }
 
+func UnMarshallEnvironment(
+	id, orgID, name, envType string,
+	createdAt time.Time,
+	archivedAt *time.Time,
+) (*Environment, error) {
+	dID, err := NewIdFromString(id)
+	if err != nil {
+		return nil, err
+	}
+
+	dOrgID, err := NewIdFromString(orgID)
+	if err != nil {
+		return nil, err
+	}
+
+	dEnvType, err := marshallToEventType(envType)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Environment{
+		id:         dID,
+		orgID:      dOrgID,
+		name:       name,
+		envType:    dEnvType,
+		createdAt:  createdAt,
+		archivedAt: archivedAt,
+	}, nil
+}
+
 type EnvType struct {
 	name string
 }

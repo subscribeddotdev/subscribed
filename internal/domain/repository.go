@@ -6,10 +6,12 @@ import (
 )
 
 var (
-	ErrApiKeyExists = errors.New("the api key already exists")
+	ErrApiKeyExists        = errors.New("the api key already exists")
+	ErrEnvironmentNotFound = errors.New("environment not found")
 )
 
 type EnvironmentRepository interface {
+	ByID(ctx context.Context, id ID) (*Environment, error)
 	Insert(ctx context.Context, env *Environment) error
 }
 

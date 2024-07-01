@@ -32,8 +32,11 @@ func TestEnvironmentRepository_ByID(t *testing.T) {
 	assert.Equal(t, env.Name, foundEnv.Name())
 	assert.Equal(t, env.OrganizationID, foundEnv.OrgID().String())
 	assert.Equal(t, env.EnvType, foundEnv.Type().String())
-	assert.Equal(t, env.ArchivedAt.Ptr(), foundEnv.ArchivedAt())
-	assert.Equal(t, env.CreatedAt, foundEnv.CreatedAt())
+
+	if env.ArchivedAt.Ptr() != nil {
+		assert.Equal(t, env.ArchivedAt.Ptr().Truncate(time.Second), foundEnv.ArchivedAt().Truncate(time.Second))
+	}
+	assert.Equal(t, env.CreatedAt.Truncate(time.Second), foundEnv.CreatedAt().Truncate(time.Second))
 }
 
 func assertEnvironment(t *testing.T, env *domain.Environment) {

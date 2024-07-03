@@ -15,34 +15,34 @@ func TestNewEndpoint(t *testing.T) {
 		name        string
 		expectedErr string
 
-		applicationID          domain.ID
-		endpointUrl            domain.EndpointURL
-		description            string
-		eventTypesSubscribedTo []domain.EventType
+		applicationID domain.ID
+		endpointUrl   domain.EndpointURL
+		description   string
+		eventTypeIDs  []domain.ID
 	}{
 		{
-			name:                   "create_new_endpoint",
-			expectedErr:            "",
-			applicationID:          domain.NewID(),
-			endpointUrl:            mustEndpointURL(t, gofakeit.URL()),
-			description:            gofakeit.Sentence(gofakeit.IntRange(5, 10)),
-			eventTypesSubscribedTo: nil,
+			name:          "create_new_endpoint",
+			expectedErr:   "",
+			applicationID: domain.NewID(),
+			endpointUrl:   mustEndpointURL(t, gofakeit.URL()),
+			description:   gofakeit.Sentence(gofakeit.IntRange(5, 10)),
+			eventTypeIDs:  []domain.ID{domain.NewID()},
 		},
 		{
-			name:                   "error_invalid_endpoint_url",
-			expectedErr:            "endpointURL cannot be empty",
-			applicationID:          domain.NewID(),
-			endpointUrl:            domain.EndpointURL{},
-			description:            gofakeit.Sentence(gofakeit.IntRange(5, 10)),
-			eventTypesSubscribedTo: nil,
+			name:          "error_invalid_endpoint_url",
+			expectedErr:   "endpointURL cannot be empty",
+			applicationID: domain.NewID(),
+			endpointUrl:   domain.EndpointURL{},
+			description:   gofakeit.Sentence(gofakeit.IntRange(5, 10)),
+			eventTypeIDs:  []domain.ID{domain.NewID()},
 		},
 		{
-			name:                   "error_invalid_application_id",
-			expectedErr:            "applicationID cannot be empty",
-			applicationID:          domain.ID{},
-			endpointUrl:            mustEndpointURL(t, gofakeit.URL()),
-			description:            gofakeit.Sentence(gofakeit.IntRange(5, 10)),
-			eventTypesSubscribedTo: nil,
+			name:          "error_invalid_application_id",
+			expectedErr:   "applicationID cannot be empty",
+			applicationID: domain.ID{},
+			endpointUrl:   mustEndpointURL(t, gofakeit.URL()),
+			description:   gofakeit.Sentence(gofakeit.IntRange(5, 10)),
+			eventTypeIDs:  []domain.ID{domain.NewID()},
 		},
 	}
 
@@ -50,7 +50,7 @@ func TestNewEndpoint(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 
-			endpoint, err := domain.NewEndpoint(tc.endpointUrl, tc.applicationID, tc.description, tc.eventTypesSubscribedTo)
+			endpoint, err := domain.NewEndpoint(tc.endpointUrl, tc.applicationID, tc.description, tc.eventTypeIDs)
 
 			if tc.expectedErr != "" {
 				assert.EqualError(t, err, tc.expectedErr)
@@ -62,7 +62,7 @@ func TestNewEndpoint(t *testing.T) {
 			assert.True(t, endpoint.CreatedAt().Before(time.Now()))
 			assert.Equal(t, tc.endpointUrl, endpoint.EndpointURL())
 			assert.Equal(t, tc.description, endpoint.Description())
-			assert.Equal(t, tc.eventTypesSubscribedTo, endpoint.EventTypesSubscribedTo())
+			assert.Equal(t, tc.eventTypeIDs, endpoint.EventTypeIDs())
 			assert.NotEmpty(t, endpoint.SigningSecret())
 		})
 	}

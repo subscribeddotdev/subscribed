@@ -17,22 +17,22 @@ func (s SigningSecret) String() string {
 type Headers map[string]string
 
 type Endpoint struct {
-	id                     ID
-	url                    EndpointURL
-	applicationID          ID
-	description            string
-	headers                Headers
-	eventTypesSubscribedTo []EventType
-	signingSecret          SigningSecret
-	createdAt              time.Time
-	updatedAt              time.Time
+	id            ID
+	url           EndpointURL
+	applicationID ID
+	description   string
+	headers       Headers
+	eventTypeIDs  []ID
+	signingSecret SigningSecret
+	createdAt     time.Time
+	updatedAt     time.Time
 }
 
 func NewEndpoint(
 	endpointURL EndpointURL,
 	applicationID ID,
 	description string,
-	eventTypesSubscribedTo []EventType,
+	eventTypeIDs []ID,
 ) (*Endpoint, error) {
 	if endpointURL.IsEmpty() {
 		return nil, errors.New("endpointURL cannot be empty")
@@ -43,15 +43,15 @@ func NewEndpoint(
 	}
 
 	return &Endpoint{
-		id:                     NewID(),
-		url:                    endpointURL,
-		applicationID:          applicationID,
-		description:            description,
-		eventTypesSubscribedTo: eventTypesSubscribedTo,
-		createdAt:              time.Now().UTC(),
-		updatedAt:              time.Now().UTC(),
-		signingSecret:          SigningSecret(fmt.Sprintf("whsec_%s", NewID())), //TODO: replace this with a hashed secret
-		headers:                nil,
+		id:            NewID(),
+		url:           endpointURL,
+		applicationID: applicationID,
+		description:   description,
+		eventTypeIDs:  eventTypeIDs,
+		createdAt:     time.Now().UTC(),
+		updatedAt:     time.Now().UTC(),
+		signingSecret: SigningSecret(fmt.Sprintf("whsec_%s", NewID())), //TODO: replace this with a hashed secret
+		headers:       nil,
 	}, nil
 }
 
@@ -67,8 +67,8 @@ func (e *Endpoint) Description() string {
 	return e.description
 }
 
-func (e *Endpoint) EventTypesSubscribedTo() []EventType {
-	return e.eventTypesSubscribedTo
+func (e *Endpoint) EventTypeIDs() []ID {
+	return e.eventTypeIDs
 }
 
 func (e *Endpoint) CreatedAt() time.Time {

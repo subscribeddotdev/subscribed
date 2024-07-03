@@ -7,10 +7,10 @@ import (
 )
 
 type AddEndpoint struct {
-	ApplicationID          domain.ID
-	EndpointUrl            string
-	Description            string
-	EventTypesSubscribedTo []domain.EventType
+	ApplicationID domain.ID
+	EndpointUrl   string
+	Description   string
+	EventTypeIDs  []domain.ID
 }
 
 type AddEndpointHandler struct {
@@ -29,7 +29,7 @@ func (c AddEndpointHandler) Execute(ctx context.Context, cmd AddEndpoint) error 
 		return err
 	}
 
-	endpoint, err := domain.NewEndpoint(endpointURL, cmd.ApplicationID, cmd.Description, cmd.EventTypesSubscribedTo)
+	endpoint, err := domain.NewEndpoint(endpointURL, cmd.ApplicationID, cmd.Description, cmd.EventTypeIDs)
 	if err != nil {
 		return err
 	}

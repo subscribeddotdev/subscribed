@@ -19,7 +19,9 @@ type TransactableAdapters struct {
 	OrganizationRepository iam.OrganizationRepository
 	EnvironmentRepository  domain.EnvironmentRepository
 	MessageRepository      domain.MessageRepository
+	EndpointRepository     domain.EndpointRepository
 }
 
 type EventPublisher interface {
+	PublishMessageSent(ctx context.Context, e MessageSent) error
 }

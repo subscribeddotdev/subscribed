@@ -1,9 +1,12 @@
 package events
 
 import (
+	"context"
+	"fmt"
+
 	"github.com/ThreeDotsLabs/watermill"
 	"github.com/ThreeDotsLabs/watermill-amqp/v2/pkg/amqp"
-
+	"github.com/subscribeddotdev/subscribed-backend/internal/app/command"
 	"github.com/subscribeddotdev/subscribed-backend/internal/common/messaging"
 )
 
@@ -20,4 +23,9 @@ func NewPublisher(amqpUrl string, logger watermill.LoggerAdapter) (*Publisher, e
 	return &Publisher{
 		eventPublisher: eventPublisher,
 	}, nil
+}
+
+func (p Publisher) PublishMessageSent(ctx context.Context, e command.MessageSent) error {
+	fmt.Println("Event published")
+	return nil
 }

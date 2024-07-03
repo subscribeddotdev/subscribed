@@ -1,5 +1,6 @@
 package command
 
-type SomethingHappened struct {
-	ID string
+type MessageSent struct {
+	MessageID  string
+	EndpointID string
 }

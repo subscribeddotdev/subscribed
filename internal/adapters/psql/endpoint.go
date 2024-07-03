@@ -37,3 +37,7 @@ func (o EndpointRepository) Insert(ctx context.Context, endpoint *domain.Endpoin
 
 	return nil
 }
+
+func (o EndpointRepository) ByEventTypeIdAndAppID(ctx context.Context, eventTypeID domain.ID, appID domain.ID) ([]*domain.Endpoint, error) {
+	return nil, nil
+}

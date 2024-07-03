@@ -27,6 +27,7 @@ func (o ApiKeyRepository) Insert(ctx context.Context, apiKey *domain.ApiKey) err
 	model := models.APIKey{
 		SecretKey:     apiKey.SecretKey().FullKey(),
 		Suffix:        apiKey.SecretKey().String(),
+		OrgID:         apiKey.OrgID().String(),
 		EnvironmentID: apiKey.EnvID().String(),
 		Name:          apiKey.Name(),
 		CreatedAt:     apiKey.CreatedAt(),
@@ -55,5 +56,12 @@ func (o ApiKeyRepository) FindBySecretKey(ctx context.Context, sk domain.SecretK
 		return nil, fmt.Errorf("error querying the api key '%s': %v", sk, err)
 	}
 
-	return domain.UnMarshallApiKey(model.EnvironmentID, model.Name, sk, model.CreatedAt, model.ExpiresAt.Ptr())
+	return domain.UnMarshallApiKey(
+		model.EnvironmentID,
+		model.OrgID,
+		model.Name,
+		sk,
+		model.CreatedAt,
+		model.ExpiresAt.Ptr(),
+	)
 }

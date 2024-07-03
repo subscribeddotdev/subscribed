@@ -18,6 +18,7 @@ func TestNewApiKey(t *testing.T) {
 
 		apiKeyName   string
 		envID        domain.ID
+		orgID        domain.ID
 		expiresAt    *time.Time
 		isTestApiKey bool
 	}{
@@ -28,6 +29,7 @@ func TestNewApiKey(t *testing.T) {
 			envID:        domain.NewID(),
 			expiresAt:    nil,
 			isTestApiKey: false,
+			orgID:        domain.NewID(),
 		},
 		{
 			name:         "create_new_test_api_key",
@@ -36,6 +38,7 @@ func TestNewApiKey(t *testing.T) {
 			envID:        domain.NewID(),
 			expiresAt:    nil,
 			isTestApiKey: true,
+			orgID:        domain.NewID(),
 		},
 		{
 			name:         "error_empty_name",
@@ -44,6 +47,7 @@ func TestNewApiKey(t *testing.T) {
 			envID:        domain.NewID(),
 			expiresAt:    nil,
 			isTestApiKey: false,
+			orgID:        domain.NewID(),
 		},
 		{
 			name:         "error_empty_or_invalid_env_id",
@@ -52,6 +56,7 @@ func TestNewApiKey(t *testing.T) {
 			envID:        domain.ID{},
 			expiresAt:    nil,
 			isTestApiKey: false,
+			orgID:        domain.NewID(),
 		},
 		{
 			name:         "error_expires_at_set_in_the_past",
@@ -60,6 +65,7 @@ func TestNewApiKey(t *testing.T) {
 			envID:        domain.NewID(),
 			expiresAt:    tests.ToPtr(time.Date(2020, 1, 1, 1, 1, 1, 1, time.UTC)),
 			isTestApiKey: false,
+			orgID:        domain.NewID(),
 		},
 	}
 
@@ -67,7 +73,7 @@ func TestNewApiKey(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 
-			apiKey, err := domain.NewApiKey(tc.apiKeyName, tc.envID, tc.expiresAt, tc.isTestApiKey)
+			apiKey, err := domain.NewApiKey(tc.apiKeyName, tc.orgID, tc.envID, tc.expiresAt, tc.isTestApiKey)
 
 			if tc.expectedErr != "" {
 				assert.EqualError(t, err, tc.expectedErr)

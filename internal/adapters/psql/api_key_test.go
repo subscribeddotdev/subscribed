@@ -16,7 +16,13 @@ func TestApiKeyRepository_Insert(t *testing.T) {
 	org := ff.NewOrganization().Save()
 	env := ff.NewEnvironment().WithOrganizationID(org.ID).Save()
 
-	apiKey, err := domain.NewApiKey(gofakeit.AppName(), tests.MustID(t, env.ID), nil, false)
+	apiKey, err := domain.NewApiKey(
+		gofakeit.AppName(),
+		tests.MustID(t, org.ID),
+		tests.MustID(t, env.ID),
+		nil,
+		false,
+	)
 	require.NoError(t, err)
 	require.NoError(t, apiKeyRepo.Insert(ctx, apiKey))
 

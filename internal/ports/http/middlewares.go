@@ -10,6 +10,7 @@ import (
 	"github.com/getkin/kin-openapi/openapi3filter"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	echomiddleware "github.com/oapi-codegen/echo-middleware"
 	"github.com/subscribeddotdev/subscribed-backend/internal/app/auth"
 	"github.com/subscribeddotdev/subscribed-backend/internal/common/logs"
 )
@@ -97,10 +98,13 @@ func (a *apiKeyMiddleware) Middleware(ctx context.Context, input *openapi3filter
 		return errors.New("x-api-key header cannot be empty")
 	}
 
-	err := a.auth.IsApiKeyValid(ctx, apiKeySecretKey)
+	orgID, err := a.auth.ResolveOrgIdFromSecretKey(ctx, apiKeySecretKey)
 	if err != nil {
 		return err
 	}
+
+	eCtx := echomiddleware.GetEchoContext(ctx)
+	eCtx.Set("org_id", orgID.String())
 
 	return nil
 }

@@ -10,12 +10,13 @@ type Message struct {
 	id            ID
 	eventTypeID   ID
 	applicationID ID
+	orgID         ID
 	sentAt        time.Time
 	payload       string
 	sendAttempts  []MessageSendAttempt
 }
 
-func NewMessage(eventTypeID, applicationID ID, payload string) (*Message, error) {
+func NewMessage(eventTypeID, orgID, applicationID ID, payload string) (*Message, error) {
 	if eventTypeID.IsEmpty() {
 		return nil, errors.New("eventTypeID cannot be empty")
 	}
@@ -24,12 +25,17 @@ func NewMessage(eventTypeID, applicationID ID, payload string) (*Message, error)
 		return nil, errors.New("applicationID cannot be empty")
 	}
 
+	if orgID.IsEmpty() {
+		return nil, errors.New("orgID cannot be empty")
+	}
+
 	if strings.TrimSpace(payload) == "" {
 		return nil, errors.New("payload cannot be empty")
 	}
 
 	return &Message{
 		id:            NewID(),
+		orgID:         orgID,
 		eventTypeID:   eventTypeID,
 		applicationID: applicationID,
 		sentAt:        time.Now().UTC(),
@@ -44,6 +50,10 @@ func (m *Message) Id() ID {
 
 func (m *Message) EventTypeID() ID {
 	return m.eventTypeID
+}
+
+func (m *Message) OrgID() ID {
+	return m.orgID
 }
 
 func (m *Message) ApplicationID() ID {

@@ -67,11 +67,13 @@ CREATE TABLE event_types (
 
 CREATE TABLE messages (
     id VARCHAR(26) NOT NULL PRIMARY KEY,
+    org_id VARCHAR(26) NOT NULL,
     application_id VARCHAR(26) NOT NULL,
     event_type_id VARCHAR(26) NOT NULL,
     payload TEXT NOT NULL,
     sent_at TIMESTAMPTZ NOT NULL,
 
+    CONSTRAINT fk_message_belongs_to_org FOREIGN KEY (org_id) REFERENCES organizations (id),
     CONSTRAINT fk_message_belongs_to_application FOREIGN KEY (application_id) REFERENCES applications (id),
     CONSTRAINT fk_message_is_of_event_type FOREIGN KEY (event_type_id) REFERENCES event_types (id)
 );
@@ -79,11 +81,13 @@ CREATE TABLE messages (
 CREATE TABLE api_keys (
     secret_key TEXT NOT NULL PRIMARY KEY,
     suffix TEXT NOT NULL,
+    org_id VARCHAR(26) NOT NULL,
     environment_id VARCHAR(26) NOT NULL,
     name TEXT NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
     expires_at TIMESTAMPTZ,
 
+    CONSTRAINT fk_api_key_belongs_to_an_org FOREIGN KEY (org_id) REFERENCES organizations (id),
     CONSTRAINT fk_api_key_belongs_to_an_env FOREIGN KEY (environment_id) REFERENCES environments (id)
 );
 

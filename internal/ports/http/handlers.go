@@ -1,6 +1,7 @@
 package http
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/friendsofgo/errors"
@@ -60,13 +61,19 @@ func (h handlers) CreateApplication(c echo.Context) error {
 }
 
 func (h handlers) SendMessage(c echo.Context, applicationID string) error {
+	orgID, err := h.resolveOrgIdFromCtx(c)
+	if err != nil {
+		return NewHandlerError(err, "error-retrieving-org-id")
+	}
+
 	var body SendMessageRequest
-	err := c.Bind(&body)
+	err = c.Bind(&body)
 	if err != nil {
 		return NewHandlerErrorWithStatus(err, "error-parsing-the-body", http.StatusBadRequest)
 	}
 
 	err = h.application.Command.SendMessage.Execute(c.Request().Context(), command.SendMessage{
+		OrgID:         orgID,
 		ApplicationID: applicationID,
 		EventTypeID:   body.EventTypeId,
 		Payload:       body.Payload,
@@ -121,8 +128,13 @@ func (h handlers) CreateEventType(c echo.Context) error {
 }
 
 func (h handlers) CreateApiKey(c echo.Context, params CreateApiKeyParams) error {
+	member, err := h.resolveMemberFromCtx(c)
+	if err != nil {
+		return err
+	}
+
 	var body CreateApiKeyRequest
-	err := c.Bind(&body)
+	err = c.Bind(&body)
 	if err != nil {
 		return NewHandlerErrorWithStatus(err, "error-parsing-the-body", http.StatusBadRequest)
 	}
@@ -131,6 +143,7 @@ func (h handlers) CreateApiKey(c echo.Context, params CreateApiKeyParams) error 
 		Name:          body.Name,
 		ExpiresAt:     body.ExpiresAt,
 		EnvironmentID: params.EnvironmentId,
+		OrgID:         member.OrganizationID().String(),
 	})
 	if err != nil {
 		return NewHandlerError(err, "unable-to-create-api-key")
@@ -155,4 +168,21 @@ func (h handlers) resolveMemberFromCtx(c echo.Context) (*iam.Member, error) {
 	}
 
 	return m, nil
+}
+
+func (h handlers) resolveOrgIdFromCtx(c echo.Context) (string, error) {
+	fmt.Println("### resolving ###")
+
+	val := c.Get("org_id")
+	if val == nil {
+		return "", errors.New("orgID hasn't been set in the context")
+	}
+
+	fmt.Println("### val ###", val)
+	orgID, ok := val.(string)
+	if !ok {
+		return "", errors.New("invalid orgID type")
+	}
+
+	return orgID, nil
 }

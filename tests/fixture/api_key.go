@@ -16,6 +16,11 @@ func (a *ApiKey) WithEnvironmentID(value string) *ApiKey {
 	return a
 }
 
+func (a *ApiKey) WithOrgID(value string) *ApiKey {
+	a.model.OrgID = value
+	return a
+}
+
 func (a *ApiKey) Save() models.APIKey {
 	err := a.model.Insert(a.factory.ctx, a.factory.db, boil.Infer())
 	require.NoError(a.factory.t, err)

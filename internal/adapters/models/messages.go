@@ -24,6 +24,7 @@ import (
 // Message is an object representing the database table.
 type Message struct {
 	ID            string    `boil:"id" json:"id" toml:"id" yaml:"id"`
+	OrgID         string    `boil:"org_id" json:"org_id" toml:"org_id" yaml:"org_id"`
 	ApplicationID string    `boil:"application_id" json:"application_id" toml:"application_id" yaml:"application_id"`
 	EventTypeID   string    `boil:"event_type_id" json:"event_type_id" toml:"event_type_id" yaml:"event_type_id"`
 	Payload       string    `boil:"payload" json:"payload" toml:"payload" yaml:"payload"`
@@ -35,12 +36,14 @@ type Message struct {
 
 var MessageColumns = struct {
 	ID            string
+	OrgID         string
 	ApplicationID string
 	EventTypeID   string
 	Payload       string
 	SentAt        string
 }{
 	ID:            "id",
+	OrgID:         "org_id",
 	ApplicationID: "application_id",
 	EventTypeID:   "event_type_id",
 	Payload:       "payload",
@@ -49,12 +52,14 @@ var MessageColumns = struct {
 
 var MessageTableColumns = struct {
 	ID            string
+	OrgID         string
 	ApplicationID string
 	EventTypeID   string
 	Payload       string
 	SentAt        string
 }{
 	ID:            "messages.id",
+	OrgID:         "messages.org_id",
 	ApplicationID: "messages.application_id",
 	EventTypeID:   "messages.event_type_id",
 	Payload:       "messages.payload",
@@ -65,12 +70,14 @@ var MessageTableColumns = struct {
 
 var MessageWhere = struct {
 	ID            whereHelperstring
+	OrgID         whereHelperstring
 	ApplicationID whereHelperstring
 	EventTypeID   whereHelperstring
 	Payload       whereHelperstring
 	SentAt        whereHelpertime_Time
 }{
 	ID:            whereHelperstring{field: "\"messages\".\"id\""},
+	OrgID:         whereHelperstring{field: "\"messages\".\"org_id\""},
 	ApplicationID: whereHelperstring{field: "\"messages\".\"application_id\""},
 	EventTypeID:   whereHelperstring{field: "\"messages\".\"event_type_id\""},
 	Payload:       whereHelperstring{field: "\"messages\".\"payload\""},
@@ -80,16 +87,19 @@ var MessageWhere = struct {
 // MessageRels is where relationship names are stored.
 var MessageRels = struct {
 	Application string
+	Org         string
 	EventType   string
 }{
 	Application: "Application",
+	Org:         "Org",
 	EventType:   "EventType",
 }
 
 // messageR is where relationships are stored.
 type messageR struct {
-	Application *Application `boil:"Application" json:"Application" toml:"Application" yaml:"Application"`
-	EventType   *EventType   `boil:"EventType" json:"EventType" toml:"EventType" yaml:"EventType"`
+	Application *Application  `boil:"Application" json:"Application" toml:"Application" yaml:"Application"`
+	Org         *Organization `boil:"Org" json:"Org" toml:"Org" yaml:"Org"`
+	EventType   *EventType    `boil:"EventType" json:"EventType" toml:"EventType" yaml:"EventType"`
 }
 
 // NewStruct creates a new relationship struct
@@ -104,6 +114,13 @@ func (r *messageR) GetApplication() *Application {
 	return r.Application
 }
 
+func (r *messageR) GetOrg() *Organization {
+	if r == nil {
+		return nil
+	}
+	return r.Org
+}
+
 func (r *messageR) GetEventType() *EventType {
 	if r == nil {
 		return nil
@@ -115,8 +132,8 @@ func (r *messageR) GetEventType() *EventType {
 type messageL struct{}
 
 var (
-	messageAllColumns            = []string{"id", "application_id", "event_type_id", "payload", "sent_at"}
-	messageColumnsWithoutDefault = []string{"id", "application_id", "event_type_id", "payload", "sent_at"}
+	messageAllColumns            = []string{"id", "org_id", "application_id", "event_type_id", "payload", "sent_at"}
+	messageColumnsWithoutDefault = []string{"id", "org_id", "application_id", "event_type_id", "payload", "sent_at"}
 	messageColumnsWithDefault    = []string{}
 	messagePrimaryKeyColumns     = []string{"id"}
 	messageGeneratedColumns      = []string{}
@@ -411,6 +428,17 @@ func (o *Message) Application(mods ...qm.QueryMod) applicationQuery {
 	return Applications(queryMods...)
 }
 
+// Org pointed to by the foreign key.
+func (o *Message) Org(mods ...qm.QueryMod) organizationQuery {
+	queryMods := []qm.QueryMod{
+		qm.Where("\"id\" = ?", o.OrgID),
+	}
+
+	queryMods = append(queryMods, mods...)
+
+	return Organizations(queryMods...)
+}
+
 // EventType pointed to by the foreign key.
 func (o *Message) EventType(mods ...qm.QueryMod) eventTypeQuery {
 	queryMods := []qm.QueryMod{
@@ -534,6 +562,126 @@ func (messageL) LoadApplication(ctx context.Context, e boil.ContextExecutor, sin
 					foreign.R = &applicationR{}
 				}
 				foreign.R.Messages = append(foreign.R.Messages, local)
+				break
+			}
+		}
+	}
+
+	return nil
+}
+
+// LoadOrg allows an eager lookup of values, cached into the
+// loaded structs of the objects. This is for an N-1 relationship.
+func (messageL) LoadOrg(ctx context.Context, e boil.ContextExecutor, singular bool, maybeMessage interface{}, mods queries.Applicator) error {
+	var slice []*Message
+	var object *Message
+
+	if singular {
+		var ok bool
+		object, ok = maybeMessage.(*Message)
+		if !ok {
+			object = new(Message)
+			ok = queries.SetFromEmbeddedStruct(&object, &maybeMessage)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeMessage))
+			}
+		}
+	} else {
+		s, ok := maybeMessage.(*[]*Message)
+		if ok {
+			slice = *s
+		} else {
+			ok = queries.SetFromEmbeddedStruct(&slice, maybeMessage)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeMessage))
+			}
+		}
+	}
+
+	args := make([]interface{}, 0, 1)
+	if singular {
+		if object.R == nil {
+			object.R = &messageR{}
+		}
+		args = append(args, object.OrgID)
+
+	} else {
+	Outer:
+		for _, obj := range slice {
+			if obj.R == nil {
+				obj.R = &messageR{}
+			}
+
+			for _, a := range args {
+				if a == obj.OrgID {
+					continue Outer
+				}
+			}
+
+			args = append(args, obj.OrgID)
+
+		}
+	}
+
+	if len(args) == 0 {
+		return nil
+	}
+
+	query := NewQuery(
+		qm.From(`organizations`),
+		qm.WhereIn(`organizations.id in ?`, args...),
+	)
+	if mods != nil {
+		mods.Apply(query)
+	}
+
+	results, err := query.QueryContext(ctx, e)
+	if err != nil {
+		return errors.Wrap(err, "failed to eager load Organization")
+	}
+
+	var resultSlice []*Organization
+	if err = queries.Bind(results, &resultSlice); err != nil {
+		return errors.Wrap(err, "failed to bind eager loaded slice Organization")
+	}
+
+	if err = results.Close(); err != nil {
+		return errors.Wrap(err, "failed to close results of eager load for organizations")
+	}
+	if err = results.Err(); err != nil {
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for organizations")
+	}
+
+	if len(organizationAfterSelectHooks) != 0 {
+		for _, obj := range resultSlice {
+			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
+				return err
+			}
+		}
+	}
+
+	if len(resultSlice) == 0 {
+		return nil
+	}
+
+	if singular {
+		foreign := resultSlice[0]
+		object.R.Org = foreign
+		if foreign.R == nil {
+			foreign.R = &organizationR{}
+		}
+		foreign.R.OrgMessages = append(foreign.R.OrgMessages, object)
+		return nil
+	}
+
+	for _, local := range slice {
+		for _, foreign := range resultSlice {
+			if local.OrgID == foreign.ID {
+				local.R.Org = foreign
+				if foreign.R == nil {
+					foreign.R = &organizationR{}
+				}
+				foreign.R.OrgMessages = append(foreign.R.OrgMessages, local)
 				break
 			}
 		}
@@ -704,6 +852,53 @@ func (o *Message) SetApplication(ctx context.Context, exec boil.ContextExecutor,
 		}
 	} else {
 		related.R.Messages = append(related.R.Messages, o)
+	}
+
+	return nil
+}
+
+// SetOrg of the message to the related item.
+// Sets o.R.Org to related.
+// Adds o to related.R.OrgMessages.
+func (o *Message) SetOrg(ctx context.Context, exec boil.ContextExecutor, insert bool, related *Organization) error {
+	var err error
+	if insert {
+		if err = related.Insert(ctx, exec, boil.Infer()); err != nil {
+			return errors.Wrap(err, "failed to insert into foreign table")
+		}
+	}
+
+	updateQuery := fmt.Sprintf(
+		"UPDATE \"messages\" SET %s WHERE %s",
+		strmangle.SetParamNames("\"", "\"", 1, []string{"org_id"}),
+		strmangle.WhereClause("\"", "\"", 2, messagePrimaryKeyColumns),
+	)
+	values := []interface{}{related.ID, o.ID}
+
+	if boil.IsDebug(ctx) {
+		writer := boil.DebugWriterFrom(ctx)
+		fmt.Fprintln(writer, updateQuery)
+		fmt.Fprintln(writer, values)
+	}
+	if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
+		return errors.Wrap(err, "failed to update local table")
+	}
+
+	o.OrgID = related.ID
+	if o.R == nil {
+		o.R = &messageR{
+			Org: related,
+		}
+	} else {
+		o.R.Org = related
+	}
+
+	if related.R == nil {
+		related.R = &organizationR{
+			OrgMessages: MessageSlice{o},
+		}
+	} else {
+		related.R.OrgMessages = append(related.R.OrgMessages, o)
 	}
 
 	return nil

@@ -23,20 +23,29 @@ func (s *Service) ResolveMemberByLoginProviderID(ctx context.Context, loginProvi
 	return s.memberRepo.ByLoginProviderID(ctx, iam.LoginProviderID(loginProviderID))
 }
 
-func (s *Service) IsApiKeyValid(ctx context.Context, secretKey string) error {
+func (s *Service) resolveApiKeyFromSecretKey(ctx context.Context, secretKey string) (*domain.ApiKey, error) {
 	sk, err := domain.UnMarshallSecretKey(secretKey)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	ak, err := s.apiKeyRepo.FindBySecretKey(ctx, sk)
 	if err != nil {
-		return err
+		return nil, err
+	}
+
+	return ak, nil
+}
+
+func (s *Service) ResolveOrgIdFromSecretKey(ctx context.Context, secretKey string) (domain.ID, error) {
+	ak, err := s.resolveApiKeyFromSecretKey(ctx, secretKey)
+	if err != nil {
+		return domain.ID{}, err
 	}
 
 	if ak.IsExpired() {
-		return domain.ErrApiKeyIsExpired
+		return domain.ID{}, domain.ErrApiKeyIsExpired
 	}
 
-	return nil
+	return ak.OrgID(), nil
 }

@@ -17,7 +17,7 @@ func TestApplication_Lifecycle(t *testing.T) {
 	org := ff.NewOrganization().Save()
 	env := ff.NewEnvironment().WithOrganizationID(org.ID).Save()
 	app := ff.NewApplication().WithEnvironmentID(env.ID).Save()
-	apiKey := ff.NewApiKey().WithEnvironmentID(env.ID).Save()
+	apiKey := ff.NewApiKey().WithOrgID(org.ID).WithEnvironmentID(env.ID).Save()
 	eventType := ff.NewEventType().WithOrgID(org.ID).Save()
 
 	apiClient := getClientWithApiKey(t, apiKey.SecretKey)

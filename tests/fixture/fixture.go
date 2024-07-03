@@ -89,7 +89,7 @@ func (f *Factory) NewEventType() *EventType {
 }
 
 func (f *Factory) NewApiKey() *ApiKey {
-	ak, err := domain.NewApiKey(gofakeit.AppName(), domain.NewID(), nil, false)
+	ak, err := domain.NewApiKey(gofakeit.AppName(), domain.NewID(), domain.NewID(), nil, false)
 	require.NoError(f.t, err)
 
 	return &ApiKey{

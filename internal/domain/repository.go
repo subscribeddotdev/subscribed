@@ -8,6 +8,7 @@ import (
 var (
 	ErrApiKeyExists        = errors.New("the api key already exists")
 	ErrApiKeyNotFound      = errors.New("api key not found")
+	ErrEventTypeNotFound   = errors.New("event type not found")
 	ErrEnvironmentNotFound = errors.New("environment not found")
 )
 

@@ -22,24 +22,37 @@ func TestEndpointRepository_Insert(t *testing.T) {
 }
 
 func TestEndpointRepository_ByEventTypeIdAndAppID(t *testing.T) {
-	// Fixture several
 	ff := fixture.NewFactory(t, ctx, db)
 	org := ff.NewOrganization().Save()
 	env := ff.NewEnvironment().WithOrganizationID(org.ID).Save()
 	app := ff.NewApplication().WithEnvironmentID(env.ID).Save()
 	eventType := ff.NewEventType().WithOrgID(org.ID).Save()
-	eventTypeID := tests.MustID(t, app.ID)
+	eventTypeID := tests.MustID(t, eventType.ID)
 
-	endpoints := make([]*domain.Endpoint, 5)
+	fixtureEndpoints := make([]*domain.Endpoint, 5)
 	for i := 0; i < 5; i++ {
-		endpoints[i] = fixtureEndpoint(t, eventTypeID, []domain.ID{tests.MustID(t, eventType.ID)})
-		err := endpointRepo.Insert(ctx, endpoints[i])
+		fixtureEndpoints[i] = fixtureEndpoint(t, tests.MustID(t, app.ID), []domain.ID{tests.MustID(t, eventType.ID)})
+		err := endpointRepo.Insert(ctx, fixtureEndpoints[i])
 		require.NoError(t, err)
 	}
 
-	result, err := endpointRepo.ByEventTypeIdAndAppID(ctx, eventTypeID, tests.MustID(t, app.ID))
+	endpoints, err := endpointRepo.ByEventTypeIdAndAppID(ctx, eventTypeID, tests.MustID(t, app.ID))
 	require.NoError(t, err)
-	assert.NotEmpty(t, result)
+	assert.NotEmpty(t, endpoints)
+
+	for _, endpoint := range endpoints {
+		require.Equal(t, app.ID, endpoint.ApplicationID().String())
+		containsEventTypeID := false
+
+		for _, endpointEventTypeID := range endpoint.EventTypeIDs() {
+			if endpointEventTypeID.String() == eventTypeID.String() {
+				containsEventTypeID = true
+				break
+			}
+		}
+
+		assert.True(t, containsEventTypeID)
+	}
 }
 
 func fixtureEndpoint(t *testing.T, appID domain.ID, eventTypeIDs []domain.ID) *domain.Endpoint {

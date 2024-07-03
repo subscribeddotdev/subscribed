@@ -90,3 +90,52 @@ func (e *Endpoint) Headers() map[string]string {
 func (e *Endpoint) ApplicationID() ID {
 	return e.applicationID
 }
+
+func UnMarshallEndpoint(
+	id,
+	applicationID,
+	endpointURL,
+	description string,
+	headers Headers,
+	eventTypeIDs []string,
+	signingSecret string,
+	createdAt,
+	updatedAt time.Time,
+) (*Endpoint, error) {
+	dID, err := NewIdFromString(id)
+	if err != nil {
+		return nil, err
+	}
+
+	appID, err := NewIdFromString(applicationID)
+	if err != nil {
+		return nil, err
+	}
+
+	dEndpointURL, err := NewEndpointURL(endpointURL)
+	if err != nil {
+		return nil, err
+	}
+
+	dEventTypeIDs := make([]ID, len(eventTypeIDs))
+	for i, eventTypeID := range eventTypeIDs {
+		eID, err := NewIdFromString(eventTypeID)
+		if err != nil {
+			return nil, err
+		}
+
+		dEventTypeIDs[i] = eID
+	}
+
+	return &Endpoint{
+		id:            dID,
+		url:           dEndpointURL,
+		applicationID: appID,
+		description:   description,
+		headers:       headers,
+		eventTypeIDs:  dEventTypeIDs,
+		signingSecret: SigningSecret(signingSecret),
+		createdAt:     createdAt,
+		updatedAt:     updatedAt,
+	}, nil
+}

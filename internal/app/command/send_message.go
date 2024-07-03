@@ -11,6 +11,7 @@ type SendMessage struct {
 	EventTypeID   string
 	Payload       string
 	ApplicationID string
+	OrgID         string
 }
 
 type SendMessageHandler struct {
@@ -24,6 +25,11 @@ func NewSendMessageHandler(txProvider TransactionProvider) SendMessageHandler {
 }
 
 func (c SendMessageHandler) Execute(ctx context.Context, cmd SendMessage) error {
+	orgID, err := domain.NewIdFromString(cmd.OrgID)
+	if err != nil {
+		return err
+	}
+
 	eventTypeID, err := domain.NewIdFromString(cmd.EventTypeID)
 	if err != nil {
 		return err
@@ -34,7 +40,7 @@ func (c SendMessageHandler) Execute(ctx context.Context, cmd SendMessage) error 
 		return err
 	}
 
-	message, err := domain.NewMessage(eventTypeID, applicationID, cmd.Payload)
+	message, err := domain.NewMessage(eventTypeID, orgID, applicationID, cmd.Payload)
 	if err != nil {
 		return err
 	}

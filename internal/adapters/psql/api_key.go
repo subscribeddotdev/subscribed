@@ -2,7 +2,9 @@ package psql
 
 import (
 	"context"
+	"database/sql"
 	"errors"
+	"fmt"
 
 	"github.com/lib/pq"
 	"github.com/subscribeddotdev/subscribed-backend/internal/adapters/models"
@@ -25,6 +27,7 @@ func (o ApiKeyRepository) Insert(ctx context.Context, apiKey *domain.ApiKey) err
 	model := models.APIKey{
 		SecretKey:     apiKey.SecretKey().FullKey(),
 		Suffix:        apiKey.SecretKey().String(),
+		OrgID:         apiKey.OrgID().String(),
 		EnvironmentID: apiKey.EnvID().String(),
 		Name:          apiKey.Name(),
 		CreatedAt:     apiKey.CreatedAt(),
@@ -42,4 +45,23 @@ func (o ApiKeyRepository) Insert(ctx context.Context, apiKey *domain.ApiKey) err
 	}
 
 	return nil
+}
+
+func (o ApiKeyRepository) FindBySecretKey(ctx context.Context, sk domain.SecretKey) (*domain.ApiKey, error) {
+	model, err := models.APIKeys(models.APIKeyWhere.SecretKey.EQ(sk.FullKey())).One(ctx, o.db)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, domain.ErrApiKeyNotFound
+	}
+	if err != nil {
+		return nil, fmt.Errorf("error querying the api key '%s': %v", sk, err)
+	}
+
+	return domain.UnMarshallApiKey(
+		model.EnvironmentID,
+		model.OrgID,
+		model.Name,
+		sk,
+		model.CreatedAt,
+		model.ExpiresAt.Ptr(),
+	)
 }

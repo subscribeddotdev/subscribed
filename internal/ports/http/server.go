@@ -19,6 +19,11 @@ import (
 	"github.com/subscribeddotdev/subscribed-backend/internal/common/logs"
 )
 
+const (
+	akSecurityScheme  = "ApiKeyAuth"
+	jwtSecurityScheme = "BearerAuth"
+)
+
 type Server struct {
 	logger *logs.Logger
 	s      *libhttp.Server
@@ -98,13 +103,23 @@ func registerMiddlewares(router *echo.Echo, spec *openapi3.T, config Config) {
 		},
 	}))
 
-	authMiddleware := clerkhttp.NewEchoOapiAuthMiddleware(config.ClerkSecretKey)
+	authApiKeyMiddleware := apiKeyMiddleware{auth: config.Application.Authorization}
+	authJwtMiddleware := clerkhttp.NewEchoOapiAuthMiddleware(config.ClerkSecretKey)
 
 	spec.Servers = nil
 	router.Use(oapimiddleware.OapiRequestValidatorWithOptions(spec, &oapimiddleware.Options{
-		ErrorHandler: nil,
 		Options: openapi3filter.Options{
-			AuthenticationFunc: authMiddleware.Middleware(),
+			AuthenticationFunc: func(ctx context.Context, input *openapi3filter.AuthenticationInput) error {
+				if input.SecuritySchemeName == akSecurityScheme {
+					return authApiKeyMiddleware.Middleware(ctx, input)
+				}
+
+				if input.SecuritySchemeName == jwtSecurityScheme {
+					return authJwtMiddleware.JwtMiddleware(ctx, input)
+				}
+
+				return fmt.Errorf("unable to recognise '%s' as the security scheme", input.SecuritySchemeName)
+			},
 		},
 	}))
 }

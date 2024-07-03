@@ -86,7 +86,7 @@ func run(logger *logs.Logger) error {
 	txProvider := transaction.NewPsqlProvider(db, eventPublisher, logger)
 
 	application := &app.App{
-		Authorization: auth.NewService(memberRepo),
+		Authorization: auth.NewService(memberRepo, apiKeyRepo),
 		Command: app.Command{
 			CreateOrganization: observability.NewCommandDecorator[command.CreateOrganization](command.NewCreateOrganizationHandler(txProvider), logger),
 			CreateApplication:  observability.NewCommandDecorator[command.CreateApplication](command.NewCreateApplicationHandler(applicationRepo), logger),

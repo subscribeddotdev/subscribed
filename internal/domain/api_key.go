@@ -10,12 +10,14 @@ import (
 )
 
 type SecretKey struct {
-	prefix   string
-	hash     string
-	checksum uint32
+	prefix string
+	hash   string
 }
 
-var base64Encoder = base64.NewEncoding("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_.")
+var (
+	base64Encoder      = base64.NewEncoding("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_.")
+	ErrApiKeyIsExpired = errors.New("api key is expired")
+)
 
 func newSecretKey(isTestKey bool) (SecretKey, error) {
 	prefix := "sbs"
@@ -38,27 +40,53 @@ func newSecretKey(isTestKey bool) (SecretKey, error) {
 }
 
 func (k SecretKey) FullKey() string {
-	return fmt.Sprintf("%s_%s_%d", k.prefix, k.hash, k.checksum)
+	return fmt.Sprintf("%s_%s", k.prefix, k.hash)
 }
 
 // String returns a trimmed version of the key by showing only the last 5 characters of the hash
 func (k SecretKey) String() string {
-	return fmt.Sprintf("%s_...%s_%d", k.prefix, k.hash[12:], k.checksum)
+	return fmt.Sprintf("%s_...%s", k.prefix, k.hash[12:])
+}
+
+func UnMarshallSecretKey(value string) (SecretKey, error) {
+	chunks := strings.Split(value, "_")
+
+	if len(chunks) < 3 {
+		return SecretKey{}, fmt.Errorf("malformed secret key: %s", value)
+	}
+
+	var hash string
+	if strings.Contains(value, "sbs_live_") {
+		hash = strings.Split(value, "sbs_live_")[1]
+	}
+
+	if strings.Contains(value, "sbs_test_") {
+		hash = strings.Split(value, "sbs_test_")[1]
+	}
+
+	return SecretKey{
+		prefix: fmt.Sprintf("%s_%s", chunks[0], chunks[1]),
+		hash:   hash,
+	}, nil
 }
 
 type ApiKey struct {
-	id        ID
 	envID     ID
+	orgID     ID
 	name      string
 	secretKey SecretKey
 	createdAt time.Time
 	expiresAt *time.Time
 }
 
-func NewApiKey(name string, envID ID, expiresAt *time.Time, isTestApiKey bool) (*ApiKey, error) {
+func NewApiKey(name string, orgID, envID ID, expiresAt *time.Time, isTestApiKey bool) (*ApiKey, error) {
 	name = strings.TrimSpace(name)
 	if name == "" {
 		return nil, errors.New("name cannot be empty")
+	}
+
+	if orgID.IsEmpty() {
+		return nil, errors.New("orgID cannot be empty")
 	}
 
 	if envID.IsEmpty() {
@@ -75,21 +103,21 @@ func NewApiKey(name string, envID ID, expiresAt *time.Time, isTestApiKey bool) (
 	}
 
 	return &ApiKey{
-		id:        NewID(),
-		envID:     envID,
-		name:      name,
 		secretKey: sk,
+		name:      name,
+		envID:     envID,
+		orgID:     orgID,
 		createdAt: time.Now().UTC(),
 		expiresAt: expiresAt,
 	}, nil
 }
 
-func (a *ApiKey) Id() ID {
-	return a.id
-}
-
 func (a *ApiKey) EnvID() ID {
 	return a.envID
+}
+
+func (a *ApiKey) OrgID() ID {
+	return a.orgID
 }
 
 func (a *ApiKey) Name() string {
@@ -106,4 +134,40 @@ func (a *ApiKey) CreatedAt() time.Time {
 
 func (a *ApiKey) ExpiresAt() *time.Time {
 	return a.expiresAt
+}
+
+func (a *ApiKey) IsExpired() bool {
+	if a.expiresAt == nil {
+		return false
+	}
+
+	return a.expiresAt.UTC().Before(time.Now().UTC())
+}
+
+func UnMarshallApiKey(
+	envID,
+	orgID,
+	name string,
+	secretKey SecretKey,
+	createdAt time.Time,
+	expiresAt *time.Time,
+) (*ApiKey, error) {
+	dEnvID, err := NewIdFromString(envID)
+	if err != nil {
+		return nil, err
+	}
+
+	dOrgID, err := NewIdFromString(orgID)
+	if err != nil {
+		return nil, err
+	}
+
+	return &ApiKey{
+		orgID:     dOrgID,
+		envID:     dEnvID,
+		name:      name,
+		secretKey: secretKey,
+		createdAt: createdAt,
+		expiresAt: expiresAt,
+	}, nil
 }

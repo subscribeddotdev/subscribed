@@ -30,41 +30,39 @@ func NewEchoOapiAuthMiddleware(clerkSecretKey string) *EchoOapiAuthMiddleware {
 	return &EchoOapiAuthMiddleware{}
 }
 
-func (e *EchoOapiAuthMiddleware) Middleware() openapi3filter.AuthenticationFunc {
-	return func(ctx context.Context, input *openapi3filter.AuthenticationInput) error {
-		r := input.RequestValidationInput.Request
-		params := &AuthorizationParams{}
+func (e *EchoOapiAuthMiddleware) JwtMiddleware(ctx context.Context, input *openapi3filter.AuthenticationInput) error {
+	r := input.RequestValidationInput.Request
+	params := &AuthorizationParams{}
 
-		params.Clock = clerk.NewClock()
+	params.Clock = clerk.NewClock()
 
-		authorization := strings.TrimSpace(r.Header.Get("Authorization"))
-		if authorization == "" {
-			return errors.New("authorization header cannot be empty")
-		}
-
-		token := strings.TrimPrefix(authorization, "Bearer ")
-		decoded, err := jwt.Decode(r.Context(), &jwt.DecodeParams{Token: token})
-		if err != nil {
-			return fmt.Errorf("unable to decode the token: %v", err)
-		}
-
-		params.JWK, err = getJWK(r.Context(), params.JWKSClient, decoded.KeyID, params.Clock)
-		if err != nil {
-			return err
-		}
-
-		params.Token = token
-		claims, err := jwt.Verify(r.Context(), &params.VerifyParams)
-		if err != nil {
-			return err
-		}
-
-		// Token was verified. Add the session claims to the request context.
-		echoCtx := oapimiddleware.GetEchoContext(ctx)
-		echoCtx.Set(ctxJwtUserClaims, claims)
-
-		return nil
+	authorization := strings.TrimSpace(r.Header.Get("Authorization"))
+	if authorization == "" {
+		return errors.New("authorization header cannot be empty")
 	}
+
+	token := strings.TrimPrefix(authorization, "Bearer ")
+	decoded, err := jwt.Decode(r.Context(), &jwt.DecodeParams{Token: token})
+	if err != nil {
+		return fmt.Errorf("unable to decode the token: %v", err)
+	}
+
+	params.JWK, err = getJWK(r.Context(), params.JWKSClient, decoded.KeyID, params.Clock)
+	if err != nil {
+		return err
+	}
+
+	params.Token = token
+	claims, err := jwt.Verify(r.Context(), &params.VerifyParams)
+	if err != nil {
+		return err
+	}
+
+	// Token was verified. Add the session claims to the request context.
+	echoCtx := oapimiddleware.GetEchoContext(ctx)
+	echoCtx.Set(ctxJwtUserClaims, claims)
+
+	return nil
 }
 
 // Retrieve the JSON web key for the provided token from the JWKS set.

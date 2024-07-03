@@ -21,6 +21,7 @@ func NewMessageRepository(db boil.ContextExecutor) *MessageRepository {
 func (o MessageRepository) Insert(ctx context.Context, message *domain.Message) error {
 	model := models.Message{
 		ID:            message.Id().String(),
+		OrgID:         message.OrgID().String(),
 		ApplicationID: message.ApplicationID().String(),
 		EventTypeID:   message.EventTypeID().String(),
 		Payload:       message.Payload(),

@@ -9,6 +9,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/friendsofgo/errors"
 	"github.com/labstack/echo/v4"
 	_ "github.com/lib/pq"
 	"github.com/stretchr/testify/require"
@@ -47,6 +48,24 @@ func getClient(t *testing.T, token string) *client.ClientWithResponses {
 			if token != "" {
 				req.Header.Set(echo.HeaderAuthorization, fmt.Sprintf("Bearer %s", token))
 			}
+			return nil
+		}),
+	)
+	require.NoError(t, err)
+
+	return cli
+}
+
+func getClientWithApiKey(t *testing.T, key string) *client.ClientWithResponses {
+	cli, err := client.NewClientWithResponses(
+		fmt.Sprintf("http://localhost:%s", os.Getenv("HTTP_PORT")),
+		client.WithRequestEditorFn(func(ctx context.Context, req *http.Request) error {
+			if key == "" {
+				return errors.New("api key is missing")
+			}
+
+			req.Header.Set("x-api-key", key)
+
 			return nil
 		}),
 	)

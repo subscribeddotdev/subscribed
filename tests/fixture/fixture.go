@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/brianvoe/gofakeit/v6"
+	"github.com/stretchr/testify/require"
 	"github.com/subscribeddotdev/subscribed-backend/internal/adapters/models"
 	"github.com/subscribeddotdev/subscribed-backend/internal/domain"
 	"github.com/volatiletech/null/v8"
@@ -83,6 +84,20 @@ func (f *Factory) NewEventType() *EventType {
 		model: models.EventType{
 			ID:   domain.NewID().String(),
 			Name: gofakeit.Verb(),
+		},
+	}
+}
+
+func (f *Factory) NewApiKey() *ApiKey {
+	ak, err := domain.NewApiKey(gofakeit.AppName(), domain.NewID(), domain.NewID(), nil, false)
+	require.NoError(f.t, err)
+
+	return &ApiKey{
+		factory: f,
+		model: models.APIKey{
+			SecretKey: ak.SecretKey().FullKey(),
+			Suffix:    ak.SecretKey().String(),
+			Name:      ak.Name(),
 		},
 	}
 }

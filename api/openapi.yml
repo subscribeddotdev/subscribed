@@ -21,8 +21,8 @@ paths:
         - Health
       operationId: healthCheck
       responses:
-        '201':
-          description: CREATED
+        '200':
+          description: OK
         default:
           $ref: '#/components/responses/DefaultError'
   /applications:
@@ -75,8 +75,8 @@ paths:
         - Messages
       operationId: sendMessage
       summary: Send a message to an application
-      #security:
-        #- BearerAuth: [ ] #TODO: replace with the API Key
+      security:
+        - ApiKeyAuth: []
       parameters:
         - name: applicationID
           in: path
@@ -400,5 +400,4 @@ components:
     ApiKeyAuth:
       type: apiKey
       in: header
-      name: Authorization
-
+      name: x-api-key

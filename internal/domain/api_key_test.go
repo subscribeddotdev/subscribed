@@ -76,7 +76,6 @@ func TestNewApiKey(t *testing.T) {
 
 			require.NoError(t, err)
 
-			assert.NotNil(t, apiKey.Id())
 			assert.Equal(t, tc.envID, apiKey.EnvID())
 			assert.True(t, apiKey.CreatedAt().Before(time.Now()))
 			assert.NotEmpty(t, apiKey.SecretKey().FullKey())

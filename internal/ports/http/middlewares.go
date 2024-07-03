@@ -1,11 +1,16 @@
 package http
 
 import (
+	"context"
+	"errors"
 	"log/slog"
 	"net/http"
+	"strings"
 
+	"github.com/getkin/kin-openapi/openapi3filter"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/subscribeddotdev/subscribed-backend/internal/app/auth"
 	"github.com/subscribeddotdev/subscribed-backend/internal/common/logs"
 )
 
@@ -78,4 +83,24 @@ func errorHandler(logger *logs.Logger) echo.HTTPErrorHandler {
 			logger.Debug("Failed to send error response", "error", err)
 		}
 	}
+}
+
+type apiKeyMiddleware struct {
+	auth *auth.Service
+}
+
+func (a *apiKeyMiddleware) Middleware(ctx context.Context, input *openapi3filter.AuthenticationInput) error {
+	r := input.RequestValidationInput.Request
+
+	apiKeySecretKey := strings.TrimSpace(r.Header.Get("x-api-key"))
+	if apiKeySecretKey == "" {
+		return errors.New("x-api-key header cannot be empty")
+	}
+
+	err := a.auth.IsApiKeyValid(ctx, apiKeySecretKey)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

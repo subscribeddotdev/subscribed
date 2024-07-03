@@ -17,7 +17,10 @@ func TestApplication_Lifecycle(t *testing.T) {
 	org := ff.NewOrganization().Save()
 	env := ff.NewEnvironment().WithOrganizationID(org.ID).Save()
 	app := ff.NewApplication().WithEnvironmentID(env.ID).Save()
+	apiKey := ff.NewApiKey().WithEnvironmentID(env.ID).Save()
 	eventType := ff.NewEventType().WithOrgID(org.ID).Save()
+
+	apiClient := getClientWithApiKey(t, apiKey.SecretKey)
 
 	t.Run("send_message", func(t *testing.T) {
 		payload, err := gofakeit.JSON(&gofakeit.JSONOptions{
@@ -29,12 +32,12 @@ func TestApplication_Lifecycle(t *testing.T) {
 		})
 		require.NoError(t, err)
 
-		resp, err := getClient(t, "").SendMessage(ctx, app.ID, client.SendMessageRequest{
+		resp, err := apiClient.SendMessage(ctx, app.ID, client.SendMessageRequest{
 			EventTypeId: eventType.ID,
 			Payload:     string(payload),
 		})
 		require.NoError(t, err)
-		assert.Equal(t, http.StatusCreated, resp.StatusCode)
+		require.Equal(t, http.StatusCreated, resp.StatusCode)
 		msg, err := models.Messages(
 			models.MessageWhere.ApplicationID.EQ(app.ID),
 			models.MessageWhere.EventTypeID.EQ(eventType.ID),

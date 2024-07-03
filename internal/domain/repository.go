@@ -7,6 +7,7 @@ import (
 
 var (
 	ErrApiKeyExists        = errors.New("the api key already exists")
+	ErrApiKeyNotFound      = errors.New("api key not found")
 	ErrEnvironmentNotFound = errors.New("environment not found")
 )
 
@@ -33,4 +34,5 @@ type MessageRepository interface {
 
 type ApiKeyRepository interface {
 	Insert(ctx context.Context, apiKey *ApiKey) error
+	FindBySecretKey(ctx context.Context, sk SecretKey) (*ApiKey, error)
 }

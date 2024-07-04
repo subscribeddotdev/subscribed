@@ -10,21 +10,27 @@ import (
 	"time"
 
 	"github.com/ThreeDotsLabs/watermill"
+	"github.com/ThreeDotsLabs/watermill-amqp/v2/pkg/amqp"
+	"github.com/ThreeDotsLabs/watermill/message"
+	"github.com/ThreeDotsLabs/watermill/message/router/middleware"
+	"github.com/ThreeDotsLabs/watermill/message/router/plugin"
 	"github.com/kelseyhightower/envconfig"
 	_ "github.com/lib/pq"
-	"github.com/subscribeddotdev/subscribed-backend/internal/adapters/psql"
-	"github.com/subscribeddotdev/subscribed-backend/internal/app/auth"
-	"github.com/subscribeddotdev/subscribed-backend/internal/app/command"
-	"github.com/subscribeddotdev/subscribed-backend/internal/common/clerkhttp"
-	"github.com/subscribeddotdev/subscribed-backend/internal/common/observability"
+	"github.com/subscribeddotdev/subscribed-backend/internal/common/messaging"
 	svix "github.com/svix/svix-webhooks/go"
 	"golang.org/x/sync/errgroup"
 
 	"github.com/subscribeddotdev/subscribed-backend/internal/adapters/events"
+	"github.com/subscribeddotdev/subscribed-backend/internal/adapters/psql"
 	"github.com/subscribeddotdev/subscribed-backend/internal/adapters/transaction"
 	"github.com/subscribeddotdev/subscribed-backend/internal/app"
+	"github.com/subscribeddotdev/subscribed-backend/internal/app/auth"
+	"github.com/subscribeddotdev/subscribed-backend/internal/app/command"
+	"github.com/subscribeddotdev/subscribed-backend/internal/common/clerkhttp"
 	"github.com/subscribeddotdev/subscribed-backend/internal/common/logs"
+	"github.com/subscribeddotdev/subscribed-backend/internal/common/observability"
 	"github.com/subscribeddotdev/subscribed-backend/internal/common/postgres"
+	amqpport "github.com/subscribeddotdev/subscribed-backend/internal/ports/amqp"
 	"github.com/subscribeddotdev/subscribed-backend/internal/ports/http"
 )
 
@@ -33,7 +39,7 @@ type Config struct {
 	Port                   int    `envconfig:"HTTP_PORT" required:"true"`
 	ProductionMode         bool   `envconfig:"PRODUCTION_MODE" required:"true"`
 	AllowedCorsOrigin      string `envconfig:"HTTP_ALLOWED_CORS" required:"true"`
-	AmqpUrL                string `envconfig:"AMQP_URL" required:"true"`
+	AmqpURL                string `envconfig:"AMQP_URL" required:"true"`
 	ClerkSecretKey         string `envconfig:"CLERK_SECRET_KEY" required:"true"`
 	ClerkEmulatorServerURL string `envconfig:"CLERK_EMULATOR_SERVER_URL" required:"true"`
 	ClerkWebhookSecret     string `envconfig:"CLERK_WEBHOOK_SECRET" required:"true"`
@@ -78,7 +84,19 @@ func run(logger *logs.Logger) error {
 	apiKeyRepo := psql.NewApiKeyRepository(db)
 	envRepo := psql.NewEnvironmentRepository(db)
 
-	eventPublisher, err := events.NewPublisher(config.AmqpUrL, watermill.NewStdLogger(!config.ProductionMode, !config.ProductionMode))
+	watermillLogger := watermill.NewSlogLogger(logger.Logger)
+	publisher, err := messaging.NewAmqpPublisher(config.AmqpURL, logger)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = publisher.Close() }()
+
+	subscriber, err := amqp.NewSubscriber(amqp.NewDurableQueueConfig(config.AmqpURL), watermillLogger)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = subscriber.Close() }()
+	eventPublisher, err := events.NewPublisher(publisher)
 	if err != nil {
 		return err
 	}
@@ -95,6 +113,46 @@ func run(logger *logs.Logger) error {
 			CreateEventType:    observability.NewCommandDecorator[command.CreateEventType](command.NewCreateEventTypeHandler(eventTypeRepo), logger),
 			CreateApiKey:       observability.NewCommandDecorator[command.CreateApiKey](command.NewCreateApiKeyHandler(apiKeyRepo, envRepo), logger),
 		},
+	}
+
+	router, err := message.NewRouter(message.RouterConfig{}, watermillLogger)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = router.Close() }()
+
+	poisonQueueMiddleware, err := middleware.PoisonQueue(publisher, "poison_queue")
+	if err != nil {
+		return err
+	}
+
+	retryMiddleware := middleware.Retry{
+		MaxRetries:      3,
+		Logger:          watermillLogger,
+		InitialInterval: time.Millisecond * 3,
+	}
+
+	router.AddPlugin(plugin.SignalsHandler)
+	router.AddMiddleware(
+		// Handle panics
+		middleware.Recoverer,
+
+		// Sets the correlation id to the messages' context
+		// messaging.CorrelationIdMiddleware,
+
+		// Send failed events to a specific queue
+		poisonQueueMiddleware,
+
+		// messaging.ErrorLoggerMiddleware(logger),
+
+		// Retry failed events
+		retryMiddleware.Middleware,
+	)
+
+	// Event handlers
+	eventHandlers := amqpport.NewHandlers(application)
+	for _, handler := range eventHandlers {
+		router.AddNoPublisherHandler(handler.HandlerName(), handler.EventName(), subscriber, handler.Handle)
 	}
 
 	var webhookVerifier http.LoginProviderWebhookVerifier
@@ -123,6 +181,10 @@ func run(logger *logs.Logger) error {
 
 	g.Go(func() error {
 		return httpserver.Start()
+	})
+
+	g.Go(func() error {
+		return router.Run(ctx)
 	})
 
 	// Gracefully termination of services

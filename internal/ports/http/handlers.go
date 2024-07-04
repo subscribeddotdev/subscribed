@@ -1,7 +1,6 @@
 package http
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/friendsofgo/errors"
@@ -184,14 +183,11 @@ func (h handlers) resolveMemberFromCtx(c echo.Context) (*iam.Member, error) {
 }
 
 func (h handlers) resolveOrgIdFromCtx(c echo.Context) (string, error) {
-	fmt.Println("### resolving ###")
-
 	val := c.Get("org_id")
 	if val == nil {
 		return "", errors.New("orgID hasn't been set in the context")
 	}
 
-	fmt.Println("### val ###", val)
 	orgID, ok := val.(string)
 	if !ok {
 		return "", errors.New("invalid orgID type")

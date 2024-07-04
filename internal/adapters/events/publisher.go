@@ -6,28 +6,20 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/ThreeDotsLabs/watermill"
-	"github.com/ThreeDotsLabs/watermill-amqp/v2/pkg/amqp"
 	"github.com/ThreeDotsLabs/watermill/message"
 	events "github.com/subscribeddotdev/subscribed-backend/events/go"
 	"github.com/subscribeddotdev/subscribed-backend/internal/app/command"
-	"github.com/subscribeddotdev/subscribed-backend/internal/common/messaging"
 	"github.com/subscribeddotdev/subscribed-backend/internal/domain"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 type Publisher struct {
-	eventPublisher *messaging.Publisher
+	eventPublisher message.Publisher
 }
 
-func NewPublisher(amqpUrl string, logger watermill.LoggerAdapter) (*Publisher, error) {
-	eventPublisher, err := messaging.NewPublisher(amqp.NewDurableQueueConfig(amqpUrl), logger)
-	if err != nil {
-		return nil, err
-	}
-
+func NewPublisher(publisher message.Publisher) (*Publisher, error) {
 	return &Publisher{
-		eventPublisher: eventPublisher,
+		eventPublisher: publisher,
 	}, nil
 }
 
@@ -49,7 +41,7 @@ func (p Publisher) PublishMessageSent(ctx context.Context, e command.MessageSent
 		return fmt.Errorf("error to marshall event %s due to: %v", command.MessageSentEvent, err)
 	}
 
-	err = p.eventPublisher.Publish(command.MessageSentEvent, message.Message{
+	err = p.eventPublisher.Publish(command.MessageSentEvent, &message.Message{
 		Payload: payload,
 	})
 	if err != nil {

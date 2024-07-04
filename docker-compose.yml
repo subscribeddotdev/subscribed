@@ -33,6 +33,8 @@ services:
       - "8080:8080"
     volumes:
       - .:/usr/app
+      - ${GOCACHE:-/tmp/go-cache}:/root/.cache/go-build
+      - ${GOMODCACHE:-/tmp/go-mod-cache}:/go/pkg/mod
 
   emulators:
     build: ./misc/tools/reflex

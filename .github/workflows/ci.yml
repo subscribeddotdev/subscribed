@@ -8,10 +8,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: arduino/setup-task@v1
+      - uses: arduino/setup-task@v2
         with:
           version: 3.10.0
-      - uses: actions/setup-go@v3
+      - uses: actions/setup-go@v5
         with:
           go-version: "1.22.3"
 
@@ -22,8 +22,8 @@ jobs:
         run: task wait-for -- 8080
         timeout-minutes: 1
 
-      - name: Download deps
-        run: go mod download
+      # - name: Download deps
+      #  run: go mod download
 
       - name: Test all
         run: task test:all
@@ -36,12 +36,12 @@ jobs:
     name: lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/setup-go@v3
+      - uses: actions/setup-go@v5
         with:
           go-version: "1.22.3"
       - uses: actions/checkout@v4
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@v3
+        uses: golangci/golangci-lint-action@v6.0.1
         with:
           version: latest
           args: --timeout 3m --verbose

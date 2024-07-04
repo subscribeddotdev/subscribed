@@ -12,8 +12,9 @@ message Header {
   google.protobuf.Timestamp published_at = 5;
 }
 
-message SomethingHappened {
+message MessageSent {
   Header header = 1;
 
-  string id = 2;
+  string message_id = 2;
+  string endpoint_id = 3;
 }

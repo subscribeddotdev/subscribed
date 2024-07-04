@@ -19,6 +19,8 @@ func TestApplication_Lifecycle(t *testing.T) {
 	app := ff.NewApplication().WithEnvironmentID(env.ID).Save()
 	apiKey := ff.NewApiKey().WithOrgID(org.ID).WithEnvironmentID(env.ID).Save()
 	eventType := ff.NewEventType().WithOrgID(org.ID).Save()
+	// TODO: Use it to assert MessageSent
+	ff.NewEndpoint().WithEventTypeIDs([]string{eventType.ID}).WithAppID(app.ID).Save()
 
 	apiClient := getClientWithApiKey(t, apiKey.SecretKey)
 
@@ -45,5 +47,7 @@ func TestApplication_Lifecycle(t *testing.T) {
 		require.NoError(t, err)
 
 		assert.Equal(t, string(payload), msg.Payload)
+
+		// TODO: assert that MessageSent events have been published with the endpoint_id fixture above
 	})
 }

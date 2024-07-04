@@ -47,20 +47,18 @@ func (c SendMessageHandler) Execute(ctx context.Context, cmd SendMessage) error 
 		return err
 	}
 
-	// Load all endpoints by event_type_id
+	// TODO: consider moving this inside the transaction???
 	endpoints, err := c.endpointRepo.ByEventTypeIdAndAppID(ctx, message.EventTypeID(), message.ApplicationID())
 	if err != nil {
 		return fmt.Errorf("error retrieving endpoints: %v", err)
 	}
 
 	return c.txProvider.Transact(ctx, func(adapters TransactableAdapters) error {
-		// Save message
 		err = adapters.MessageRepository.Insert(ctx, message)
 		if err != nil {
 			return fmt.Errorf("error saving message: %v", err)
 		}
 
-		// For each endpoint, publish an event
 		for _, endpoint := range endpoints {
 			err = adapters.EventPublisher.PublishMessageSent(ctx, MessageSent{
 				MessageID:  message.Id().String(),

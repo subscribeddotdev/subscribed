@@ -38,6 +38,7 @@ func (p PsqlProvider) Transact(ctx context.Context, f command.TransactFunc) erro
 		OrganizationRepository: psql.NewOrganizationRepository(tx),
 		EnvironmentRepository:  psql.NewEnvironmentRepository(tx),
 		MessageRepository:      psql.NewMessageRepository(tx),
+		EndpointRepository:     psql.NewEndpointRepository(tx),
 	}
 
 	if err = f(adapters); err != nil {

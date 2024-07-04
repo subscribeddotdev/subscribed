@@ -8,7 +8,9 @@ import (
 var (
 	ErrApiKeyExists        = errors.New("the api key already exists")
 	ErrApiKeyNotFound      = errors.New("api key not found")
+	ErrEndpointNotFound    = errors.New("endpoint not found")
 	ErrEventTypeNotFound   = errors.New("event type not found")
+	ErrMessageNotFound     = errors.New("message not found")
 	ErrEnvironmentNotFound = errors.New("environment not found")
 )
 
@@ -27,10 +29,12 @@ type EventTypeRepository interface {
 
 type EndpointRepository interface {
 	Insert(ctx context.Context, endpoint *Endpoint) error
+	ByID(ctx context.Context, id ID) (*Endpoint, error)
 	ByEventTypeIdAndAppID(ctx context.Context, eventTypeID ID, appID ID) ([]*Endpoint, error)
 }
 
 type MessageRepository interface {
+	ByID(ctx context.Context, id ID) (*Message, error)
 	Insert(ctx context.Context, message *Message) error
 }
 

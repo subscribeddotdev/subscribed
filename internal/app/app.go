@@ -16,12 +16,13 @@ type QueryHandler[Q, R any] interface {
 }
 
 type Command struct {
-	AddEndpoint        CommandHandler[command.AddEndpoint]
-	SendMessage        CommandHandler[command.SendMessage]
-	CreateApplication  CommandHandler[command.CreateApplication]
-	CreateOrganization CommandHandler[command.CreateOrganization]
-	CreateEventType    CommandHandler[command.CreateEventType]
-	CreateApiKey       CommandHandler[command.CreateApiKey]
+	AddEndpoint         CommandHandler[command.AddEndpoint]
+	SendMessage         CommandHandler[command.SendMessage]
+	CreateApplication   CommandHandler[command.CreateApplication]
+	CreateOrganization  CommandHandler[command.CreateOrganization]
+	CreateEventType     CommandHandler[command.CreateEventType]
+	CreateApiKey        CommandHandler[command.CreateApiKey]
+	CallWebhookEndpoint CommandHandler[command.CallWebhookEndpoint]
 }
 
 type App struct {

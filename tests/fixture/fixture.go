@@ -101,3 +101,16 @@ func (f *Factory) NewApiKey() *ApiKey {
 		},
 	}
 }
+
+func (f *Factory) NewEndpoint() *Endpoint {
+	return &Endpoint{
+		factory: f,
+		model: models.Endpoint{
+			ID:            domain.NewID().String(),
+			ApplicationID: domain.NewID().String(),
+			URL:           gofakeit.URL(),
+			Description:   null.StringFrom(gofakeit.Sentence(10)),
+			SigningSecret: gofakeit.UUID(),
+		},
+	}
+}

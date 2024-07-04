@@ -317,7 +317,7 @@ components:
           type: string
         description:
           type: string
-        event_types_subscribed_to:
+        event_type_ids:
           type: array
           items:
             type: string

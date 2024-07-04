@@ -1,5 +1,10 @@
 package command
 
-type SomethingHappened struct {
-	ID string
+const (
+	MessageSentEvent = "MessageSent"
+)
+
+type MessageSent struct {
+	MessageID  string
+	EndpointID string
 }

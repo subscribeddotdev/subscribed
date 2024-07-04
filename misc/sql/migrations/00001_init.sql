@@ -65,6 +65,14 @@ CREATE TABLE event_types (
     CONSTRAINT fk_event_type_belongs_to_org FOREIGN KEY (org_id) REFERENCES organizations (id)
 );
 
+CREATE TABLE endpoint_event_types (
+    endpoint_id VARCHAR(26) NOT NULL,
+    event_type_id VARCHAR(26) NOT NULL,
+    CONSTRAINT pk_endpoint_event_type PRIMARY KEY (endpoint_id, event_type_id),
+    CONSTRAINT fk_endpoint_subscribes_to_event_types FOREIGN KEY (endpoint_id) REFERENCES endpoints (id),
+    CONSTRAINT fk_event_type_can_be_subscribed_to_endpoints FOREIGN KEY (event_type_id) REFERENCES event_types (id)
+);
+
 CREATE TABLE messages (
     id VARCHAR(26) NOT NULL PRIMARY KEY,
     org_id VARCHAR(26) NOT NULL,
@@ -96,6 +104,7 @@ CREATE TABLE api_keys (
 -- +goose Down
 -- +goose StatementBegin
 DROP TABLE messages;
+DROP TABLE endpoint_event_types;
 DROP TABLE event_types;
 DROP TABLE endpoints;
 DROP TABLE api_keys;

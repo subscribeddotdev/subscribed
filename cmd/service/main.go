@@ -91,7 +91,7 @@ func run(logger *logs.Logger) error {
 			CreateOrganization: observability.NewCommandDecorator[command.CreateOrganization](command.NewCreateOrganizationHandler(txProvider), logger),
 			CreateApplication:  observability.NewCommandDecorator[command.CreateApplication](command.NewCreateApplicationHandler(applicationRepo), logger),
 			AddEndpoint:        observability.NewCommandDecorator[command.AddEndpoint](command.NewAddEndpointHandler(endpointRepo), logger),
-			SendMessage:        observability.NewCommandDecorator[command.SendMessage](command.NewSendMessageHandler(txProvider), logger),
+			SendMessage:        observability.NewCommandDecorator[command.SendMessage](command.NewSendMessageHandler(txProvider, endpointRepo), logger),
 			CreateEventType:    observability.NewCommandDecorator[command.CreateEventType](command.NewCreateEventTypeHandler(eventTypeRepo), logger),
 			CreateApiKey:       observability.NewCommandDecorator[command.CreateApiKey](command.NewCreateApiKeyHandler(apiKeyRepo, envRepo), logger),
 		},

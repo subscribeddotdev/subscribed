@@ -35,11 +35,24 @@ func (h handlers) AddEndpoint(c echo.Context, applicationID string) error {
 		description = *body.Description
 	}
 
+	var eventTypeIDs []domain.ID
+
+	if body.EventTypeIds != nil {
+		for _, eventTypeID := range *body.EventTypeIds {
+			eID, err := domain.NewIdFromString(eventTypeID)
+			if err != nil {
+				return NewHandlerErrorWithStatus(err, "error-mapping-event-type-id", http.StatusBadRequest)
+			}
+
+			eventTypeIDs = append(eventTypeIDs, eID)
+		}
+	}
+
 	err = h.application.Command.AddEndpoint.Execute(c.Request().Context(), command.AddEndpoint{
-		ApplicationID:          appID,
-		EndpointUrl:            body.Url,
-		Description:            description,
-		EventTypesSubscribedTo: nil,
+		ApplicationID: appID,
+		EndpointUrl:   body.Url,
+		Description:   description,
+		EventTypeIDs:  eventTypeIDs,
 	})
 	if err != nil {
 		return NewHandlerError(err, "unable-to-add-endpoint")

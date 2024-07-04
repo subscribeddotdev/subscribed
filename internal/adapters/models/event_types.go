@@ -101,17 +101,20 @@ var EventTypeWhere = struct {
 
 // EventTypeRels is where relationship names are stored.
 var EventTypeRels = struct {
-	Org      string
-	Messages string
+	Org       string
+	Endpoints string
+	Messages  string
 }{
-	Org:      "Org",
-	Messages: "Messages",
+	Org:       "Org",
+	Endpoints: "Endpoints",
+	Messages:  "Messages",
 }
 
 // eventTypeR is where relationships are stored.
 type eventTypeR struct {
-	Org      *Organization `boil:"Org" json:"Org" toml:"Org" yaml:"Org"`
-	Messages MessageSlice  `boil:"Messages" json:"Messages" toml:"Messages" yaml:"Messages"`
+	Org       *Organization `boil:"Org" json:"Org" toml:"Org" yaml:"Org"`
+	Endpoints EndpointSlice `boil:"Endpoints" json:"Endpoints" toml:"Endpoints" yaml:"Endpoints"`
+	Messages  MessageSlice  `boil:"Messages" json:"Messages" toml:"Messages" yaml:"Messages"`
 }
 
 // NewStruct creates a new relationship struct
@@ -124,6 +127,13 @@ func (r *eventTypeR) GetOrg() *Organization {
 		return nil
 	}
 	return r.Org
+}
+
+func (r *eventTypeR) GetEndpoints() EndpointSlice {
+	if r == nil {
+		return nil
+	}
+	return r.Endpoints
 }
 
 func (r *eventTypeR) GetMessages() MessageSlice {
@@ -433,6 +443,21 @@ func (o *EventType) Org(mods ...qm.QueryMod) organizationQuery {
 	return Organizations(queryMods...)
 }
 
+// Endpoints retrieves all the endpoint's Endpoints with an executor.
+func (o *EventType) Endpoints(mods ...qm.QueryMod) endpointQuery {
+	var queryMods []qm.QueryMod
+	if len(mods) != 0 {
+		queryMods = append(queryMods, mods...)
+	}
+
+	queryMods = append(queryMods,
+		qm.InnerJoin("\"endpoint_event_types\" on \"endpoints\".\"id\" = \"endpoint_event_types\".\"endpoint_id\""),
+		qm.Where("\"endpoint_event_types\".\"event_type_id\"=?", o.ID),
+	)
+
+	return Endpoints(queryMods...)
+}
+
 // Messages retrieves all the message's Messages with an executor.
 func (o *EventType) Messages(mods ...qm.QueryMod) messageQuery {
 	var queryMods []qm.QueryMod
@@ -559,6 +584,137 @@ func (eventTypeL) LoadOrg(ctx context.Context, e boil.ContextExecutor, singular 
 					foreign.R = &organizationR{}
 				}
 				foreign.R.OrgEventTypes = append(foreign.R.OrgEventTypes, local)
+				break
+			}
+		}
+	}
+
+	return nil
+}
+
+// LoadEndpoints allows an eager lookup of values, cached into the
+// loaded structs of the objects. This is for a 1-M or N-M relationship.
+func (eventTypeL) LoadEndpoints(ctx context.Context, e boil.ContextExecutor, singular bool, maybeEventType interface{}, mods queries.Applicator) error {
+	var slice []*EventType
+	var object *EventType
+
+	if singular {
+		var ok bool
+		object, ok = maybeEventType.(*EventType)
+		if !ok {
+			object = new(EventType)
+			ok = queries.SetFromEmbeddedStruct(&object, &maybeEventType)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeEventType))
+			}
+		}
+	} else {
+		s, ok := maybeEventType.(*[]*EventType)
+		if ok {
+			slice = *s
+		} else {
+			ok = queries.SetFromEmbeddedStruct(&slice, maybeEventType)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeEventType))
+			}
+		}
+	}
+
+	args := make([]interface{}, 0, 1)
+	if singular {
+		if object.R == nil {
+			object.R = &eventTypeR{}
+		}
+		args = append(args, object.ID)
+	} else {
+	Outer:
+		for _, obj := range slice {
+			if obj.R == nil {
+				obj.R = &eventTypeR{}
+			}
+
+			for _, a := range args {
+				if a == obj.ID {
+					continue Outer
+				}
+			}
+
+			args = append(args, obj.ID)
+		}
+	}
+
+	if len(args) == 0 {
+		return nil
+	}
+
+	query := NewQuery(
+		qm.Select("\"endpoints\".\"id\", \"endpoints\".\"application_id\", \"endpoints\".\"url\", \"endpoints\".\"description\", \"endpoints\".\"signing_secret\", \"endpoints\".\"created_at\", \"endpoints\".\"updated_at\", \"a\".\"event_type_id\""),
+		qm.From("\"endpoints\""),
+		qm.InnerJoin("\"endpoint_event_types\" as \"a\" on \"endpoints\".\"id\" = \"a\".\"endpoint_id\""),
+		qm.WhereIn("\"a\".\"event_type_id\" in ?", args...),
+	)
+	if mods != nil {
+		mods.Apply(query)
+	}
+
+	results, err := query.QueryContext(ctx, e)
+	if err != nil {
+		return errors.Wrap(err, "failed to eager load endpoints")
+	}
+
+	var resultSlice []*Endpoint
+
+	var localJoinCols []string
+	for results.Next() {
+		one := new(Endpoint)
+		var localJoinCol string
+
+		err = results.Scan(&one.ID, &one.ApplicationID, &one.URL, &one.Description, &one.SigningSecret, &one.CreatedAt, &one.UpdatedAt, &localJoinCol)
+		if err != nil {
+			return errors.Wrap(err, "failed to scan eager loaded results for endpoints")
+		}
+		if err = results.Err(); err != nil {
+			return errors.Wrap(err, "failed to plebian-bind eager loaded slice endpoints")
+		}
+
+		resultSlice = append(resultSlice, one)
+		localJoinCols = append(localJoinCols, localJoinCol)
+	}
+
+	if err = results.Close(); err != nil {
+		return errors.Wrap(err, "failed to close results in eager load on endpoints")
+	}
+	if err = results.Err(); err != nil {
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for endpoints")
+	}
+
+	if len(endpointAfterSelectHooks) != 0 {
+		for _, obj := range resultSlice {
+			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
+				return err
+			}
+		}
+	}
+	if singular {
+		object.R.Endpoints = resultSlice
+		for _, foreign := range resultSlice {
+			if foreign.R == nil {
+				foreign.R = &endpointR{}
+			}
+			foreign.R.EventTypes = append(foreign.R.EventTypes, object)
+		}
+		return nil
+	}
+
+	for i, foreign := range resultSlice {
+		localJoinCol := localJoinCols[i]
+		for _, local := range slice {
+			if local.ID == localJoinCol {
+				local.R.Endpoints = append(local.R.Endpoints, foreign)
+				if foreign.R == nil {
+					foreign.R = &endpointR{}
+				}
+				foreign.R.EventTypes = append(foreign.R.EventTypes, local)
 				break
 			}
 		}
@@ -726,6 +882,151 @@ func (o *EventType) SetOrg(ctx context.Context, exec boil.ContextExecutor, inser
 	}
 
 	return nil
+}
+
+// AddEndpoints adds the given related objects to the existing relationships
+// of the event_type, optionally inserting them as new records.
+// Appends related to o.R.Endpoints.
+// Sets related.R.EventTypes appropriately.
+func (o *EventType) AddEndpoints(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*Endpoint) error {
+	var err error
+	for _, rel := range related {
+		if insert {
+			if err = rel.Insert(ctx, exec, boil.Infer()); err != nil {
+				return errors.Wrap(err, "failed to insert into foreign table")
+			}
+		}
+	}
+
+	for _, rel := range related {
+		query := "insert into \"endpoint_event_types\" (\"event_type_id\", \"endpoint_id\") values ($1, $2)"
+		values := []interface{}{o.ID, rel.ID}
+
+		if boil.IsDebug(ctx) {
+			writer := boil.DebugWriterFrom(ctx)
+			fmt.Fprintln(writer, query)
+			fmt.Fprintln(writer, values)
+		}
+		_, err = exec.ExecContext(ctx, query, values...)
+		if err != nil {
+			return errors.Wrap(err, "failed to insert into join table")
+		}
+	}
+	if o.R == nil {
+		o.R = &eventTypeR{
+			Endpoints: related,
+		}
+	} else {
+		o.R.Endpoints = append(o.R.Endpoints, related...)
+	}
+
+	for _, rel := range related {
+		if rel.R == nil {
+			rel.R = &endpointR{
+				EventTypes: EventTypeSlice{o},
+			}
+		} else {
+			rel.R.EventTypes = append(rel.R.EventTypes, o)
+		}
+	}
+	return nil
+}
+
+// SetEndpoints removes all previously related items of the
+// event_type replacing them completely with the passed
+// in related items, optionally inserting them as new records.
+// Sets o.R.EventTypes's Endpoints accordingly.
+// Replaces o.R.Endpoints with related.
+// Sets related.R.EventTypes's Endpoints accordingly.
+func (o *EventType) SetEndpoints(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*Endpoint) error {
+	query := "delete from \"endpoint_event_types\" where \"event_type_id\" = $1"
+	values := []interface{}{o.ID}
+	if boil.IsDebug(ctx) {
+		writer := boil.DebugWriterFrom(ctx)
+		fmt.Fprintln(writer, query)
+		fmt.Fprintln(writer, values)
+	}
+	_, err := exec.ExecContext(ctx, query, values...)
+	if err != nil {
+		return errors.Wrap(err, "failed to remove relationships before set")
+	}
+
+	removeEndpointsFromEventTypesSlice(o, related)
+	if o.R != nil {
+		o.R.Endpoints = nil
+	}
+
+	return o.AddEndpoints(ctx, exec, insert, related...)
+}
+
+// RemoveEndpoints relationships from objects passed in.
+// Removes related items from R.Endpoints (uses pointer comparison, removal does not keep order)
+// Sets related.R.EventTypes.
+func (o *EventType) RemoveEndpoints(ctx context.Context, exec boil.ContextExecutor, related ...*Endpoint) error {
+	if len(related) == 0 {
+		return nil
+	}
+
+	var err error
+	query := fmt.Sprintf(
+		"delete from \"endpoint_event_types\" where \"event_type_id\" = $1 and \"endpoint_id\" in (%s)",
+		strmangle.Placeholders(dialect.UseIndexPlaceholders, len(related), 2, 1),
+	)
+	values := []interface{}{o.ID}
+	for _, rel := range related {
+		values = append(values, rel.ID)
+	}
+
+	if boil.IsDebug(ctx) {
+		writer := boil.DebugWriterFrom(ctx)
+		fmt.Fprintln(writer, query)
+		fmt.Fprintln(writer, values)
+	}
+	_, err = exec.ExecContext(ctx, query, values...)
+	if err != nil {
+		return errors.Wrap(err, "failed to remove relationships before set")
+	}
+	removeEndpointsFromEventTypesSlice(o, related)
+	if o.R == nil {
+		return nil
+	}
+
+	for _, rel := range related {
+		for i, ri := range o.R.Endpoints {
+			if rel != ri {
+				continue
+			}
+
+			ln := len(o.R.Endpoints)
+			if ln > 1 && i < ln-1 {
+				o.R.Endpoints[i] = o.R.Endpoints[ln-1]
+			}
+			o.R.Endpoints = o.R.Endpoints[:ln-1]
+			break
+		}
+	}
+
+	return nil
+}
+
+func removeEndpointsFromEventTypesSlice(o *EventType, related []*Endpoint) {
+	for _, rel := range related {
+		if rel.R == nil {
+			continue
+		}
+		for i, ri := range rel.R.EventTypes {
+			if o.ID != ri.ID {
+				continue
+			}
+
+			ln := len(rel.R.EventTypes)
+			if ln > 1 && i < ln-1 {
+				rel.R.EventTypes[i] = rel.R.EventTypes[ln-1]
+			}
+			rel.R.EventTypes = rel.R.EventTypes[:ln-1]
+			break
+		}
+	}
 }
 
 // AddMessages adds the given related objects to the existing relationships

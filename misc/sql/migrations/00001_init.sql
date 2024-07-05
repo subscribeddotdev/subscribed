@@ -86,6 +86,22 @@ CREATE TABLE messages (
     CONSTRAINT fk_message_is_of_event_type FOREIGN KEY (event_type_id) REFERENCES event_types (id)
 );
 
+CREATE TYPE SendAttemptStatus AS ENUM('failed', 'succeeded');
+
+CREATE TABLE message_send_attempts (
+    id VARCHAR(26) NOT NULL PRIMARY KEY,
+    message_id VARCHAR(26) NOT NULL,
+    endpoint_id VARCHAR(26) NOT NULL,
+    attempted_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    status SendAttemptStatus NOT NULL,
+    response TEXT,
+    status_code SMALLINT,
+    headers jsonb,
+
+    CONSTRAINT fk_attempt_belongs_to_msg FOREIGN KEY (message_id) REFERENCES messages (id),
+    CONSTRAINT fk_attempt_belongs_to_endpoint FOREIGN KEY (endpoint_id) REFERENCES endpoints (id)
+);
+
 CREATE TABLE api_keys (
     secret_key TEXT NOT NULL PRIMARY KEY,
     suffix TEXT NOT NULL,
@@ -103,6 +119,7 @@ CREATE TABLE api_keys (
 
 -- +goose Down
 -- +goose StatementBegin
+DROP TABLE message_send_attempts;
 DROP TABLE messages;
 DROP TABLE endpoint_event_types;
 DROP TABLE event_types;
@@ -113,4 +130,5 @@ DROP TABLE members;
 DROP TABLE environments;
 DROP TABLE organizations;
 DROP TYPE EnvType;
+DROP TYPE SendAttemptStatus;
 -- +goose StatementEnd

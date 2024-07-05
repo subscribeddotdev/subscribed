@@ -29,8 +29,6 @@ func (h MessageSentHandler) Handle(m *message.Message) error {
 		return fmt.Errorf("error unmarshalling event '%s': %v", command.MessageSentEvent, err)
 	}
 
-	fmt.Println(payload.MessageId, payload.EndpointId, m.Context())
-
 	return h.application.Command.CallWebhookEndpoint.Execute(m.Context(), command.CallWebhookEndpoint{
 		EndpointID: payload.EndpointId,
 		MessageID:  payload.MessageId,

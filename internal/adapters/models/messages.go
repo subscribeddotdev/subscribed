@@ -86,20 +86,23 @@ var MessageWhere = struct {
 
 // MessageRels is where relationship names are stored.
 var MessageRels = struct {
-	Application string
-	Org         string
-	EventType   string
+	Application         string
+	Org                 string
+	EventType           string
+	MessageSendAttempts string
 }{
-	Application: "Application",
-	Org:         "Org",
-	EventType:   "EventType",
+	Application:         "Application",
+	Org:                 "Org",
+	EventType:           "EventType",
+	MessageSendAttempts: "MessageSendAttempts",
 }
 
 // messageR is where relationships are stored.
 type messageR struct {
-	Application *Application  `boil:"Application" json:"Application" toml:"Application" yaml:"Application"`
-	Org         *Organization `boil:"Org" json:"Org" toml:"Org" yaml:"Org"`
-	EventType   *EventType    `boil:"EventType" json:"EventType" toml:"EventType" yaml:"EventType"`
+	Application         *Application            `boil:"Application" json:"Application" toml:"Application" yaml:"Application"`
+	Org                 *Organization           `boil:"Org" json:"Org" toml:"Org" yaml:"Org"`
+	EventType           *EventType              `boil:"EventType" json:"EventType" toml:"EventType" yaml:"EventType"`
+	MessageSendAttempts MessageSendAttemptSlice `boil:"MessageSendAttempts" json:"MessageSendAttempts" toml:"MessageSendAttempts" yaml:"MessageSendAttempts"`
 }
 
 // NewStruct creates a new relationship struct
@@ -126,6 +129,13 @@ func (r *messageR) GetEventType() *EventType {
 		return nil
 	}
 	return r.EventType
+}
+
+func (r *messageR) GetMessageSendAttempts() MessageSendAttemptSlice {
+	if r == nil {
+		return nil
+	}
+	return r.MessageSendAttempts
 }
 
 // messageL is where Load methods for each relationship are stored.
@@ -448,6 +458,20 @@ func (o *Message) EventType(mods ...qm.QueryMod) eventTypeQuery {
 	queryMods = append(queryMods, mods...)
 
 	return EventTypes(queryMods...)
+}
+
+// MessageSendAttempts retrieves all the message_send_attempt's MessageSendAttempts with an executor.
+func (o *Message) MessageSendAttempts(mods ...qm.QueryMod) messageSendAttemptQuery {
+	var queryMods []qm.QueryMod
+	if len(mods) != 0 {
+		queryMods = append(queryMods, mods...)
+	}
+
+	queryMods = append(queryMods,
+		qm.Where("\"message_send_attempts\".\"message_id\"=?", o.ID),
+	)
+
+	return MessageSendAttempts(queryMods...)
 }
 
 // LoadApplication allows an eager lookup of values, cached into the
@@ -810,6 +834,120 @@ func (messageL) LoadEventType(ctx context.Context, e boil.ContextExecutor, singu
 	return nil
 }
 
+// LoadMessageSendAttempts allows an eager lookup of values, cached into the
+// loaded structs of the objects. This is for a 1-M or N-M relationship.
+func (messageL) LoadMessageSendAttempts(ctx context.Context, e boil.ContextExecutor, singular bool, maybeMessage interface{}, mods queries.Applicator) error {
+	var slice []*Message
+	var object *Message
+
+	if singular {
+		var ok bool
+		object, ok = maybeMessage.(*Message)
+		if !ok {
+			object = new(Message)
+			ok = queries.SetFromEmbeddedStruct(&object, &maybeMessage)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeMessage))
+			}
+		}
+	} else {
+		s, ok := maybeMessage.(*[]*Message)
+		if ok {
+			slice = *s
+		} else {
+			ok = queries.SetFromEmbeddedStruct(&slice, maybeMessage)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeMessage))
+			}
+		}
+	}
+
+	args := make([]interface{}, 0, 1)
+	if singular {
+		if object.R == nil {
+			object.R = &messageR{}
+		}
+		args = append(args, object.ID)
+	} else {
+	Outer:
+		for _, obj := range slice {
+			if obj.R == nil {
+				obj.R = &messageR{}
+			}
+
+			for _, a := range args {
+				if a == obj.ID {
+					continue Outer
+				}
+			}
+
+			args = append(args, obj.ID)
+		}
+	}
+
+	if len(args) == 0 {
+		return nil
+	}
+
+	query := NewQuery(
+		qm.From(`message_send_attempts`),
+		qm.WhereIn(`message_send_attempts.message_id in ?`, args...),
+	)
+	if mods != nil {
+		mods.Apply(query)
+	}
+
+	results, err := query.QueryContext(ctx, e)
+	if err != nil {
+		return errors.Wrap(err, "failed to eager load message_send_attempts")
+	}
+
+	var resultSlice []*MessageSendAttempt
+	if err = queries.Bind(results, &resultSlice); err != nil {
+		return errors.Wrap(err, "failed to bind eager loaded slice message_send_attempts")
+	}
+
+	if err = results.Close(); err != nil {
+		return errors.Wrap(err, "failed to close results in eager load on message_send_attempts")
+	}
+	if err = results.Err(); err != nil {
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for message_send_attempts")
+	}
+
+	if len(messageSendAttemptAfterSelectHooks) != 0 {
+		for _, obj := range resultSlice {
+			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
+				return err
+			}
+		}
+	}
+	if singular {
+		object.R.MessageSendAttempts = resultSlice
+		for _, foreign := range resultSlice {
+			if foreign.R == nil {
+				foreign.R = &messageSendAttemptR{}
+			}
+			foreign.R.Message = object
+		}
+		return nil
+	}
+
+	for _, foreign := range resultSlice {
+		for _, local := range slice {
+			if local.ID == foreign.MessageID {
+				local.R.MessageSendAttempts = append(local.R.MessageSendAttempts, foreign)
+				if foreign.R == nil {
+					foreign.R = &messageSendAttemptR{}
+				}
+				foreign.R.Message = local
+				break
+			}
+		}
+	}
+
+	return nil
+}
+
 // SetApplication of the message to the related item.
 // Sets o.R.Application to related.
 // Adds o to related.R.Messages.
@@ -948,6 +1086,59 @@ func (o *Message) SetEventType(ctx context.Context, exec boil.ContextExecutor, i
 		related.R.Messages = append(related.R.Messages, o)
 	}
 
+	return nil
+}
+
+// AddMessageSendAttempts adds the given related objects to the existing relationships
+// of the message, optionally inserting them as new records.
+// Appends related to o.R.MessageSendAttempts.
+// Sets related.R.Message appropriately.
+func (o *Message) AddMessageSendAttempts(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*MessageSendAttempt) error {
+	var err error
+	for _, rel := range related {
+		if insert {
+			rel.MessageID = o.ID
+			if err = rel.Insert(ctx, exec, boil.Infer()); err != nil {
+				return errors.Wrap(err, "failed to insert into foreign table")
+			}
+		} else {
+			updateQuery := fmt.Sprintf(
+				"UPDATE \"message_send_attempts\" SET %s WHERE %s",
+				strmangle.SetParamNames("\"", "\"", 1, []string{"message_id"}),
+				strmangle.WhereClause("\"", "\"", 2, messageSendAttemptPrimaryKeyColumns),
+			)
+			values := []interface{}{o.ID, rel.ID}
+
+			if boil.IsDebug(ctx) {
+				writer := boil.DebugWriterFrom(ctx)
+				fmt.Fprintln(writer, updateQuery)
+				fmt.Fprintln(writer, values)
+			}
+			if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
+				return errors.Wrap(err, "failed to update foreign table")
+			}
+
+			rel.MessageID = o.ID
+		}
+	}
+
+	if o.R == nil {
+		o.R = &messageR{
+			MessageSendAttempts: related,
+		}
+	} else {
+		o.R.MessageSendAttempts = append(o.R.MessageSendAttempts, related...)
+	}
+
+	for _, rel := range related {
+		if rel.R == nil {
+			rel.R = &messageSendAttemptR{
+				Message: o,
+			}
+		} else {
+			rel.R.Message = o
+		}
+	}
 	return nil
 }
 

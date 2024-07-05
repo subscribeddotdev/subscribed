@@ -109,33 +109,3 @@ func UnMarshallMessage(
 		payload:       payload,
 	}, nil
 }
-
-type MessageSendAttempt struct {
-	id         ID
-	endpointID ID
-	timestamp  time.Time
-	status     string
-	response   string
-	statusCode uint
-	headers    Headers
-}
-
-func (m *MessageSendAttempt) Timestamp() time.Time {
-	return m.timestamp
-}
-
-func (m *MessageSendAttempt) Status() string {
-	return m.status
-}
-
-func (m *MessageSendAttempt) Response() string {
-	return m.response
-}
-
-func (m *MessageSendAttempt) StatusCode() uint {
-	return m.statusCode
-}
-
-func (m *MessageSendAttempt) Headers() Headers {
-	return m.headers
-}

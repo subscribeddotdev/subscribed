@@ -3,11 +3,13 @@ package psql
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"fmt"
 
 	"github.com/friendsofgo/errors"
 	"github.com/subscribeddotdev/subscribed-backend/internal/adapters/models"
 	"github.com/subscribeddotdev/subscribed-backend/internal/domain"
+	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 )
 
@@ -44,4 +46,34 @@ func (o MessageRepository) ByID(ctx context.Context, id domain.ID) (*domain.Mess
 	}
 
 	return domain.UnMarshallMessage(model.ID, model.EventTypeID, model.ApplicationID, model.OrgID, model.SentAt, model.Payload)
+}
+
+func (o MessageRepository) SaveMessageSendAttempt(ctx context.Context, attempt *domain.MessageSendAttempt) error {
+	var headers []byte
+	var err error
+
+	if attempt.Headers() != nil {
+		headers, err = json.Marshal(attempt.Headers())
+		if err != nil {
+			return err
+		}
+	}
+
+	model := models.MessageSendAttempt{
+		ID:          attempt.Id().String(),
+		MessageID:   attempt.MessageID().String(),
+		EndpointID:  attempt.EndpointID().String(),
+		AttemptedAt: attempt.Timestamp(),
+		Status:      attempt.Status().String(),
+		Response:    null.StringFrom(attempt.Response()),
+		StatusCode:  null.Int16From(int16(attempt.StatusCode())),
+		Headers:     null.JSONFrom(headers),
+	}
+
+	err = model.Insert(ctx, o.db, boil.Infer())
+	if err != nil {
+		return fmt.Errorf("error saving messageSendAttempt of msg id '%s' due to: %v", attempt.MessageID(), err)
+	}
+
+	return nil
 }

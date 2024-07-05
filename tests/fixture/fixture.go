@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"os"
 	"testing"
 	"time"
 
@@ -108,7 +109,7 @@ func (f *Factory) NewEndpoint() *Endpoint {
 		model: models.Endpoint{
 			ID:            domain.NewID().String(),
 			ApplicationID: domain.NewID().String(),
-			URL:           gofakeit.URL(),
+			URL:           os.Getenv("WEBHOOK_EMULATOR_URL") + "/webhook",
 			Description:   null.StringFrom(gofakeit.Sentence(10)),
 			SigningSecret: gofakeit.UUID(),
 		},

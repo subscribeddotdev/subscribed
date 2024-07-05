@@ -96,7 +96,7 @@ CREATE TABLE message_send_attempts (
     status SendAttemptStatus NOT NULL,
     response TEXT,
     status_code SMALLINT,
-    headers jsonb,
+    request_headers jsonb,
 
     CONSTRAINT fk_attempt_belongs_to_msg FOREIGN KEY (message_id) REFERENCES messages (id),
     CONSTRAINT fk_attempt_belongs_to_endpoint FOREIGN KEY (endpoint_id) REFERENCES endpoints (id)

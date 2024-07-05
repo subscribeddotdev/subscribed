@@ -24,57 +24,57 @@ import (
 
 // MessageSendAttempt is an object representing the database table.
 type MessageSendAttempt struct {
-	ID          string      `boil:"id" json:"id" toml:"id" yaml:"id"`
-	MessageID   string      `boil:"message_id" json:"message_id" toml:"message_id" yaml:"message_id"`
-	EndpointID  string      `boil:"endpoint_id" json:"endpoint_id" toml:"endpoint_id" yaml:"endpoint_id"`
-	AttemptedAt time.Time   `boil:"attempted_at" json:"attempted_at" toml:"attempted_at" yaml:"attempted_at"`
-	Status      string      `boil:"status" json:"status" toml:"status" yaml:"status"`
-	Response    null.String `boil:"response" json:"response,omitempty" toml:"response" yaml:"response,omitempty"`
-	StatusCode  null.Int16  `boil:"status_code" json:"status_code,omitempty" toml:"status_code" yaml:"status_code,omitempty"`
-	Headers     null.JSON   `boil:"headers" json:"headers,omitempty" toml:"headers" yaml:"headers,omitempty"`
+	ID             string      `boil:"id" json:"id" toml:"id" yaml:"id"`
+	MessageID      string      `boil:"message_id" json:"message_id" toml:"message_id" yaml:"message_id"`
+	EndpointID     string      `boil:"endpoint_id" json:"endpoint_id" toml:"endpoint_id" yaml:"endpoint_id"`
+	AttemptedAt    time.Time   `boil:"attempted_at" json:"attempted_at" toml:"attempted_at" yaml:"attempted_at"`
+	Status         string      `boil:"status" json:"status" toml:"status" yaml:"status"`
+	Response       null.String `boil:"response" json:"response,omitempty" toml:"response" yaml:"response,omitempty"`
+	StatusCode     null.Int16  `boil:"status_code" json:"status_code,omitempty" toml:"status_code" yaml:"status_code,omitempty"`
+	RequestHeaders null.JSON   `boil:"request_headers" json:"request_headers,omitempty" toml:"request_headers" yaml:"request_headers,omitempty"`
 
 	R *messageSendAttemptR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L messageSendAttemptL  `boil:"-" json:"-" toml:"-" yaml:"-"`
 }
 
 var MessageSendAttemptColumns = struct {
-	ID          string
-	MessageID   string
-	EndpointID  string
-	AttemptedAt string
-	Status      string
-	Response    string
-	StatusCode  string
-	Headers     string
+	ID             string
+	MessageID      string
+	EndpointID     string
+	AttemptedAt    string
+	Status         string
+	Response       string
+	StatusCode     string
+	RequestHeaders string
 }{
-	ID:          "id",
-	MessageID:   "message_id",
-	EndpointID:  "endpoint_id",
-	AttemptedAt: "attempted_at",
-	Status:      "status",
-	Response:    "response",
-	StatusCode:  "status_code",
-	Headers:     "headers",
+	ID:             "id",
+	MessageID:      "message_id",
+	EndpointID:     "endpoint_id",
+	AttemptedAt:    "attempted_at",
+	Status:         "status",
+	Response:       "response",
+	StatusCode:     "status_code",
+	RequestHeaders: "request_headers",
 }
 
 var MessageSendAttemptTableColumns = struct {
-	ID          string
-	MessageID   string
-	EndpointID  string
-	AttemptedAt string
-	Status      string
-	Response    string
-	StatusCode  string
-	Headers     string
+	ID             string
+	MessageID      string
+	EndpointID     string
+	AttemptedAt    string
+	Status         string
+	Response       string
+	StatusCode     string
+	RequestHeaders string
 }{
-	ID:          "message_send_attempts.id",
-	MessageID:   "message_send_attempts.message_id",
-	EndpointID:  "message_send_attempts.endpoint_id",
-	AttemptedAt: "message_send_attempts.attempted_at",
-	Status:      "message_send_attempts.status",
-	Response:    "message_send_attempts.response",
-	StatusCode:  "message_send_attempts.status_code",
-	Headers:     "message_send_attempts.headers",
+	ID:             "message_send_attempts.id",
+	MessageID:      "message_send_attempts.message_id",
+	EndpointID:     "message_send_attempts.endpoint_id",
+	AttemptedAt:    "message_send_attempts.attempted_at",
+	Status:         "message_send_attempts.status",
+	Response:       "message_send_attempts.response",
+	StatusCode:     "message_send_attempts.status_code",
+	RequestHeaders: "message_send_attempts.request_headers",
 }
 
 // Generated where
@@ -142,23 +142,23 @@ func (w whereHelpernull_JSON) IsNull() qm.QueryMod    { return qmhelper.WhereIsN
 func (w whereHelpernull_JSON) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
 
 var MessageSendAttemptWhere = struct {
-	ID          whereHelperstring
-	MessageID   whereHelperstring
-	EndpointID  whereHelperstring
-	AttemptedAt whereHelpertime_Time
-	Status      whereHelperstring
-	Response    whereHelpernull_String
-	StatusCode  whereHelpernull_Int16
-	Headers     whereHelpernull_JSON
+	ID             whereHelperstring
+	MessageID      whereHelperstring
+	EndpointID     whereHelperstring
+	AttemptedAt    whereHelpertime_Time
+	Status         whereHelperstring
+	Response       whereHelpernull_String
+	StatusCode     whereHelpernull_Int16
+	RequestHeaders whereHelpernull_JSON
 }{
-	ID:          whereHelperstring{field: "\"message_send_attempts\".\"id\""},
-	MessageID:   whereHelperstring{field: "\"message_send_attempts\".\"message_id\""},
-	EndpointID:  whereHelperstring{field: "\"message_send_attempts\".\"endpoint_id\""},
-	AttemptedAt: whereHelpertime_Time{field: "\"message_send_attempts\".\"attempted_at\""},
-	Status:      whereHelperstring{field: "\"message_send_attempts\".\"status\""},
-	Response:    whereHelpernull_String{field: "\"message_send_attempts\".\"response\""},
-	StatusCode:  whereHelpernull_Int16{field: "\"message_send_attempts\".\"status_code\""},
-	Headers:     whereHelpernull_JSON{field: "\"message_send_attempts\".\"headers\""},
+	ID:             whereHelperstring{field: "\"message_send_attempts\".\"id\""},
+	MessageID:      whereHelperstring{field: "\"message_send_attempts\".\"message_id\""},
+	EndpointID:     whereHelperstring{field: "\"message_send_attempts\".\"endpoint_id\""},
+	AttemptedAt:    whereHelpertime_Time{field: "\"message_send_attempts\".\"attempted_at\""},
+	Status:         whereHelperstring{field: "\"message_send_attempts\".\"status\""},
+	Response:       whereHelpernull_String{field: "\"message_send_attempts\".\"response\""},
+	StatusCode:     whereHelpernull_Int16{field: "\"message_send_attempts\".\"status_code\""},
+	RequestHeaders: whereHelpernull_JSON{field: "\"message_send_attempts\".\"request_headers\""},
 }
 
 // MessageSendAttemptRels is where relationship names are stored.
@@ -199,9 +199,9 @@ func (r *messageSendAttemptR) GetMessage() *Message {
 type messageSendAttemptL struct{}
 
 var (
-	messageSendAttemptAllColumns            = []string{"id", "message_id", "endpoint_id", "attempted_at", "status", "response", "status_code", "headers"}
+	messageSendAttemptAllColumns            = []string{"id", "message_id", "endpoint_id", "attempted_at", "status", "response", "status_code", "request_headers"}
 	messageSendAttemptColumnsWithoutDefault = []string{"id", "message_id", "endpoint_id", "status"}
-	messageSendAttemptColumnsWithDefault    = []string{"attempted_at", "response", "status_code", "headers"}
+	messageSendAttemptColumnsWithDefault    = []string{"attempted_at", "response", "status_code", "request_headers"}
 	messageSendAttemptPrimaryKeyColumns     = []string{"id"}
 	messageSendAttemptGeneratedColumns      = []string{}
 )

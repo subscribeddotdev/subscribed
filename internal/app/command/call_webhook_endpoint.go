@@ -3,6 +3,9 @@ package command
 import (
 	"bytes"
 	"context"
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"io"
@@ -59,12 +62,26 @@ func (c CallWebhookEndpointHandler) Execute(ctx context.Context, cmd CallWebhook
 		}
 
 		// TODO: retrieve the notification from the endpoint itself
-		req, err := http.NewRequestWithContext(ctx, http.MethodPost, endpoint.EndpointURL().String(), bytes.NewReader([]byte(message.Payload())))
+		req, err := http.NewRequestWithContext(
+			ctx,
+			http.MethodPost,
+			endpoint.EndpointURL().String(),
+			bytes.NewReader([]byte(message.Payload())),
+		)
 		if err != nil {
 			return fmt.Errorf("error creating request: %v", err)
 		}
 
-		req.Header.Set("x-sbs-whsec", endpoint.SigningSecret().String())
+		timestamp := time.Now()
+		signature, err := createSignature(message, endpoint, timestamp)
+		if err != nil {
+			return err
+		}
+
+		req.Header.Set("user-agent", "subscribed-backend")
+		req.Header.Set("x-sbs-id", cmd.MessageID)
+		req.Header.Set("x-sbs-timestamp", fmt.Sprintf("%d", timestamp.Unix()))
+		req.Header.Set("x-sbs-signature", signature)
 		for name, value := range endpoint.Headers() {
 			req.Header.Set(name, value)
 		}
@@ -81,10 +98,9 @@ func (c CallWebhookEndpointHandler) Execute(ctx context.Context, cmd CallWebhook
 			return fmt.Errorf("error reading response from endpoint '%s': %v", endpoint.EndpointURL(), err)
 		}
 
-		responseHeaders := domain.Headers{}
-		for name, value := range resp.Header {
-			fmt.Printf("Header ---> key=%s --- value=%s\n", name, value)
-			responseHeaders[name] = strings.Join(value, ";")
+		reqHeaders := domain.Headers{}
+		for name, value := range req.Header {
+			reqHeaders[name] = strings.Join(value, ";")
 		}
 
 		attempt, err := domain.NewMessageSendAttempt(
@@ -92,7 +108,7 @@ func (c CallWebhookEndpointHandler) Execute(ctx context.Context, cmd CallWebhook
 			messageID,
 			string(body[:n]),
 			domain.StatusCode(resp.StatusCode),
-			responseHeaders,
+			reqHeaders,
 		)
 		if err != nil {
 			return fmt.Errorf("error creating messageSendAttempt: %v", err)
@@ -105,4 +121,20 @@ func (c CallWebhookEndpointHandler) Execute(ctx context.Context, cmd CallWebhook
 
 		return nil
 	})
+}
+
+func createSignature(message *domain.Message, endpoint *domain.Endpoint, timestamp time.Time) (string, error) {
+	signedContent := fmt.Sprintf("%s.%d.%s", message.Id(), timestamp.Unix(), message.Payload())
+
+	// Decode secret (base64)
+	secretBytes, err := endpoint.SigningSecret().UnEncoded()
+	if err != nil {
+		return "", fmt.Errorf("error decoding secret: %v", err)
+	}
+
+	// Create HMAC signature
+	h := hmac.New(sha256.New, secretBytes)
+	h.Write([]byte(signedContent))
+
+	return base64.StdEncoding.EncodeToString(h.Sum(nil)), nil
 }

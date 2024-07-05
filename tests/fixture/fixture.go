@@ -104,6 +104,8 @@ func (f *Factory) NewApiKey() *ApiKey {
 }
 
 func (f *Factory) NewEndpoint() *Endpoint {
+	ss, err := domain.NewSigningSecret()
+	require.NoError(f.t, err)
 	return &Endpoint{
 		factory: f,
 		model: models.Endpoint{
@@ -111,7 +113,7 @@ func (f *Factory) NewEndpoint() *Endpoint {
 			ApplicationID: domain.NewID().String(),
 			URL:           os.Getenv("WEBHOOK_EMULATOR_URL") + "/webhook",
 			Description:   null.StringFrom(gofakeit.Sentence(10)),
-			SigningSecret: gofakeit.UUID(),
+			SigningSecret: ss.String(),
 		},
 	}
 }

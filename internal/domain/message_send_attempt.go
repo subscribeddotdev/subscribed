@@ -29,21 +29,21 @@ var (
 )
 
 type MessageSendAttempt struct {
-	id         ID
-	messageID  ID
-	endpointID ID
-	timestamp  time.Time
-	status     SendAttemptStatus
-	response   string // TODO: make this value-object
-	statusCode StatusCode
-	headers    Headers
+	id             ID
+	messageID      ID
+	endpointID     ID
+	timestamp      time.Time
+	status         SendAttemptStatus
+	response       string // TODO: make this value-object
+	statusCode     StatusCode
+	requestHeaders Headers
 }
 
 func NewMessageSendAttempt(
 	endpointID, messageID ID,
 	response string,
 	statusCode StatusCode,
-	headers Headers,
+	requestHeaders Headers,
 ) (*MessageSendAttempt, error) {
 	if endpointID.IsEmpty() {
 		return nil, errors.New("endpointURL cannot be empty")
@@ -59,14 +59,14 @@ func NewMessageSendAttempt(
 	}
 
 	return &MessageSendAttempt{
-		id:         NewID(),
-		messageID:  messageID,
-		endpointID: endpointID,
-		timestamp:  time.Now().UTC(),
-		status:     status,
-		response:   response,
-		statusCode: statusCode,
-		headers:    headers,
+		id:             NewID(),
+		messageID:      messageID,
+		endpointID:     endpointID,
+		timestamp:      time.Now().UTC(),
+		status:         status,
+		response:       response,
+		statusCode:     statusCode,
+		requestHeaders: requestHeaders,
 	}, nil
 }
 
@@ -98,6 +98,6 @@ func (m *MessageSendAttempt) StatusCode() StatusCode {
 	return m.statusCode
 }
 
-func (m *MessageSendAttempt) Headers() Headers {
-	return m.headers
+func (m *MessageSendAttempt) RequestHeaders() Headers {
+	return m.requestHeaders
 }

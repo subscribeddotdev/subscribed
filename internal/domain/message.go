@@ -72,30 +72,40 @@ func (m *Message) SendAttempts() []MessageSendAttempt {
 	return m.sendAttempts
 }
 
-type MessageSendAttempt struct {
-	timestamp  time.Time
-	status     string
-	response   string
-	statusCode int
-	headers    map[string]string
-}
+func UnMarshallMessage(
+	id,
+	eventTypeID,
+	applicationID,
+	orgID string,
+	sentAt time.Time,
+	payload string,
+) (*Message, error) {
+	dID, err := NewIdFromString(id)
+	if err != nil {
+		return nil, err
+	}
 
-func (m *MessageSendAttempt) Timestamp() time.Time {
-	return m.timestamp
-}
+	dEventTypeID, err := NewIdFromString(eventTypeID)
+	if err != nil {
+		return nil, err
+	}
 
-func (m *MessageSendAttempt) Status() string {
-	return m.status
-}
+	dApplicationID, err := NewIdFromString(applicationID)
+	if err != nil {
+		return nil, err
+	}
 
-func (m *MessageSendAttempt) Response() string {
-	return m.response
-}
+	dOrgID, err := NewIdFromString(orgID)
+	if err != nil {
+		return nil, err
+	}
 
-func (m *MessageSendAttempt) StatusCode() int {
-	return m.statusCode
-}
-
-func (m *MessageSendAttempt) Headers() map[string]string {
-	return m.headers
+	return &Message{
+		id:            dID,
+		eventTypeID:   dEventTypeID,
+		applicationID: dApplicationID,
+		orgID:         dOrgID,
+		sentAt:        sentAt,
+		payload:       payload,
+	}, nil
 }

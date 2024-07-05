@@ -4,23 +4,25 @@
 package models
 
 var TableNames = struct {
-	APIKeys            string
-	Applications       string
-	EndpointEventTypes string
-	Endpoints          string
-	Environments       string
-	EventTypes         string
-	Members            string
-	Messages           string
-	Organizations      string
+	APIKeys             string
+	Applications        string
+	EndpointEventTypes  string
+	Endpoints           string
+	Environments        string
+	EventTypes          string
+	Members             string
+	MessageSendAttempts string
+	Messages            string
+	Organizations       string
 }{
-	APIKeys:            "api_keys",
-	Applications:       "applications",
-	EndpointEventTypes: "endpoint_event_types",
-	Endpoints:          "endpoints",
-	Environments:       "environments",
-	EventTypes:         "event_types",
-	Members:            "members",
-	Messages:           "messages",
-	Organizations:      "organizations",
+	APIKeys:             "api_keys",
+	Applications:        "applications",
+	EndpointEventTypes:  "endpoint_event_types",
+	Endpoints:           "endpoints",
+	Environments:        "environments",
+	EventTypes:          "event_types",
+	Members:             "members",
+	MessageSendAttempts: "message_send_attempts",
+	Messages:            "messages",
+	Organizations:       "organizations",
 }

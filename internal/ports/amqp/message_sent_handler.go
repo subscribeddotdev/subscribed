@@ -26,9 +26,11 @@ func (h MessageSentHandler) Handle(m *message.Message) error {
 	var payload events.MessageSent
 	err := json.Unmarshal(m.Payload, &payload)
 	if err != nil {
-		return err
+		return fmt.Errorf("error unmarshalling event '%s': %v", command.MessageSentEvent, err)
 	}
 
-	fmt.Println("### --->", string(m.Payload))
-	return nil
+	return h.application.Command.CallWebhookEndpoint.Execute(m.Context(), command.CallWebhookEndpoint{
+		EndpointID: payload.EndpointId,
+		MessageID:  payload.MessageId,
+	})
 }

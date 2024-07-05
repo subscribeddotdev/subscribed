@@ -144,17 +144,20 @@ var EndpointWhere = struct {
 
 // EndpointRels is where relationship names are stored.
 var EndpointRels = struct {
-	Application string
-	EventTypes  string
+	Application         string
+	EventTypes          string
+	MessageSendAttempts string
 }{
-	Application: "Application",
-	EventTypes:  "EventTypes",
+	Application:         "Application",
+	EventTypes:          "EventTypes",
+	MessageSendAttempts: "MessageSendAttempts",
 }
 
 // endpointR is where relationships are stored.
 type endpointR struct {
-	Application *Application   `boil:"Application" json:"Application" toml:"Application" yaml:"Application"`
-	EventTypes  EventTypeSlice `boil:"EventTypes" json:"EventTypes" toml:"EventTypes" yaml:"EventTypes"`
+	Application         *Application            `boil:"Application" json:"Application" toml:"Application" yaml:"Application"`
+	EventTypes          EventTypeSlice          `boil:"EventTypes" json:"EventTypes" toml:"EventTypes" yaml:"EventTypes"`
+	MessageSendAttempts MessageSendAttemptSlice `boil:"MessageSendAttempts" json:"MessageSendAttempts" toml:"MessageSendAttempts" yaml:"MessageSendAttempts"`
 }
 
 // NewStruct creates a new relationship struct
@@ -174,6 +177,13 @@ func (r *endpointR) GetEventTypes() EventTypeSlice {
 		return nil
 	}
 	return r.EventTypes
+}
+
+func (r *endpointR) GetMessageSendAttempts() MessageSendAttemptSlice {
+	if r == nil {
+		return nil
+	}
+	return r.MessageSendAttempts
 }
 
 // endpointL is where Load methods for each relationship are stored.
@@ -491,6 +501,20 @@ func (o *Endpoint) EventTypes(mods ...qm.QueryMod) eventTypeQuery {
 	return EventTypes(queryMods...)
 }
 
+// MessageSendAttempts retrieves all the message_send_attempt's MessageSendAttempts with an executor.
+func (o *Endpoint) MessageSendAttempts(mods ...qm.QueryMod) messageSendAttemptQuery {
+	var queryMods []qm.QueryMod
+	if len(mods) != 0 {
+		queryMods = append(queryMods, mods...)
+	}
+
+	queryMods = append(queryMods,
+		qm.Where("\"message_send_attempts\".\"endpoint_id\"=?", o.ID),
+	)
+
+	return MessageSendAttempts(queryMods...)
+}
+
 // LoadApplication allows an eager lookup of values, cached into the
 // loaded structs of the objects. This is for an N-1 relationship.
 func (endpointL) LoadApplication(ctx context.Context, e boil.ContextExecutor, singular bool, maybeEndpoint interface{}, mods queries.Applicator) error {
@@ -742,6 +766,120 @@ func (endpointL) LoadEventTypes(ctx context.Context, e boil.ContextExecutor, sin
 	return nil
 }
 
+// LoadMessageSendAttempts allows an eager lookup of values, cached into the
+// loaded structs of the objects. This is for a 1-M or N-M relationship.
+func (endpointL) LoadMessageSendAttempts(ctx context.Context, e boil.ContextExecutor, singular bool, maybeEndpoint interface{}, mods queries.Applicator) error {
+	var slice []*Endpoint
+	var object *Endpoint
+
+	if singular {
+		var ok bool
+		object, ok = maybeEndpoint.(*Endpoint)
+		if !ok {
+			object = new(Endpoint)
+			ok = queries.SetFromEmbeddedStruct(&object, &maybeEndpoint)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeEndpoint))
+			}
+		}
+	} else {
+		s, ok := maybeEndpoint.(*[]*Endpoint)
+		if ok {
+			slice = *s
+		} else {
+			ok = queries.SetFromEmbeddedStruct(&slice, maybeEndpoint)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeEndpoint))
+			}
+		}
+	}
+
+	args := make([]interface{}, 0, 1)
+	if singular {
+		if object.R == nil {
+			object.R = &endpointR{}
+		}
+		args = append(args, object.ID)
+	} else {
+	Outer:
+		for _, obj := range slice {
+			if obj.R == nil {
+				obj.R = &endpointR{}
+			}
+
+			for _, a := range args {
+				if a == obj.ID {
+					continue Outer
+				}
+			}
+
+			args = append(args, obj.ID)
+		}
+	}
+
+	if len(args) == 0 {
+		return nil
+	}
+
+	query := NewQuery(
+		qm.From(`message_send_attempts`),
+		qm.WhereIn(`message_send_attempts.endpoint_id in ?`, args...),
+	)
+	if mods != nil {
+		mods.Apply(query)
+	}
+
+	results, err := query.QueryContext(ctx, e)
+	if err != nil {
+		return errors.Wrap(err, "failed to eager load message_send_attempts")
+	}
+
+	var resultSlice []*MessageSendAttempt
+	if err = queries.Bind(results, &resultSlice); err != nil {
+		return errors.Wrap(err, "failed to bind eager loaded slice message_send_attempts")
+	}
+
+	if err = results.Close(); err != nil {
+		return errors.Wrap(err, "failed to close results in eager load on message_send_attempts")
+	}
+	if err = results.Err(); err != nil {
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for message_send_attempts")
+	}
+
+	if len(messageSendAttemptAfterSelectHooks) != 0 {
+		for _, obj := range resultSlice {
+			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
+				return err
+			}
+		}
+	}
+	if singular {
+		object.R.MessageSendAttempts = resultSlice
+		for _, foreign := range resultSlice {
+			if foreign.R == nil {
+				foreign.R = &messageSendAttemptR{}
+			}
+			foreign.R.Endpoint = object
+		}
+		return nil
+	}
+
+	for _, foreign := range resultSlice {
+		for _, local := range slice {
+			if local.ID == foreign.EndpointID {
+				local.R.MessageSendAttempts = append(local.R.MessageSendAttempts, foreign)
+				if foreign.R == nil {
+					foreign.R = &messageSendAttemptR{}
+				}
+				foreign.R.Endpoint = local
+				break
+			}
+		}
+	}
+
+	return nil
+}
+
 // SetApplication of the endpoint to the related item.
 // Sets o.R.Application to related.
 // Adds o to related.R.Endpoints.
@@ -932,6 +1070,59 @@ func removeEventTypesFromEndpointsSlice(o *Endpoint, related []*EventType) {
 			break
 		}
 	}
+}
+
+// AddMessageSendAttempts adds the given related objects to the existing relationships
+// of the endpoint, optionally inserting them as new records.
+// Appends related to o.R.MessageSendAttempts.
+// Sets related.R.Endpoint appropriately.
+func (o *Endpoint) AddMessageSendAttempts(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*MessageSendAttempt) error {
+	var err error
+	for _, rel := range related {
+		if insert {
+			rel.EndpointID = o.ID
+			if err = rel.Insert(ctx, exec, boil.Infer()); err != nil {
+				return errors.Wrap(err, "failed to insert into foreign table")
+			}
+		} else {
+			updateQuery := fmt.Sprintf(
+				"UPDATE \"message_send_attempts\" SET %s WHERE %s",
+				strmangle.SetParamNames("\"", "\"", 1, []string{"endpoint_id"}),
+				strmangle.WhereClause("\"", "\"", 2, messageSendAttemptPrimaryKeyColumns),
+			)
+			values := []interface{}{o.ID, rel.ID}
+
+			if boil.IsDebug(ctx) {
+				writer := boil.DebugWriterFrom(ctx)
+				fmt.Fprintln(writer, updateQuery)
+				fmt.Fprintln(writer, values)
+			}
+			if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
+				return errors.Wrap(err, "failed to update foreign table")
+			}
+
+			rel.EndpointID = o.ID
+		}
+	}
+
+	if o.R == nil {
+		o.R = &endpointR{
+			MessageSendAttempts: related,
+		}
+	} else {
+		o.R.MessageSendAttempts = append(o.R.MessageSendAttempts, related...)
+	}
+
+	for _, rel := range related {
+		if rel.R == nil {
+			rel.R = &messageSendAttemptR{
+				Endpoint: o,
+			}
+		} else {
+			rel.R.Endpoint = o
+		}
+	}
+	return nil
 }
 
 // Endpoints retrieves all the records using an executor.

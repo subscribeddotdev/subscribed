@@ -70,10 +70,26 @@ func (o EndpointRepository) ByEventTypeIdAndAppID(
 	return mapRowsToDomainEndpoints(model.R.Endpoints, appID)
 }
 
+func (o EndpointRepository) ByID(ctx context.Context, id domain.ID) (*domain.Endpoint, error) {
+	model, err := models.FindEndpoint(ctx, o.db, id.String())
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, domain.ErrEndpointNotFound
+	}
+	if err != nil {
+		return nil, fmt.Errorf("error querying endpoint by id '%s': %v", id.String(), err)
+	}
+
+	return mapRowToDomainEndpoint(model)
+}
+
 func mapRowToDomainEndpoint(row *models.Endpoint) (*domain.Endpoint, error) {
-	eventTypeIDs := make([]string, len(row.R.EventTypes))
-	for j, eventType := range row.R.EventTypes {
-		eventTypeIDs[j] = eventType.ID
+	var eventTypeIDs []string
+
+	if row.R != nil && row.R.EventTypes != nil {
+		eventTypeIDs = make([]string, len(row.R.EventTypes))
+		for j, eventType := range row.R.EventTypes {
+			eventTypeIDs[j] = eventType.ID
+		}
 	}
 
 	endpoint, err := domain.UnMarshallEndpoint(

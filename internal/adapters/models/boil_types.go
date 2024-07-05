@@ -63,3 +63,16 @@ func AllEnvtype() []string {
 		EnvtypeDevelopment,
 	}
 }
+
+// Enum values for Sendattemptstatus
+const (
+	SendattemptstatusFailed    string = "failed"
+	SendattemptstatusSucceeded string = "succeeded"
+)
+
+func AllSendattemptstatus() []string {
+	return []string{
+		SendattemptstatusFailed,
+		SendattemptstatusSucceeded,
+	}
+}

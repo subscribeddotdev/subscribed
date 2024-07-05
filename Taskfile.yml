@@ -55,19 +55,20 @@ tasks:
 
   test:all:
     cmds:
+      - go clean -testcache
       - task wait-for -- 8080
+      - task wait-for -- 8090
+      - task wait-for -- 8091
       - task test
       - task test:components
 
   test:
     cmds:
-      - go clean -testcache
-      - go test -v ./internal/...
+      - go test -v -race ./internal/...
 
   test:components:
     cmds:
-      - go clean -testcache
-      - go test -v ./tests/components/...
+      - go test -v -race ./tests/components/...
 
   lint:docker:
     cmds:

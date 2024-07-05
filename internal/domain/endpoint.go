@@ -1,18 +1,10 @@
 package domain
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/friendsofgo/errors"
 )
-
-// SigningSecret TODO: pending implementation
-type SigningSecret string
-
-func (s SigningSecret) String() string {
-	return string(s)
-}
 
 type Headers map[string]string
 
@@ -42,6 +34,11 @@ func NewEndpoint(
 		return nil, errors.New("applicationID cannot be empty")
 	}
 
+	signingSecret, err := NewSigningSecret()
+	if err != nil {
+		return nil, err
+	}
+
 	return &Endpoint{
 		id:            NewID(),
 		url:           endpointURL,
@@ -50,7 +47,7 @@ func NewEndpoint(
 		eventTypeIDs:  eventTypeIDs,
 		createdAt:     time.Now().UTC(),
 		updatedAt:     time.Now().UTC(),
-		signingSecret: SigningSecret(fmt.Sprintf("whsec_%s", NewID())), //TODO: replace this with a hashed secret
+		signingSecret: signingSecret,
 		headers:       nil,
 	}, nil
 }
@@ -127,6 +124,11 @@ func UnMarshallEndpoint(
 		dEventTypeIDs[i] = eID
 	}
 
+	ss, err := UnMarshallSigningSecret(signingSecret)
+	if err != nil {
+		return nil, err
+	}
+
 	return &Endpoint{
 		id:            dID,
 		url:           dEndpointURL,
@@ -134,7 +136,7 @@ func UnMarshallEndpoint(
 		description:   description,
 		headers:       headers,
 		eventTypeIDs:  dEventTypeIDs,
-		signingSecret: SigningSecret(signingSecret),
+		signingSecret: ss,
 		createdAt:     createdAt,
 		updatedAt:     updatedAt,
 	}, nil

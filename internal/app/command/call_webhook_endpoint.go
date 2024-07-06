@@ -52,7 +52,7 @@ func (c CallWebhookEndpointHandler) Execute(ctx context.Context, cmd CallWebhook
 			return fmt.Errorf("error querying the endpoint by id '%s': %v", cmd.EndpointID, err)
 		}
 
-		message, err := adapters.MessageRepository.ByID(ctx, messageID)
+		message, err := adapters.MessageRepository.ByID(ctx, messageID.ToMessageID())
 		if err != nil {
 			return fmt.Errorf("error querying message by id '%s': %v", cmd.MessageID, err)
 		}

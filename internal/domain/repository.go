@@ -34,7 +34,7 @@ type EndpointRepository interface {
 }
 
 type MessageRepository interface {
-	ByID(ctx context.Context, id ID) (*Message, error)
+	ByID(ctx context.Context, id MessageID) (*Message, error)
 	Insert(ctx context.Context, message *Message) error
 	SaveMessageSendAttempt(ctx context.Context, attempt *MessageSendAttempt) error
 }

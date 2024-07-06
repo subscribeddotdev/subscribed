@@ -36,7 +36,7 @@ func (o MessageRepository) Insert(ctx context.Context, message *domain.Message) 
 	return model.Insert(ctx, o.db, boil.Infer())
 }
 
-func (o MessageRepository) ByID(ctx context.Context, id domain.ID) (*domain.Message, error) {
+func (o MessageRepository) ByID(ctx context.Context, id domain.MessageID) (*domain.Message, error) {
 	model, err := models.FindMessage(ctx, o.db, id.String())
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, domain.ErrMessageNotFound
@@ -49,8 +49,8 @@ func (o MessageRepository) ByID(ctx context.Context, id domain.ID) (*domain.Mess
 }
 
 func (o MessageRepository) SaveMessageSendAttempt(ctx context.Context, attempt *domain.MessageSendAttempt) error {
-	var reqHeaders []byte
 	var err error
+	var reqHeaders []byte
 
 	if attempt.RequestHeaders() != nil {
 		reqHeaders, err = json.Marshal(attempt.RequestHeaders())

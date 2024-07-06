@@ -90,7 +90,7 @@ func UnMarshallMessage(
 	sentAt time.Time,
 	payload string,
 ) (*Message, error) {
-	dID, err := NewIdFromString(id)
+	dID, err := NewIdFromStringWithPrefix(id)
 	if err != nil {
 		return nil, err
 	}

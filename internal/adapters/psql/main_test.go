@@ -19,6 +19,7 @@ var (
 	endpointRepo     *psql.EndpointRepository
 	organizationRepo *psql.OrganizationRepository
 	apiKeyRepo       *psql.ApiKeyRepository
+	msgRepo          *psql.MessageRepository
 )
 
 // Set up file
@@ -43,6 +44,7 @@ func TestMain(m *testing.M) {
 	endpointRepo = psql.NewEndpointRepository(db)
 	organizationRepo = psql.NewOrganizationRepository(db)
 	apiKeyRepo = psql.NewApiKeyRepository(db)
+	msgRepo = psql.NewMessageRepository(db)
 
 	os.Exit(m.Run())
 }

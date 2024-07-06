@@ -6,8 +6,18 @@ import (
 	"time"
 )
 
+type MessageID string
+
+func NewMessageID() MessageID {
+	return MessageID(NewID().WithPrefix("msg").String())
+}
+
+func (i MessageID) String() string {
+	return string(i)
+}
+
 type Message struct {
-	id            ID
+	id            MessageID
 	eventTypeID   ID
 	applicationID ID
 	orgID         ID
@@ -34,7 +44,7 @@ func NewMessage(eventTypeID, orgID, applicationID ID, payload string) (*Message,
 	}
 
 	return &Message{
-		id:            NewID(),
+		id:            NewMessageID(),
 		orgID:         orgID,
 		eventTypeID:   eventTypeID,
 		applicationID: applicationID,
@@ -44,7 +54,7 @@ func NewMessage(eventTypeID, orgID, applicationID ID, payload string) (*Message,
 	}, nil
 }
 
-func (m *Message) Id() ID {
+func (m *Message) Id() MessageID {
 	return m.id
 }
 
@@ -101,7 +111,7 @@ func UnMarshallMessage(
 	}
 
 	return &Message{
-		id:            dID,
+		id:            MessageID(dID),
 		eventTypeID:   dEventTypeID,
 		applicationID: dApplicationID,
 		orgID:         dOrgID,

@@ -39,7 +39,7 @@ func TestNewEndpoint(t *testing.T) {
 		{
 			name:          "error_invalid_application_id",
 			expectedErr:   "applicationID cannot be empty",
-			applicationID: domain.ID{},
+			applicationID: domain.ID(""),
 			endpointUrl:   mustEndpointURL(t, gofakeit.URL()),
 			description:   gofakeit.Sentence(gofakeit.IntRange(5, 10)),
 			eventTypeIDs:  []domain.ID{domain.NewID()},

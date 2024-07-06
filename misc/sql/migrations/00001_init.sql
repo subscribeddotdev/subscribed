@@ -74,7 +74,7 @@ CREATE TABLE endpoint_event_types (
 );
 
 CREATE TABLE messages (
-    id VARCHAR(26) NOT NULL PRIMARY KEY,
+    id TEXT NOT NULL PRIMARY KEY,
     org_id VARCHAR(26) NOT NULL,
     application_id VARCHAR(26) NOT NULL,
     event_type_id VARCHAR(26) NOT NULL,
@@ -90,7 +90,7 @@ CREATE TYPE SendAttemptStatus AS ENUM('failed', 'succeeded');
 
 CREATE TABLE message_send_attempts (
     id VARCHAR(26) NOT NULL PRIMARY KEY,
-    message_id VARCHAR(26) NOT NULL,
+    message_id TEXT NOT NULL,
     endpoint_id VARCHAR(26) NOT NULL,
     attempted_at TIMESTAMPTZ NOT NULL DEFAULT now(),
     status SendAttemptStatus NOT NULL,

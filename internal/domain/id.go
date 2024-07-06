@@ -1,32 +1,35 @@
 package domain
 
-import "github.com/oklog/ulid/v2"
+import (
+	"fmt"
 
-type ID struct {
-	value ulid.ULID
-}
+	"github.com/oklog/ulid/v2"
+)
+
+type ID string
 
 func NewID() ID {
-	return ID{
-		value: ulid.Make(),
-	}
+	return ID(ulid.Make().String())
 }
 
-func NewIdFromString(id string) (ID, error) {
-	value, err := ulid.Parse(id)
+func (i ID) WithPrefix(prefix string) ID {
+	id := ID(fmt.Sprintf("%s_%s", prefix, i))
+	return id
+}
+
+func NewIdFromString(value string) (ID, error) {
+	parsedID, err := ulid.Parse(value)
 	if err != nil {
-		return ID{}, err
+		return "", err
 	}
 
-	return ID{
-		value: value,
-	}, nil
+	return ID(parsedID.String()), nil
 }
 
 func (i ID) String() string {
-	return i.value.String()
+	return string(i)
 }
 
 func (i ID) IsEmpty() bool {
-	return i.value.String() == "" || i.value.String() == "00000000000000000000000000"
+	return string(i) == ""
 }

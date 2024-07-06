@@ -36,7 +36,7 @@ func TestNewEnvironment(t *testing.T) {
 			name:        "error_empty_or_invalid_org_id",
 			expectedErr: "orgID cannot be empty",
 			envName:     "Production",
-			orgID:       domain.ID{},
+			orgID:       domain.ID(""),
 			envType:     domain.EnvTypeProduction,
 		},
 		{

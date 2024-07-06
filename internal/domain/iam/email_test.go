@@ -34,7 +34,7 @@ func TestNewEmail(t *testing.T) {
 		{
 			name:            "error_empty_organization_id",
 			expectedErr:     "organizationID cannot be empty",
-			organizationID:  domain.ID{},
+			organizationID:  domain.ID(""),
 			loginProviderId: iam.LoginProviderID(gofakeit.UUID()),
 			firstName:       gofakeit.FirstName(),
 			lastName:        gofakeit.LastName(),

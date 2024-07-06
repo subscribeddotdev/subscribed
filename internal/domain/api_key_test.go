@@ -53,7 +53,7 @@ func TestNewApiKey(t *testing.T) {
 			name:         "error_empty_or_invalid_env_id",
 			expectedErr:  "envID cannot be empty",
 			apiKeyName:   gofakeit.AppName(),
-			envID:        domain.ID{},
+			envID:        domain.ID(""),
 			expiresAt:    nil,
 			isTestApiKey: false,
 			orgID:        domain.NewID(),

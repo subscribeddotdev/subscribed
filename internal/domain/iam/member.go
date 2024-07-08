@@ -23,8 +23,18 @@ func (i LoginProviderID) Validate() error {
 	return nil
 }
 
+type MemberID string
+
+func (i MemberID) String() string {
+	return string(i)
+}
+
+func NewMemberID() MemberID {
+	return MemberID(domain.NewID().WithPrefix("mem"))
+}
+
 type Member struct {
-	id              domain.ID
+	id              MemberID
 	organizationID  OrgID
 	loginProviderId LoginProviderID
 	firstName       string
@@ -53,7 +63,7 @@ func NewMember(
 	}
 
 	return &Member{
-		id:              domain.NewID(),
+		id:              NewMemberID(),
 		organizationID:  organizationID,
 		loginProviderId: loginProviderId,
 		firstName:       firstName,
@@ -63,7 +73,7 @@ func NewMember(
 	}, nil
 }
 
-func (m *Member) Id() domain.ID {
+func (m *Member) ID() MemberID {
 	return m.id
 }
 
@@ -91,13 +101,14 @@ func (m *Member) CreatedAt() time.Time {
 	return m.createdAt
 }
 
-func UnMarshallMember(id string, orgID OrgID, lpi LoginProviderID, firstName, lastName, email string, createdAt time.Time) (*Member, error) {
-	mID, err := domain.NewIdFromString(id)
-	if err != nil {
-		return nil, err
-	}
-
-	if err = lpi.Validate(); err != nil {
+func UnMarshallMember(
+	id MemberID,
+	orgID OrgID,
+	lpi LoginProviderID,
+	firstName, lastName, email string,
+	createdAt time.Time,
+) (*Member, error) {
+	if err := lpi.Validate(); err != nil {
 		return nil, err
 	}
 
@@ -111,7 +122,7 @@ func UnMarshallMember(id string, orgID OrgID, lpi LoginProviderID, firstName, la
 	}
 
 	return &Member{
-		id:              mID,
+		id:              id,
 		organizationID:  orgID,
 		loginProviderId: lpi,
 		firstName:       firstName,

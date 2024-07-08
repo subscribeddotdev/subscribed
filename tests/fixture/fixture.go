@@ -45,7 +45,7 @@ func (f *Factory) NewMember() *Member {
 	return &Member{
 		factory: f,
 		model: models.Member{
-			ID:              domain.NewID().String(),
+			ID:              iam.NewMemberID().String(),
 			FirstName:       null.StringFrom(gofakeit.FirstName()),
 			LastName:        null.StringFrom(gofakeit.LastName()),
 			Email:           gofakeit.Email(),

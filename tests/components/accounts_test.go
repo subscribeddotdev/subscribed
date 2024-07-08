@@ -10,6 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/subscribeddotdev/subscribed-backend/internal/adapters/models"
+	"github.com/subscribeddotdev/subscribed-backend/internal/domain"
 	"github.com/subscribeddotdev/subscribed-backend/tests/client"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
@@ -24,7 +25,7 @@ func TestAccountCreationWebhook(t *testing.T) {
 	}
 	reqBody := client.CreateAccountRequest{
 		Data: client.ClerkWebhookUserCreatedData{
-			Id:        gofakeit.UUID(),
+			Id:        fmt.Sprintf("user_%s", domain.NewID().String()),
 			FirstName: toPtr(gofakeit.FirstName()),
 			LastName:  toPtr(gofakeit.FirstName()),
 			EmailAddresses: []client.ClerkWebhookEmailAddress{

@@ -7,8 +7,18 @@ import (
 	"github.com/subscribeddotdev/subscribed-backend/internal/domain"
 )
 
+type OrgID string
+
+func (i OrgID) String() string {
+	return string(i)
+}
+
+func NewOrgID() OrgID {
+	return OrgID(domain.NewID().WithPrefix("org"))
+}
+
 type Organization struct {
-	id         domain.ID
+	id         OrgID
 	createdAt  time.Time
 	disabledAt *time.Time
 	users      []Member
@@ -16,18 +26,18 @@ type Organization struct {
 
 func NewOrganization() *Organization {
 	return &Organization{
-		id:         domain.NewID(),
+		id:         NewOrgID(),
 		createdAt:  time.Now(),
 		disabledAt: nil,
 	}
 }
 
 func MarshallToOrganization(
-	id domain.ID,
+	id OrgID,
 	createdAt time.Time,
 	disabledAt *time.Time,
 ) (*Organization, error) {
-	if id.IsEmpty() {
+	if id.String() == "" {
 		return nil, errors.New("id cannot be empty")
 	}
 
@@ -47,7 +57,7 @@ func MarshallToOrganization(
 	}, nil
 }
 
-func (o *Organization) Id() domain.ID {
+func (o *Organization) ID() OrgID {
 	return o.id
 }
 

@@ -1,6 +1,7 @@
 package psql_test
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/brianvoe/gofakeit/v6"
@@ -9,6 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/subscribeddotdev/subscribed-backend/internal/adapters/models"
 	"github.com/subscribeddotdev/subscribed-backend/internal/adapters/psql"
+	"github.com/subscribeddotdev/subscribed-backend/internal/domain"
 	"github.com/subscribeddotdev/subscribed-backend/internal/domain/iam"
 	"github.com/subscribeddotdev/subscribed-backend/tests"
 	"github.com/subscribeddotdev/subscribed-backend/tests/fixture"
@@ -31,7 +33,7 @@ func TestMemberRepository_Lifecycle(t *testing.T) {
 		exists, err := repo.ExistsByOr(
 			ctx,
 			tests.MustEmail(t, gofakeit.Email()),
-			iam.LoginProviderID(gofakeit.UUID()),
+			fixtureLoginProviderID(),
 		)
 		require.NoError(t, err)
 		assert.False(t, exists)
@@ -39,7 +41,7 @@ func TestMemberRepository_Lifecycle(t *testing.T) {
 
 	t.Run("find_member_by_email", func(t *testing.T) {
 		// When
-		exists, err := repo.ExistsByOr(ctx, member.Email(), iam.LoginProviderID(gofakeit.UUID()))
+		exists, err := repo.ExistsByOr(ctx, member.Email(), fixtureLoginProviderID())
 
 		// Then
 		require.NoError(t, err)
@@ -62,4 +64,8 @@ func assertMemberExists(t *testing.T, loginProviderId string) {
 	).Exists(ctx, db)
 	require.NoError(t, err)
 	assert.True(t, exists)
+}
+
+func fixtureLoginProviderID() iam.LoginProviderID {
+	return iam.LoginProviderID(fmt.Sprintf("user_%s", domain.NewID().String()))
 }

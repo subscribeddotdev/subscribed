@@ -9,15 +9,111 @@ import (
 	"time"
 )
 
+var (
+	ErrApiKeyIsExpired = errors.New("api key is expired")
+	base64Encoder      = base64.NewEncoding("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_.")
+)
+
+type ApiKey struct {
+	envID     EnvironmentID
+	orgID     string
+	name      string
+	secretKey SecretKey
+	createdAt time.Time
+	expiresAt *time.Time
+}
+
+func NewApiKey(name string, orgID string, envID EnvironmentID, expiresAt *time.Time, isTestApiKey bool) (*ApiKey, error) {
+	name = strings.TrimSpace(name)
+	if name == "" {
+		return nil, errors.New("name cannot be empty")
+	}
+
+	if orgID == "" {
+		return nil, errors.New("orgID cannot be empty")
+	}
+
+	if envID == "" {
+		return nil, errors.New("envID cannot be empty")
+	}
+
+	if expiresAt != nil && expiresAt.Before(time.Now()) {
+		return nil, fmt.Errorf("expiresAt cannot be set in the past")
+	}
+
+	sk, err := newSecretKey(isTestApiKey)
+	if err != nil {
+		return nil, fmt.Errorf("error while creating the secret key: %v", err)
+	}
+
+	return &ApiKey{
+		secretKey: sk,
+		name:      name,
+		envID:     envID,
+		orgID:     orgID,
+		createdAt: time.Now().UTC(),
+		expiresAt: expiresAt,
+	}, nil
+}
+
+func (a *ApiKey) EnvID() EnvironmentID {
+	return a.envID
+}
+
+func (a *ApiKey) OrgID() string {
+	return a.orgID
+}
+
+func (a *ApiKey) Name() string {
+	return a.name
+}
+
+func (a *ApiKey) SecretKey() SecretKey {
+	return a.secretKey
+}
+
+func (a *ApiKey) CreatedAt() time.Time {
+	return a.createdAt
+}
+
+func (a *ApiKey) ExpiresAt() *time.Time {
+	return a.expiresAt
+}
+
+func (a *ApiKey) IsExpired() bool {
+	if a.expiresAt == nil {
+		return false
+	}
+
+	return a.expiresAt.UTC().Before(time.Now().UTC())
+}
+
+func UnMarshallApiKey(
+	envID EnvironmentID,
+	orgID,
+	name string,
+	secretKey SecretKey,
+	createdAt time.Time,
+	expiresAt *time.Time,
+) (*ApiKey, error) {
+	return &ApiKey{
+		orgID:     orgID,
+		envID:     envID,
+		name:      name,
+		secretKey: secretKey,
+		createdAt: createdAt,
+		expiresAt: expiresAt,
+	}, nil
+}
+
+//
+// Secret Key
+//
+
 type SecretKey struct {
 	prefix string
 	hash   string
 }
-
-var (
-	base64Encoder      = base64.NewEncoding("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_.")
-	ErrApiKeyIsExpired = errors.New("api key is expired")
-)
 
 func newSecretKey(isTestKey bool) (SecretKey, error) {
 	prefix := "sbs"
@@ -67,107 +163,5 @@ func UnMarshallSecretKey(value string) (SecretKey, error) {
 	return SecretKey{
 		prefix: fmt.Sprintf("%s_%s", chunks[0], chunks[1]),
 		hash:   hash,
-	}, nil
-}
-
-type ApiKey struct {
-	envID     ID
-	orgID     ID
-	name      string
-	secretKey SecretKey
-	createdAt time.Time
-	expiresAt *time.Time
-}
-
-func NewApiKey(name string, orgID, envID ID, expiresAt *time.Time, isTestApiKey bool) (*ApiKey, error) {
-	name = strings.TrimSpace(name)
-	if name == "" {
-		return nil, errors.New("name cannot be empty")
-	}
-
-	if orgID.IsEmpty() {
-		return nil, errors.New("orgID cannot be empty")
-	}
-
-	if envID.IsEmpty() {
-		return nil, errors.New("envID cannot be empty")
-	}
-
-	if expiresAt != nil && expiresAt.Before(time.Now()) {
-		return nil, fmt.Errorf("expiresAt cannot be set in the past")
-	}
-
-	sk, err := newSecretKey(isTestApiKey)
-	if err != nil {
-		return nil, fmt.Errorf("error while creating the secret key: %v", err)
-	}
-
-	return &ApiKey{
-		secretKey: sk,
-		name:      name,
-		envID:     envID,
-		orgID:     orgID,
-		createdAt: time.Now().UTC(),
-		expiresAt: expiresAt,
-	}, nil
-}
-
-func (a *ApiKey) EnvID() ID {
-	return a.envID
-}
-
-func (a *ApiKey) OrgID() ID {
-	return a.orgID
-}
-
-func (a *ApiKey) Name() string {
-	return a.name
-}
-
-func (a *ApiKey) SecretKey() SecretKey {
-	return a.secretKey
-}
-
-func (a *ApiKey) CreatedAt() time.Time {
-	return a.createdAt
-}
-
-func (a *ApiKey) ExpiresAt() *time.Time {
-	return a.expiresAt
-}
-
-func (a *ApiKey) IsExpired() bool {
-	if a.expiresAt == nil {
-		return false
-	}
-
-	return a.expiresAt.UTC().Before(time.Now().UTC())
-}
-
-func UnMarshallApiKey(
-	envID,
-	orgID,
-	name string,
-	secretKey SecretKey,
-	createdAt time.Time,
-	expiresAt *time.Time,
-) (*ApiKey, error) {
-	dEnvID, err := NewIdFromString(envID)
-	if err != nil {
-		return nil, err
-	}
-
-	dOrgID, err := NewIdFromString(orgID)
-	if err != nil {
-		return nil, err
-	}
-
-	return &ApiKey{
-		orgID:     dOrgID,
-		envID:     dEnvID,
-		name:      name,
-		secretKey: secretKey,
-		createdAt: createdAt,
-		expiresAt: expiresAt,
 	}, nil
 }

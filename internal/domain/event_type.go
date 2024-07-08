@@ -7,9 +7,19 @@ import (
 	"errors"
 )
 
+type EventTypeID string
+
+func (i EventTypeID) String() string {
+	return string(i)
+}
+
+func NewEventTypeID() EventTypeID {
+	return EventTypeID(NewID().WithPrefix("ety"))
+}
+
 type EventType struct {
-	id          ID
-	orgID       ID
+	id          EventTypeID
+	orgID       string
 	name        string
 	description string
 	//TODO: JSON http://json-schema.org
@@ -19,8 +29,8 @@ type EventType struct {
 	archivedAt    *time.Time
 }
 
-func NewEventType(orgID ID, name, description, schema, schemaExample string) (*EventType, error) {
-	if orgID.IsEmpty() {
+func NewEventType(orgID, name, description, schema, schemaExample string) (*EventType, error) {
+	if orgID == "" {
 		return nil, errors.New("orgID cannot be empty")
 	}
 
@@ -30,7 +40,7 @@ func NewEventType(orgID ID, name, description, schema, schemaExample string) (*E
 	}
 
 	return &EventType{
-		id:            NewID(),
+		id:            NewEventTypeID(),
 		orgID:         orgID,
 		name:          name,
 		description:   description,
@@ -41,11 +51,11 @@ func NewEventType(orgID ID, name, description, schema, schemaExample string) (*E
 	}, nil
 }
 
-func (e *EventType) OrgID() ID {
+func (e *EventType) OrgID() string {
 	return e.orgID
 }
 
-func (e *EventType) Id() ID {
+func (e *EventType) ID() EventTypeID {
 	return e.id
 }
 
@@ -74,7 +84,8 @@ func (e *EventType) CreatedAt() time.Time {
 }
 
 func UnMarshallEventType(
-	id, orgID ID,
+	id EventTypeID,
+	orgID string,
 	name, description, schema, schemaExample string,
 	createdAt time.Time,
 	archivedAt *time.Time,

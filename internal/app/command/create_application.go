@@ -4,11 +4,13 @@ import (
 	"context"
 
 	"github.com/subscribeddotdev/subscribed-backend/internal/domain"
+	"github.com/subscribeddotdev/subscribed-backend/internal/domain/iam"
 )
 
 type CreateApplication struct {
 	Name  string
-	OrgID domain.ID
+	OrgID iam.OrgID
+	EnvID domain.EnvironmentID
 }
 
 type CreateApplicationHandler struct {
@@ -22,7 +24,7 @@ func NewCreateApplicationHandler(repo domain.ApplicationRepository) CreateApplic
 }
 
 func (c CreateApplicationHandler) Execute(ctx context.Context, cmd CreateApplication) error {
-	application, err := domain.NewApplication(cmd.Name, cmd.OrgID)
+	application, err := domain.NewApplication(cmd.Name, cmd.EnvID)
 	if err != nil {
 		return err
 	}

@@ -18,24 +18,24 @@ func (i MessageID) String() string {
 
 type Message struct {
 	id            MessageID
-	eventTypeID   ID
-	applicationID ID
-	orgID         ID
+	eventTypeID   EventTypeID
+	applicationID ApplicationID
+	orgID         string
 	sentAt        time.Time
 	payload       string
 	sendAttempts  []MessageSendAttempt
 }
 
-func NewMessage(eventTypeID, orgID, applicationID ID, payload string) (*Message, error) {
-	if eventTypeID.IsEmpty() {
+func NewMessage(eventTypeID EventTypeID, orgID string, applicationID ApplicationID, payload string) (*Message, error) {
+	if eventTypeID.String() == "" {
 		return nil, errors.New("eventTypeID cannot be empty")
 	}
 
-	if applicationID.IsEmpty() {
+	if applicationID.String() == "" {
 		return nil, errors.New("applicationID cannot be empty")
 	}
 
-	if orgID.IsEmpty() {
+	if orgID == "" {
 		return nil, errors.New("orgID cannot be empty")
 	}
 
@@ -58,15 +58,15 @@ func (m *Message) Id() MessageID {
 	return m.id
 }
 
-func (m *Message) EventTypeID() ID {
+func (m *Message) EventTypeID() EventTypeID {
 	return m.eventTypeID
 }
 
-func (m *Message) OrgID() ID {
+func (m *Message) OrgID() string {
 	return m.orgID
 }
 
-func (m *Message) ApplicationID() ID {
+func (m *Message) ApplicationID() ApplicationID {
 	return m.applicationID
 }
 
@@ -83,38 +83,18 @@ func (m *Message) SendAttempts() []MessageSendAttempt {
 }
 
 func UnMarshallMessage(
-	id,
-	eventTypeID,
-	applicationID,
+	id MessageID,
+	eventTypeID EventTypeID,
+	applicationID ApplicationID,
 	orgID string,
 	sentAt time.Time,
 	payload string,
 ) (*Message, error) {
-	dID, err := NewIdFromStringWithPrefix(id)
-	if err != nil {
-		return nil, err
-	}
-
-	dEventTypeID, err := NewIdFromString(eventTypeID)
-	if err != nil {
-		return nil, err
-	}
-
-	dApplicationID, err := NewIdFromString(applicationID)
-	if err != nil {
-		return nil, err
-	}
-
-	dOrgID, err := NewIdFromString(orgID)
-	if err != nil {
-		return nil, err
-	}
-
 	return &Message{
-		id:            MessageID(dID),
-		eventTypeID:   dEventTypeID,
-		applicationID: dApplicationID,
-		orgID:         dOrgID,
+		id:            id,
+		eventTypeID:   eventTypeID,
+		applicationID: applicationID,
+		orgID:         orgID,
 		sentAt:        sentAt,
 		payload:       payload,
 	}, nil

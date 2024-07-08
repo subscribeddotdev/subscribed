@@ -37,7 +37,7 @@ func (s *Service) resolveApiKeyFromSecretKey(ctx context.Context, secretKey stri
 	return ak, nil
 }
 
-func (s *Service) ResolveOrgIdFromSecretKey(ctx context.Context, secretKey string) (domain.ID, error) {
+func (s *Service) ResolveOrgIdFromSecretKey(ctx context.Context, secretKey string) (iam.OrgID, error) {
 	ak, err := s.resolveApiKeyFromSecretKey(ctx, secretKey)
 	if err != nil {
 		return "", err
@@ -47,5 +47,5 @@ func (s *Service) ResolveOrgIdFromSecretKey(ctx context.Context, secretKey strin
 		return "", domain.ErrApiKeyIsExpired
 	}
 
-	return ak.OrgID(), nil
+	return iam.OrgID(ak.OrgID()), nil
 }

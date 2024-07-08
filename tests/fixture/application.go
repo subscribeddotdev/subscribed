@@ -4,7 +4,6 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/subscribeddotdev/subscribed-backend/internal/adapters/models"
 	"github.com/subscribeddotdev/subscribed-backend/internal/domain"
-	"github.com/subscribeddotdev/subscribed-backend/tests"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 )
 
@@ -33,7 +32,7 @@ func (a *Application) Save() models.Application {
 func (a *Application) NewDomainModel() *domain.Application {
 	app, err := domain.NewApplication(
 		a.model.Name,
-		tests.MustID(a.factory.t, a.model.EnvironmentID),
+		domain.EnvironmentID(a.model.EnvironmentID),
 	)
 	require.NoError(a.factory.t, err)
 	return app

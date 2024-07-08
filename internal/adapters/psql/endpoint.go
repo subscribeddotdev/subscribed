@@ -25,7 +25,7 @@ func NewEndpointRepository(db boil.ContextExecutor) *EndpointRepository {
 
 func (o EndpointRepository) Insert(ctx context.Context, endpoint *domain.Endpoint) error {
 	model := models.Endpoint{
-		ID:            endpoint.Id().String(),
+		ID:            endpoint.ID().String(),
 		ApplicationID: endpoint.ApplicationID().String(),
 		URL:           endpoint.EndpointURL().String(),
 		Description:   null.StringFrom(endpoint.Description()),
@@ -53,8 +53,8 @@ func (o EndpointRepository) Insert(ctx context.Context, endpoint *domain.Endpoin
 
 func (o EndpointRepository) ByEventTypeIdAndAppID(
 	ctx context.Context,
-	eventTypeID,
-	appID domain.ID,
+	eventTypeID domain.EventTypeID,
+	appID domain.ApplicationID,
 ) ([]*domain.Endpoint, error) {
 	model, err := models.EventTypes(
 		models.EventTypeWhere.ID.EQ(eventTypeID.String()),
@@ -70,7 +70,7 @@ func (o EndpointRepository) ByEventTypeIdAndAppID(
 	return mapRowsToDomainEndpoints(model.R.Endpoints, appID)
 }
 
-func (o EndpointRepository) ByID(ctx context.Context, id domain.ID) (*domain.Endpoint, error) {
+func (o EndpointRepository) ByID(ctx context.Context, id domain.EndpointID) (*domain.Endpoint, error) {
 	model, err := models.FindEndpoint(ctx, o.db, id.String())
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, domain.ErrEndpointNotFound
@@ -83,18 +83,18 @@ func (o EndpointRepository) ByID(ctx context.Context, id domain.ID) (*domain.End
 }
 
 func mapRowToDomainEndpoint(row *models.Endpoint) (*domain.Endpoint, error) {
-	var eventTypeIDs []string
+	var eventTypeIDs []domain.EventTypeID
 
 	if row.R != nil && row.R.EventTypes != nil {
-		eventTypeIDs = make([]string, len(row.R.EventTypes))
+		eventTypeIDs = make([]domain.EventTypeID, len(row.R.EventTypes))
 		for j, eventType := range row.R.EventTypes {
-			eventTypeIDs[j] = eventType.ID
+			eventTypeIDs[j] = domain.EventTypeID(eventType.ID)
 		}
 	}
 
 	endpoint, err := domain.UnMarshallEndpoint(
-		row.ID,
-		row.ApplicationID,
+		domain.EndpointID(row.ID),
+		domain.ApplicationID(row.ApplicationID),
 		row.URL,
 		row.Description.String,
 		nil, // TODO: implement headers and then map it
@@ -110,7 +110,7 @@ func mapRowToDomainEndpoint(row *models.Endpoint) (*domain.Endpoint, error) {
 	return endpoint, nil
 }
 
-func mapRowsToDomainEndpoints(rows []*models.Endpoint, appID domain.ID) ([]*domain.Endpoint, error) {
+func mapRowsToDomainEndpoints(rows []*models.Endpoint, appID domain.ApplicationID) ([]*domain.Endpoint, error) {
 	endpoints := make([]*domain.Endpoint, len(rows))
 	for i, row := range rows {
 		if row.ApplicationID != appID.String() {

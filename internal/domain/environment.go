@@ -7,16 +7,26 @@ import (
 	"errors"
 )
 
+type EnvironmentID string
+
+func (i EnvironmentID) String() string {
+	return string(i)
+}
+
+func NewEnvironmentID() EnvironmentID {
+	return EnvironmentID(NewID().WithPrefix("env"))
+}
+
 type Environment struct {
-	id         ID
-	orgID      ID
+	id         EnvironmentID
+	orgID      string
 	name       string
 	envType    EnvType
 	createdAt  time.Time
 	archivedAt *time.Time
 }
 
-func NewEnvironment(name string, orgID ID, envType EnvType) (*Environment, error) {
+func NewEnvironment(name string, orgID string, envType EnvType) (*Environment, error) {
 	name = strings.TrimSpace(name)
 	if name == "" {
 		return nil, errors.New("name cannot be empty")
@@ -27,12 +37,12 @@ func NewEnvironment(name string, orgID ID, envType EnvType) (*Environment, error
 		return nil, err
 	}
 
-	if orgID.IsEmpty() {
+	if orgID == "" {
 		return nil, errors.New("orgID cannot be empty")
 	}
 
 	return &Environment{
-		id:         NewID(),
+		id:         NewEnvironmentID(),
 		orgID:      orgID,
 		name:       name,
 		envType:    envType,
@@ -41,7 +51,7 @@ func NewEnvironment(name string, orgID ID, envType EnvType) (*Environment, error
 	}, nil
 }
 
-func (e *Environment) Id() ID {
+func (e *Environment) ID() EnvironmentID {
 	return e.id
 }
 
@@ -49,7 +59,7 @@ func (e *Environment) Name() string {
 	return e.name
 }
 
-func (e *Environment) OrgID() ID {
+func (e *Environment) OrgID() string {
 	return e.orgID
 }
 
@@ -66,28 +76,19 @@ func (e *Environment) Type() EnvType {
 }
 
 func UnMarshallEnvironment(
-	id, orgID, name, envType string,
+	id EnvironmentID,
+	orgID, name, envType string,
 	createdAt time.Time,
 	archivedAt *time.Time,
 ) (*Environment, error) {
-	dID, err := NewIdFromString(id)
-	if err != nil {
-		return nil, err
-	}
-
-	dOrgID, err := NewIdFromString(orgID)
-	if err != nil {
-		return nil, err
-	}
-
 	dEnvType, err := marshallToEventType(envType)
 	if err != nil {
 		return nil, err
 	}
 
 	return &Environment{
-		id:         dID,
-		orgID:      dOrgID,
+		id:         id,
+		orgID:      orgID,
 		name:       name,
 		envType:    dEnvType,
 		createdAt:  createdAt,

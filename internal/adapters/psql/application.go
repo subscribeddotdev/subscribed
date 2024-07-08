@@ -20,7 +20,7 @@ func NewApplicationRepository(db boil.ContextExecutor) *ApplicationRepository {
 
 func (o ApplicationRepository) Insert(ctx context.Context, application *domain.Application) error {
 	model := models.Application{
-		ID:            application.Id().String(),
+		ID:            application.ID().String(),
 		EnvironmentID: application.EnvID().String(),
 		Name:          application.Name(),
 		CreatedAt:     application.CreatedAt(),

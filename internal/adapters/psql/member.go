@@ -25,12 +25,12 @@ func NewMemberRepository(db boil.ContextExecutor) *MemberRepository {
 
 func (o MemberRepository) Insert(ctx context.Context, member *iam.Member) error {
 	model := models.Member{
-		ID:              member.Id().String(),
+		ID:              member.ID().String(),
 		FirstName:       null.StringFrom(member.FirstName()),
 		LastName:        null.StringFrom(member.LastName()),
 		Email:           member.Email().String(),
 		LoginProviderID: member.LoginProviderId().String(),
-		OrganizationID:  member.OrganizationID().String(),
+		OrganizationID:  member.OrgID().String(),
 		CreatedAt:       member.CreatedAt(),
 	}
 
@@ -71,8 +71,8 @@ func (o MemberRepository) ByLoginProviderID(ctx context.Context, lpi iam.LoginPr
 	}
 
 	return iam.UnMarshallMember(
-		model.ID,
-		model.OrganizationID,
+		iam.MemberID(model.ID),
+		iam.OrgID(model.OrganizationID),
 		iam.LoginProviderID(model.LoginProviderID),
 		model.FirstName.String,
 		model.LastName.String,

@@ -21,7 +21,7 @@ func NewOrganizationRepository(db boil.ContextExecutor) *OrganizationRepository 
 
 func (o OrganizationRepository) Insert(ctx context.Context, org *iam.Organization) error {
 	model := models.Organization{
-		ID:         org.Id().String(),
+		ID:         org.ID().String(),
 		CreatedAt:  org.CreatedAt(),
 		DisabledAt: null.TimeFromPtr(org.DisabledAt()),
 	}

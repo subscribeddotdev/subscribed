@@ -12,6 +12,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/subscribeddotdev/subscribed-backend/internal/adapters/models"
 	"github.com/subscribeddotdev/subscribed-backend/internal/domain"
+	"github.com/subscribeddotdev/subscribed-backend/internal/domain/iam"
 	"github.com/volatiletech/null/v8"
 )
 
@@ -34,7 +35,7 @@ func (f *Factory) NewOrganization() *Organization {
 	return &Organization{
 		factory: f,
 		model: models.Organization{
-			ID:        domain.NewID().String(),
+			ID:        iam.NewOrgID().String(),
 			CreatedAt: time.Now().UTC(),
 		},
 	}
@@ -44,7 +45,7 @@ func (f *Factory) NewMember() *Member {
 	return &Member{
 		factory: f,
 		model: models.Member{
-			ID:              domain.NewID().String(),
+			ID:              iam.NewMemberID().String(),
 			FirstName:       null.StringFrom(gofakeit.FirstName()),
 			LastName:        null.StringFrom(gofakeit.LastName()),
 			Email:           gofakeit.Email(),
@@ -59,8 +60,8 @@ func (f *Factory) NewEnvironment() *Environment {
 	return &Environment{
 		factory: f,
 		model: models.Environment{
-			ID:             domain.NewID().String(),
-			OrganizationID: domain.NewID().String(),
+			ID:             domain.NewEnvironmentID().String(),
+			OrganizationID: iam.NewOrgID().String(),
 			Name:           gofakeit.AppName(),
 			EnvType:        []string{models.EnvtypeDevelopment, models.EnvtypeProduction}[gofakeit.Number(0, 1)],
 			CreatedAt:      time.Now().UTC(),
@@ -72,7 +73,7 @@ func (f *Factory) NewApplication() *Application {
 	return &Application{
 		factory: f,
 		model: models.Application{
-			ID:        domain.NewID().String(),
+			ID:        domain.NewApplicationID().String(),
 			Name:      gofakeit.AppName(),
 			CreatedAt: time.Now().UTC(),
 		},
@@ -83,14 +84,20 @@ func (f *Factory) NewEventType() *EventType {
 	return &EventType{
 		factory: f,
 		model: models.EventType{
-			ID:   domain.NewID().String(),
+			ID:   domain.NewEventTypeID().String(),
 			Name: gofakeit.Verb(),
 		},
 	}
 }
 
 func (f *Factory) NewApiKey() *ApiKey {
-	ak, err := domain.NewApiKey(gofakeit.AppName(), domain.NewID(), domain.NewID(), nil, false)
+	ak, err := domain.NewApiKey(
+		gofakeit.AppName(),
+		iam.NewOrgID().String(),
+		domain.NewEnvironmentID(),
+		nil,
+		false,
+	)
 	require.NoError(f.t, err)
 
 	return &ApiKey{
@@ -109,7 +116,7 @@ func (f *Factory) NewEndpoint() *Endpoint {
 	return &Endpoint{
 		factory: f,
 		model: models.Endpoint{
-			ID:            domain.NewID().String(),
+			ID:            domain.NewEndpointID().String(),
 			ApplicationID: domain.NewID().String(),
 			URL:           os.Getenv("WEBHOOK_EMULATOR_URL") + "/webhook",
 			Description:   null.StringFrom(gofakeit.Sentence(10)),

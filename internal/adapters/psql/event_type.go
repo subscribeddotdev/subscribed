@@ -22,8 +22,8 @@ func NewEventTypeRepository(db boil.ContextExecutor) *EventTypeRepository {
 
 func (e EventTypeRepository) Insert(ctx context.Context, eventType *domain.EventType) error {
 	model := models.EventType{
-		ID:            eventType.Id().String(),
-		OrgID:         eventType.OrgID().String(),
+		ID:            eventType.ID().String(),
+		OrgID:         eventType.OrgID(),
 		Name:          eventType.Name(),
 		Schema:        null.StringFrom(eventType.Schema()),
 		Description:   null.StringFrom(eventType.Description()),

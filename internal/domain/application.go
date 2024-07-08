@@ -6,36 +6,46 @@ import (
 	"time"
 )
 
+type ApplicationID string
+
+func (i ApplicationID) String() string {
+	return string(i)
+}
+
+func NewApplicationID() ApplicationID {
+	return ApplicationID(NewID().WithPrefix("app"))
+}
+
 type Application struct {
-	id        ID
+	id        ApplicationID
 	name      string
-	envID     ID
+	envID     EnvironmentID
 	createdAt time.Time
 }
 
-func NewApplication(name string, envID ID) (*Application, error) {
+func NewApplication(name string, envID EnvironmentID) (*Application, error) {
 	name = strings.TrimSpace(name)
 	if name == "" {
 		return nil, errors.New("name cannot be empty")
 	}
 
-	if envID.IsEmpty() {
+	if envID.String() == "" {
 		return nil, errors.New("envID cannot be empty")
 	}
 
 	return &Application{
-		id:        NewID(),
+		id:        NewApplicationID(),
 		name:      name,
 		envID:     envID,
 		createdAt: time.Now().UTC(),
 	}, nil
 }
 
-func (a *Application) EnvID() ID {
+func (a *Application) EnvID() EnvironmentID {
 	return a.envID
 }
 
-func (a *Application) Id() ID {
+func (a *Application) ID() ApplicationID {
 	return a.id
 }
 

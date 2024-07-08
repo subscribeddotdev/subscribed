@@ -8,6 +8,7 @@ import (
 	events "github.com/subscribeddotdev/subscribed-backend/events/go"
 	"github.com/subscribeddotdev/subscribed-backend/internal/app"
 	"github.com/subscribeddotdev/subscribed-backend/internal/app/command"
+	"github.com/subscribeddotdev/subscribed-backend/internal/domain"
 )
 
 type MessageSentHandler struct {
@@ -30,7 +31,7 @@ func (h MessageSentHandler) Handle(m *message.Message) error {
 	}
 
 	return h.application.Command.CallWebhookEndpoint.Execute(m.Context(), command.CallWebhookEndpoint{
-		EndpointID: payload.EndpointId,
-		MessageID:  payload.MessageId,
+		EndpointID: domain.EndpointID(payload.EndpointId),
+		MessageID:  domain.MessageID(payload.MessageId),
 	})
 }

@@ -16,25 +16,25 @@ func TestNewApplication(t *testing.T) {
 		expectedErr string
 
 		appName string
-		envID   domain.ID
+		envID   domain.EnvironmentID
 	}{
 		{
 			name:        "create_new_application",
 			expectedErr: "",
 			appName:     gofakeit.AppName(),
-			envID:       domain.NewID(),
+			envID:       domain.NewEnvironmentID(),
 		},
 		{
 			name:        "error_empty_name",
 			expectedErr: "name cannot be empty",
 			appName:     " ",
-			envID:       domain.NewID(),
+			envID:       domain.NewEnvironmentID(),
 		},
 		{
 			name:        "error_invalid_or_empty_env_id",
 			expectedErr: "envID cannot be empty",
 			appName:     gofakeit.AppName(),
-			envID:       domain.ID(""),
+			envID:       domain.EnvironmentID(""),
 		},
 	}
 
@@ -51,7 +51,7 @@ func TestNewApplication(t *testing.T) {
 
 			require.NoError(t, err)
 
-			assert.NotNil(t, application.Id())
+			assert.NotNil(t, application.ID())
 			assert.Equal(t, tc.appName, application.Name())
 			assert.Equal(t, tc.envID, application.EnvID())
 			assert.True(t, application.CreatedAt().Before(time.Now()))

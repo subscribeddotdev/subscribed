@@ -7,7 +7,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/subscribeddotdev/subscribed-backend/internal/domain"
-	"github.com/subscribeddotdev/subscribed-backend/tests"
 	"github.com/subscribeddotdev/subscribed-backend/tests/fixture"
 )
 
@@ -16,7 +15,7 @@ func TestEndpointRepository_Insert(t *testing.T) {
 	org := ff.NewOrganization().Save()
 	env := ff.NewEnvironment().WithOrganizationID(org.ID).Save()
 	app := ff.NewApplication().WithEnvironmentID(env.ID).Save()
-	endpoint := fixtureEndpoint(t, tests.MustID(t, app.ID), nil)
+	endpoint := fixtureEndpoint(t, domain.ApplicationID(app.ID), nil)
 
 	require.NoError(t, endpointRepo.Insert(ctx, endpoint))
 }
@@ -27,16 +26,16 @@ func TestEndpointRepository_ByEventTypeIdAndAppID(t *testing.T) {
 	env := ff.NewEnvironment().WithOrganizationID(org.ID).Save()
 	app := ff.NewApplication().WithEnvironmentID(env.ID).Save()
 	eventType := ff.NewEventType().WithOrgID(org.ID).Save()
-	eventTypeID := tests.MustID(t, eventType.ID)
+	eventTypeID := domain.EventTypeID(eventType.ID)
 
 	fixtureEndpoints := make([]*domain.Endpoint, 5)
 	for i := 0; i < 5; i++ {
-		fixtureEndpoints[i] = fixtureEndpoint(t, tests.MustID(t, app.ID), []domain.ID{tests.MustID(t, eventType.ID)})
+		fixtureEndpoints[i] = fixtureEndpoint(t, domain.ApplicationID(app.ID), []domain.EventTypeID{eventTypeID})
 		err := endpointRepo.Insert(ctx, fixtureEndpoints[i])
 		require.NoError(t, err)
 	}
 
-	endpoints, err := endpointRepo.ByEventTypeIdAndAppID(ctx, eventTypeID, tests.MustID(t, app.ID))
+	endpoints, err := endpointRepo.ByEventTypeIdAndAppID(ctx, eventTypeID, domain.ApplicationID(app.ID))
 	require.NoError(t, err)
 	assert.NotEmpty(t, endpoints)
 
@@ -55,7 +54,7 @@ func TestEndpointRepository_ByEventTypeIdAndAppID(t *testing.T) {
 	}
 }
 
-func fixtureEndpoint(t *testing.T, appID domain.ID, eventTypeIDs []domain.ID) *domain.Endpoint {
+func fixtureEndpoint(t *testing.T, appID domain.ApplicationID, eventTypeIDs []domain.EventTypeID) *domain.Endpoint {
 	endpointURL, err := domain.NewEndpointURL(gofakeit.URL())
 	require.NoError(t, err)
 

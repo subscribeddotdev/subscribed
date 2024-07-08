@@ -7,10 +7,10 @@ import (
 )
 
 type AddEndpoint struct {
-	ApplicationID domain.ID
+	ApplicationID domain.ApplicationID
 	EndpointUrl   string
 	Description   string
-	EventTypeIDs  []domain.ID
+	EventTypeIDs  []domain.EventTypeID
 }
 
 type AddEndpointHandler struct {

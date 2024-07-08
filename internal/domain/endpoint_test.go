@@ -15,34 +15,34 @@ func TestNewEndpoint(t *testing.T) {
 		name        string
 		expectedErr string
 
-		applicationID domain.ID
+		applicationID domain.ApplicationID
 		endpointUrl   domain.EndpointURL
 		description   string
-		eventTypeIDs  []domain.ID
+		eventTypeIDs  []domain.EventTypeID
 	}{
 		{
 			name:          "create_new_endpoint",
 			expectedErr:   "",
-			applicationID: domain.NewID(),
+			applicationID: domain.NewApplicationID(),
 			endpointUrl:   mustEndpointURL(t, gofakeit.URL()),
 			description:   gofakeit.Sentence(gofakeit.IntRange(5, 10)),
-			eventTypeIDs:  []domain.ID{domain.NewID()},
+			eventTypeIDs:  []domain.EventTypeID{domain.NewEventTypeID()},
 		},
 		{
 			name:          "error_invalid_endpoint_url",
 			expectedErr:   "endpointURL cannot be empty",
-			applicationID: domain.NewID(),
+			applicationID: domain.NewApplicationID(),
 			endpointUrl:   domain.EndpointURL{},
 			description:   gofakeit.Sentence(gofakeit.IntRange(5, 10)),
-			eventTypeIDs:  []domain.ID{domain.NewID()},
+			eventTypeIDs:  []domain.EventTypeID{domain.NewEventTypeID()},
 		},
 		{
 			name:          "error_invalid_application_id",
 			expectedErr:   "applicationID cannot be empty",
-			applicationID: domain.ID(""),
+			applicationID: domain.ApplicationID(""),
 			endpointUrl:   mustEndpointURL(t, gofakeit.URL()),
 			description:   gofakeit.Sentence(gofakeit.IntRange(5, 10)),
-			eventTypeIDs:  []domain.ID{domain.NewID()},
+			eventTypeIDs:  []domain.EventTypeID{domain.NewEventTypeID()},
 		},
 	}
 

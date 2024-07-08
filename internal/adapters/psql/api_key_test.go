@@ -7,7 +7,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/subscribeddotdev/subscribed-backend/internal/domain"
-	"github.com/subscribeddotdev/subscribed-backend/tests"
 	"github.com/subscribeddotdev/subscribed-backend/tests/fixture"
 )
 
@@ -18,8 +17,8 @@ func TestApiKeyRepository_Insert(t *testing.T) {
 
 	apiKey, err := domain.NewApiKey(
 		gofakeit.AppName(),
-		tests.MustID(t, org.ID),
-		tests.MustID(t, env.ID),
+		org.ID,
+		domain.EnvironmentID(env.ID),
 		nil,
 		false,
 	)

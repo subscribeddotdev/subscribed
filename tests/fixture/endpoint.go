@@ -4,7 +4,6 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/subscribeddotdev/subscribed-backend/internal/adapters/models"
 	"github.com/subscribeddotdev/subscribed-backend/internal/domain"
-	"github.com/subscribeddotdev/subscribed-backend/tests"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 )
 
@@ -58,7 +57,7 @@ func (a *Endpoint) NewDomainModel() *domain.Endpoint {
 
 	endpoint, err := domain.NewEndpoint(
 		endpointURL,
-		tests.MustID(a.factory.t, a.model.ApplicationID),
+		domain.ApplicationID(a.model.ApplicationID),
 		a.model.Description.String,
 		nil, // TODO map event_type_ids correctly
 	)

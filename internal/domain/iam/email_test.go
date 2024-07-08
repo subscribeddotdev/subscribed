@@ -6,7 +6,6 @@ import (
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/subscribeddotdev/subscribed-backend/internal/domain"
 	"github.com/subscribeddotdev/subscribed-backend/internal/domain/iam"
 	"github.com/subscribeddotdev/subscribed-backend/tests"
 )
@@ -16,7 +15,7 @@ func TestNewEmail(t *testing.T) {
 		name        string
 		expectedErr string
 
-		organizationID  domain.ID
+		organizationID  iam.OrgID
 		loginProviderId iam.LoginProviderID
 		firstName       string
 		lastName        string
@@ -25,7 +24,7 @@ func TestNewEmail(t *testing.T) {
 		{
 			name:            "new_member",
 			expectedErr:     "",
-			organizationID:  domain.NewID(),
+			organizationID:  iam.NewOrgID(),
 			loginProviderId: iam.LoginProviderID(gofakeit.UUID()),
 			firstName:       gofakeit.FirstName(),
 			lastName:        gofakeit.LastName(),
@@ -34,7 +33,7 @@ func TestNewEmail(t *testing.T) {
 		{
 			name:            "error_empty_organization_id",
 			expectedErr:     "organizationID cannot be empty",
-			organizationID:  domain.ID(""),
+			organizationID:  iam.OrgID(""),
 			loginProviderId: iam.LoginProviderID(gofakeit.UUID()),
 			firstName:       gofakeit.FirstName(),
 			lastName:        gofakeit.LastName(),
@@ -43,7 +42,7 @@ func TestNewEmail(t *testing.T) {
 		{
 			name:            "error_empty_email_address",
 			expectedErr:     "email cannot be empty",
-			organizationID:  domain.NewID(),
+			organizationID:  iam.NewOrgID(),
 			loginProviderId: iam.LoginProviderID(gofakeit.UUID()),
 			firstName:       gofakeit.FirstName(),
 			lastName:        gofakeit.LastName(),
@@ -52,7 +51,7 @@ func TestNewEmail(t *testing.T) {
 		{
 			name:            "error_empty_login_provider_id",
 			expectedErr:     "loginProviderID cannot be empty",
-			organizationID:  domain.NewID(),
+			organizationID:  iam.NewOrgID(),
 			loginProviderId: iam.LoginProviderID(""),
 			firstName:       gofakeit.FirstName(),
 			lastName:        gofakeit.LastName(),

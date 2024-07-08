@@ -9,66 +9,10 @@ import (
 	"time"
 )
 
-type SecretKey struct {
-	prefix string
-	hash   string
-}
-
 var (
-	base64Encoder      = base64.NewEncoding("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_.")
 	ErrApiKeyIsExpired = errors.New("api key is expired")
+	base64Encoder      = base64.NewEncoding("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_.")
 )
-
-func newSecretKey(isTestKey bool) (SecretKey, error) {
-	prefix := "sbs"
-	if isTestKey {
-		prefix += "_test"
-	} else {
-		prefix += "_live"
-	}
-
-	randomBytes := make([]byte, 16)
-	_, err := rand.Read(randomBytes)
-	if err != nil {
-		return SecretKey{}, fmt.Errorf("unable to generate random bytes: %v", err)
-	}
-
-	return SecretKey{
-		prefix: prefix,
-		hash:   base64Encoder.WithPadding(base64.NoPadding).EncodeToString(randomBytes),
-	}, nil
-}
-
-func (k SecretKey) FullKey() string {
-	return fmt.Sprintf("%s_%s", k.prefix, k.hash)
-}
-
-// String returns a trimmed version of the key by showing only the last 5 characters of the hash
-func (k SecretKey) String() string {
-	return fmt.Sprintf("%s_...%s", k.prefix, k.hash[12:])
-}
-
-func UnMarshallSecretKey(value string) (SecretKey, error) {
-	chunks := strings.Split(value, "_")
-
-	if len(chunks) < 3 {
-		return SecretKey{}, fmt.Errorf("malformed secret key: %s", value)
-	}
-
-	var hash string
-	if strings.Contains(value, "sbs_live_") {
-		hash = strings.Split(value, "sbs_live_")[1]
-	}
-
-	if strings.Contains(value, "sbs_test_") {
-		hash = strings.Split(value, "sbs_test_")[1]
-	}
-
-	return SecretKey{
-		prefix: fmt.Sprintf("%s_%s", chunks[0], chunks[1]),
-		hash:   hash,
-	}, nil
-}
 
 type ApiKey struct {
 	envID     ID
@@ -169,5 +113,65 @@ func UnMarshallApiKey(
 		secretKey: secretKey,
 		createdAt: createdAt,
 		expiresAt: expiresAt,
+	}, nil
+}
+
+//
+// Secret Key
+//
+
+type SecretKey struct {
+	prefix string
+	hash   string
+}
+
+func newSecretKey(isTestKey bool) (SecretKey, error) {
+	prefix := "sbs"
+	if isTestKey {
+		prefix += "_test"
+	} else {
+		prefix += "_live"
+	}
+
+	randomBytes := make([]byte, 16)
+	_, err := rand.Read(randomBytes)
+	if err != nil {
+		return SecretKey{}, fmt.Errorf("unable to generate random bytes: %v", err)
+	}
+
+	return SecretKey{
+		prefix: prefix,
+		hash:   base64Encoder.WithPadding(base64.NoPadding).EncodeToString(randomBytes),
+	}, nil
+}
+
+func (k SecretKey) FullKey() string {
+	return fmt.Sprintf("%s_%s", k.prefix, k.hash)
+}
+
+// String returns a trimmed version of the key by showing only the last 5 characters of the hash
+func (k SecretKey) String() string {
+	return fmt.Sprintf("%s_...%s", k.prefix, k.hash[12:])
+}
+
+func UnMarshallSecretKey(value string) (SecretKey, error) {
+	chunks := strings.Split(value, "_")
+
+	if len(chunks) < 3 {
+		return SecretKey{}, fmt.Errorf("malformed secret key: %s", value)
+	}
+
+	var hash string
+	if strings.Contains(value, "sbs_live_") {
+		hash = strings.Split(value, "sbs_live_")[1]
+	}
+
+	if strings.Contains(value, "sbs_test_") {
+		hash = strings.Split(value, "sbs_test_")[1]
+	}
+
+	return SecretKey{
+		prefix: fmt.Sprintf("%s_%s", chunks[0], chunks[1]),
+		hash:   hash,
 	}, nil
 }

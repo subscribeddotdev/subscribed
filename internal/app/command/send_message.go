@@ -59,6 +59,7 @@ func (c SendMessageHandler) Execute(ctx context.Context, cmd SendMessage) error 
 			return fmt.Errorf("error saving message: %v", err)
 		}
 
+		// TODO: test that a message is published for each endpoint subscribed to the event_type_id
 		for _, endpoint := range endpoints {
 			err = adapters.EventPublisher.PublishMessageSent(ctx, MessageSent{
 				MessageID:  message.Id().String(),

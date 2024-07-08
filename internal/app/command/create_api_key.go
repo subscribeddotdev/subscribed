@@ -19,7 +19,10 @@ type CreateApiKeyHandler struct {
 	envRepo    domain.EnvironmentRepository
 }
 
-func NewCreateApiKeyHandler(apiKeyRepo domain.ApiKeyRepository, envRepo domain.EnvironmentRepository) CreateApiKeyHandler {
+func NewCreateApiKeyHandler(
+	apiKeyRepo domain.ApiKeyRepository,
+	envRepo domain.EnvironmentRepository,
+) CreateApiKeyHandler {
 	return CreateApiKeyHandler{
 		apiKeyRepo: apiKeyRepo,
 		envRepo:    envRepo,

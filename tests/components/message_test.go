@@ -1,6 +1,7 @@
 package components_test
 
 import (
+	"encoding/json"
 	"net/http"
 	"testing"
 
@@ -12,27 +13,31 @@ import (
 	"github.com/subscribeddotdev/subscribed-backend/tests/fixture"
 )
 
-func TestApplication_Lifecycle(t *testing.T) {
+type JSON map[string]interface{}
+
+func (j JSON) Marshall(t *testing.T) []byte {
+	data, err := json.Marshal(j)
+	require.NoError(t, err)
+	return data
+}
+
+func TestMessages_SendMessage(t *testing.T) {
 	ff := fixture.NewFactory(t, ctx, db)
 	org := ff.NewOrganization().Save()
 	env := ff.NewEnvironment().WithOrganizationID(org.ID).Save()
 	app := ff.NewApplication().WithEnvironmentID(env.ID).Save()
 	apiKey := ff.NewApiKey().WithOrgID(org.ID).WithEnvironmentID(env.ID).Save()
 	eventType := ff.NewEventType().WithOrgID(org.ID).Save()
-	// TODO: Use it to assert MessageSent
 	ff.NewEndpoint().WithEventTypeIDs([]string{eventType.ID}).WithAppID(app.ID).Save()
-
 	apiClient := getClientWithApiKey(t, apiKey.SecretKey)
 
 	t.Run("send_message", func(t *testing.T) {
-		payload, err := gofakeit.JSON(&gofakeit.JSONOptions{
-			Type: "object",
-			Fields: []gofakeit.Field{
-				{Name: "first_name", Function: "firstname"},
-				{Name: "last_name", Function: "lastname"},
-			},
-		})
-		require.NoError(t, err)
+		payload := JSON{
+			"id":         gofakeit.UUID(),
+			"first_name": gofakeit.FirstName(),
+			"last_name":  gofakeit.LastName(),
+			"email":      gofakeit.Email(),
+		}.Marshall(t)
 
 		resp, err := apiClient.SendMessage(ctx, app.ID, client.SendMessageRequest{
 			EventTypeId: eventType.ID,
@@ -47,7 +52,5 @@ func TestApplication_Lifecycle(t *testing.T) {
 		require.NoError(t, err)
 
 		assert.Equal(t, string(payload), msg.Payload)
-
-		// TODO: assert that MessageSent events have been published with the endpoint_id fixture above
 	})
 }

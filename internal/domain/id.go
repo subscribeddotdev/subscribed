@@ -13,11 +13,6 @@ func NewID() ID {
 	return ID(ulid.Make().String())
 }
 
-func (i ID) WithPrefix(prefix string) ID {
-	id := ID(fmt.Sprintf("%s_%s", prefix, i))
-	return id
-}
-
 func NewIdFromString(value string) (ID, error) {
 	parsedID, err := ulid.Parse(value)
 	if err != nil {
@@ -39,6 +34,11 @@ func NewIdFromStringWithPrefix(value string) (ID, error) {
 
 func (i ID) String() string {
 	return string(i)
+}
+
+func (i ID) WithPrefix(prefix string) ID {
+	id := ID(fmt.Sprintf("%s_%s", prefix, i))
+	return id
 }
 
 func (i ID) IsEmpty() bool {

@@ -8,13 +8,23 @@ import (
 
 type Headers map[string]string
 
+type EndpointID string
+
+func (i EndpointID) String() string {
+	return string(i)
+}
+
+func NewEndpointID() EndpointID {
+	return EndpointID(NewID().WithPrefix("end"))
+}
+
 type Endpoint struct {
-	id            ID
+	id            EndpointID
 	url           EndpointURL
-	applicationID ID
+	applicationID ApplicationID
 	description   string
 	headers       Headers
-	eventTypeIDs  []ID
+	eventTypeIDs  []EventTypeID
 	signingSecret SigningSecret
 	createdAt     time.Time
 	updatedAt     time.Time
@@ -22,15 +32,15 @@ type Endpoint struct {
 
 func NewEndpoint(
 	endpointURL EndpointURL,
-	applicationID ID,
+	applicationID ApplicationID,
 	description string,
-	eventTypeIDs []ID,
+	eventTypeIDs []EventTypeID,
 ) (*Endpoint, error) {
 	if endpointURL.IsEmpty() {
 		return nil, errors.New("endpointURL cannot be empty")
 	}
 
-	if applicationID.IsEmpty() {
+	if applicationID.String() == "" {
 		return nil, errors.New("applicationID cannot be empty")
 	}
 
@@ -40,7 +50,7 @@ func NewEndpoint(
 	}
 
 	return &Endpoint{
-		id:            NewID(),
+		id:            NewEndpointID(),
 		url:           endpointURL,
 		applicationID: applicationID,
 		description:   description,
@@ -52,7 +62,7 @@ func NewEndpoint(
 	}, nil
 }
 
-func (e *Endpoint) Id() ID {
+func (e *Endpoint) ID() EndpointID {
 	return e.id
 }
 
@@ -64,7 +74,7 @@ func (e *Endpoint) Description() string {
 	return e.description
 }
 
-func (e *Endpoint) EventTypeIDs() []ID {
+func (e *Endpoint) EventTypeIDs() []EventTypeID {
 	return e.eventTypeIDs
 }
 
@@ -84,44 +94,24 @@ func (e *Endpoint) Headers() map[string]string {
 	return e.headers
 }
 
-func (e *Endpoint) ApplicationID() ID {
+func (e *Endpoint) ApplicationID() ApplicationID {
 	return e.applicationID
 }
 
 func UnMarshallEndpoint(
-	id,
-	applicationID,
+	id EndpointID,
+	applicationID ApplicationID,
 	endpointURL,
 	description string,
 	headers Headers,
-	eventTypeIDs []string,
+	eventTypeIDs []EventTypeID,
 	signingSecret string,
 	createdAt,
 	updatedAt time.Time,
 ) (*Endpoint, error) {
-	dID, err := NewIdFromString(id)
-	if err != nil {
-		return nil, err
-	}
-
-	appID, err := NewIdFromString(applicationID)
-	if err != nil {
-		return nil, err
-	}
-
 	dEndpointURL, err := NewEndpointURL(endpointURL)
 	if err != nil {
 		return nil, err
-	}
-
-	dEventTypeIDs := make([]ID, len(eventTypeIDs))
-	for i, eventTypeID := range eventTypeIDs {
-		eID, err := NewIdFromString(eventTypeID)
-		if err != nil {
-			return nil, err
-		}
-
-		dEventTypeIDs[i] = eID
 	}
 
 	ss, err := UnMarshallSigningSecret(signingSecret)
@@ -130,12 +120,12 @@ func UnMarshallEndpoint(
 	}
 
 	return &Endpoint{
-		id:            dID,
+		id:            id,
 		url:           dEndpointURL,
-		applicationID: appID,
+		applicationID: applicationID,
 		description:   description,
 		headers:       headers,
-		eventTypeIDs:  dEventTypeIDs,
+		eventTypeIDs:  eventTypeIDs,
 		signingSecret: ss,
 		createdAt:     createdAt,
 		updatedAt:     updatedAt,

@@ -15,7 +15,7 @@ var (
 )
 
 type EnvironmentRepository interface {
-	ByID(ctx context.Context, id ID) (*Environment, error)
+	ByID(ctx context.Context, id EnvironmentID) (*Environment, error)
 	Insert(ctx context.Context, env *Environment) error
 }
 
@@ -29,8 +29,8 @@ type EventTypeRepository interface {
 
 type EndpointRepository interface {
 	Insert(ctx context.Context, endpoint *Endpoint) error
-	ByID(ctx context.Context, id ID) (*Endpoint, error)
-	ByEventTypeIdAndAppID(ctx context.Context, eventTypeID ID, appID ID) ([]*Endpoint, error)
+	ByID(ctx context.Context, id EndpointID) (*Endpoint, error)
+	ByEventTypeIdAndAppID(ctx context.Context, eventTypeID EventTypeID, appID ApplicationID) ([]*Endpoint, error)
 }
 
 type MessageRepository interface {

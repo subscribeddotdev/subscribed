@@ -60,7 +60,7 @@ func (c CreateOrganizationHandler) Execute(ctx context.Context, cmd CreateOrgani
 			return fmt.Errorf("unable to save organization: %v", err)
 		}
 
-		defaultEnvironments, err := getDefaultEnvironments(org.Id())
+		defaultEnvironments, err := getDefaultEnvironments(org.ID())
 		if err != nil {
 			return fmt.Errorf("unable to generate the default environments: %v", err)
 		}
@@ -72,7 +72,7 @@ func (c CreateOrganizationHandler) Execute(ctx context.Context, cmd CreateOrgani
 			}
 		}
 
-		member, err := iam.NewMember(org.Id(), cmd.LoginProviderID, cmd.FirstName, cmd.LastName, cmd.Email)
+		member, err := iam.NewMember(org.ID(), cmd.LoginProviderID, cmd.FirstName, cmd.LastName, cmd.Email)
 		if err != nil {
 			return err
 		}
@@ -86,13 +86,13 @@ func (c CreateOrganizationHandler) Execute(ctx context.Context, cmd CreateOrgani
 	})
 }
 
-func getDefaultEnvironments(orgID domain.ID) ([]*domain.Environment, error) {
-	prod, err := domain.NewEnvironment("Production", orgID, domain.EnvTypeProduction)
+func getDefaultEnvironments(orgID iam.OrgID) ([]*domain.Environment, error) {
+	prod, err := domain.NewEnvironment("Production", orgID.String(), domain.EnvTypeProduction)
 	if err != nil {
 		return nil, err
 	}
 
-	dev, err := domain.NewEnvironment("Development", orgID, domain.EnvTypeDevelopment)
+	dev, err := domain.NewEnvironment("Development", orgID.String(), domain.EnvTypeDevelopment)
 	if err != nil {
 		return nil, err
 	}

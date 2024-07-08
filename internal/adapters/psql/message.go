@@ -26,7 +26,7 @@ func NewMessageRepository(db boil.ContextExecutor) *MessageRepository {
 func (o MessageRepository) Insert(ctx context.Context, message *domain.Message) error {
 	model := models.Message{
 		ID:            message.Id().String(),
-		OrgID:         message.OrgID().String(),
+		OrgID:         message.OrgID(),
 		ApplicationID: message.ApplicationID().String(),
 		EventTypeID:   message.EventTypeID().String(),
 		Payload:       message.Payload(),
@@ -45,7 +45,14 @@ func (o MessageRepository) ByID(ctx context.Context, id domain.MessageID) (*doma
 		return nil, fmt.Errorf("error querying message by id '%s': %v", id, err)
 	}
 
-	return domain.UnMarshallMessage(model.ID, model.EventTypeID, model.ApplicationID, model.OrgID, model.SentAt, model.Payload)
+	return domain.UnMarshallMessage(
+		domain.MessageID(model.ID),
+		domain.EventTypeID(model.EventTypeID),
+		domain.ApplicationID(model.ApplicationID),
+		model.OrgID,
+		model.SentAt,
+		model.Payload,
+	)
 }
 
 func (o MessageRepository) SaveMessageSendAttempt(ctx context.Context, attempt *domain.MessageSendAttempt) error {
@@ -60,7 +67,7 @@ func (o MessageRepository) SaveMessageSendAttempt(ctx context.Context, attempt *
 	}
 
 	model := models.MessageSendAttempt{
-		ID:             attempt.Id().String(),
+		ID:             attempt.ID().String(),
 		MessageID:      attempt.MessageID().String(),
 		EndpointID:     attempt.EndpointID().String(),
 		AttemptedAt:    attempt.Timestamp(),

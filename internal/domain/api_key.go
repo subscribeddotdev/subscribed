@@ -15,25 +15,25 @@ var (
 )
 
 type ApiKey struct {
-	envID     ID
-	orgID     ID
+	envID     EnvironmentID
+	orgID     string
 	name      string
 	secretKey SecretKey
 	createdAt time.Time
 	expiresAt *time.Time
 }
 
-func NewApiKey(name string, orgID, envID ID, expiresAt *time.Time, isTestApiKey bool) (*ApiKey, error) {
+func NewApiKey(name string, orgID string, envID EnvironmentID, expiresAt *time.Time, isTestApiKey bool) (*ApiKey, error) {
 	name = strings.TrimSpace(name)
 	if name == "" {
 		return nil, errors.New("name cannot be empty")
 	}
 
-	if orgID.IsEmpty() {
+	if orgID == "" {
 		return nil, errors.New("orgID cannot be empty")
 	}
 
-	if envID.IsEmpty() {
+	if envID == "" {
 		return nil, errors.New("envID cannot be empty")
 	}
 
@@ -56,11 +56,11 @@ func NewApiKey(name string, orgID, envID ID, expiresAt *time.Time, isTestApiKey 
 	}, nil
 }
 
-func (a *ApiKey) EnvID() ID {
+func (a *ApiKey) EnvID() EnvironmentID {
 	return a.envID
 }
 
-func (a *ApiKey) OrgID() ID {
+func (a *ApiKey) OrgID() string {
 	return a.orgID
 }
 
@@ -89,26 +89,16 @@ func (a *ApiKey) IsExpired() bool {
 }
 
 func UnMarshallApiKey(
-	envID,
+	envID EnvironmentID,
 	orgID,
 	name string,
 	secretKey SecretKey,
 	createdAt time.Time,
 	expiresAt *time.Time,
 ) (*ApiKey, error) {
-	dEnvID, err := NewIdFromString(envID)
-	if err != nil {
-		return nil, err
-	}
-
-	dOrgID, err := NewIdFromString(orgID)
-	if err != nil {
-		return nil, err
-	}
-
 	return &ApiKey{
-		orgID:     dOrgID,
-		envID:     dEnvID,
+		orgID:     orgID,
+		envID:     envID,
 		name:      name,
 		secretKey: secretKey,
 		createdAt: createdAt,

@@ -18,13 +18,8 @@ type handlers struct {
 }
 
 func (h handlers) AddEndpoint(c echo.Context, applicationID string) error {
-	appID, err := domain.NewIdFromString(applicationID)
-	if err != nil {
-		return NewHandlerErrorWithStatus(err, "invalid-application-id", http.StatusBadRequest)
-	}
-
 	var body AddEndpointRequest
-	err = c.Bind(&body)
+	err := c.Bind(&body)
 	if err != nil {
 		return NewHandlerErrorWithStatus(err, "error-parsing-the-body", http.StatusBadRequest)
 	}
@@ -34,7 +29,7 @@ func (h handlers) AddEndpoint(c echo.Context, applicationID string) error {
 		description = *body.Description
 	}
 
-	var eventTypeIDs []domain.ID
+	var eventTypeIDs []domain.EventTypeID
 
 	if body.EventTypeIds != nil {
 		for _, eventTypeID := range *body.EventTypeIds {
@@ -43,12 +38,12 @@ func (h handlers) AddEndpoint(c echo.Context, applicationID string) error {
 				return NewHandlerErrorWithStatus(err, "error-mapping-event-type-id", http.StatusBadRequest)
 			}
 
-			eventTypeIDs = append(eventTypeIDs, eID)
+			eventTypeIDs = append(eventTypeIDs, domain.EventTypeID(eID))
 		}
 	}
 
 	err = h.application.Command.AddEndpoint.Execute(c.Request().Context(), command.AddEndpoint{
-		ApplicationID: appID,
+		ApplicationID: domain.ApplicationID(applicationID),
 		EndpointUrl:   body.Url,
 		Description:   description,
 		EventTypeIDs:  eventTypeIDs,
@@ -86,8 +81,8 @@ func (h handlers) SendMessage(c echo.Context, applicationID string) error {
 
 	err = h.application.Command.SendMessage.Execute(c.Request().Context(), command.SendMessage{
 		OrgID:         orgID,
-		ApplicationID: applicationID,
-		EventTypeID:   body.EventTypeId,
+		ApplicationID: domain.ApplicationID(applicationID),
+		EventTypeID:   domain.EventTypeID(body.EventTypeId),
 		Payload:       body.Payload,
 	})
 	if err != nil {
@@ -126,7 +121,7 @@ func (h handlers) CreateEventType(c echo.Context) error {
 	}
 
 	err = h.application.Command.CreateEventType.Execute(c.Request().Context(), command.CreateEventType{
-		OrgID:         member.OrganizationID().String(),
+		OrgID:         member.OrgID(),
 		Name:          body.Name,
 		Description:   description,
 		Schema:        schema,
@@ -154,8 +149,8 @@ func (h handlers) CreateApiKey(c echo.Context, params CreateApiKeyParams) error 
 	err = h.application.Command.CreateApiKey.Execute(c.Request().Context(), command.CreateApiKey{
 		Name:          body.Name,
 		ExpiresAt:     body.ExpiresAt,
-		EnvironmentID: params.EnvironmentId,
-		OrgID:         member.OrganizationID().String(),
+		EnvironmentID: domain.EnvironmentID(params.EnvironmentId),
+		OrgID:         member.OrgID().String(),
 	})
 	if err != nil {
 		return NewHandlerError(err, "unable-to-create-api-key")

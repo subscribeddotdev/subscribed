@@ -6,7 +6,6 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/subscribeddotdev/subscribed-backend/internal/adapters/models"
 	"github.com/subscribeddotdev/subscribed-backend/internal/domain"
-	"github.com/subscribeddotdev/subscribed-backend/tests"
 	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 )
@@ -55,8 +54,8 @@ func (a *EventType) Save() models.EventType {
 
 func (a *EventType) NewDomainModel() *domain.EventType {
 	return domain.UnMarshallEventType(
-		tests.MustID(a.factory.t, a.model.ID),
-		tests.MustID(a.factory.t, a.model.OrgID),
+		domain.EventTypeID(a.model.ID),
+		a.model.OrgID,
 		a.model.Name,
 		a.model.Description.String,
 		a.model.Schema.String,

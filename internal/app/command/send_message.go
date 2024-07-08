@@ -8,9 +8,9 @@ import (
 )
 
 type SendMessage struct {
-	EventTypeID   string
+	EventTypeID   domain.EventTypeID
 	Payload       string
-	ApplicationID string
+	ApplicationID domain.ApplicationID
 	OrgID         string
 }
 
@@ -27,22 +27,12 @@ func NewSendMessageHandler(txProvider TransactionProvider, endpointRepo domain.E
 }
 
 func (c SendMessageHandler) Execute(ctx context.Context, cmd SendMessage) error {
-	orgID, err := domain.NewIdFromString(cmd.OrgID)
-	if err != nil {
-		return err
-	}
-
-	eventTypeID, err := domain.NewIdFromString(cmd.EventTypeID)
-	if err != nil {
-		return err
-	}
-
-	applicationID, err := domain.NewIdFromString(cmd.ApplicationID)
-	if err != nil {
-		return err
-	}
-
-	message, err := domain.NewMessage(eventTypeID, orgID, applicationID, cmd.Payload)
+	message, err := domain.NewMessage(
+		cmd.EventTypeID,
+		cmd.OrgID,
+		cmd.ApplicationID,
+		cmd.Payload,
+	)
 	if err != nil {
 		return err
 	}
@@ -63,7 +53,7 @@ func (c SendMessageHandler) Execute(ctx context.Context, cmd SendMessage) error 
 		for _, endpoint := range endpoints {
 			err = adapters.EventPublisher.PublishMessageSent(ctx, MessageSent{
 				MessageID:  message.Id().String(),
-				EndpointID: endpoint.Id().String(),
+				EndpointID: endpoint.ID().String(),
 			})
 			if err != nil {
 				return fmt.Errorf("error publishing the event MessageSent: %v", err)

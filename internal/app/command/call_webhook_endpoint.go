@@ -21,8 +21,8 @@ const (
 )
 
 type CallWebhookEndpoint struct {
-	EndpointID string
-	MessageID  string
+	EndpointID domain.EndpointID
+	MessageID  domain.MessageID
 }
 
 type CallWebhookEndpointHandler struct {
@@ -36,23 +36,13 @@ func NewCallWebhookEndpointHandler(txProvider TransactionProvider) CallWebhookEn
 }
 
 func (c CallWebhookEndpointHandler) Execute(ctx context.Context, cmd CallWebhookEndpoint) error {
-	endpointID, err := domain.NewIdFromString(cmd.EndpointID)
-	if err != nil {
-		return err
-	}
-
-	messageID, err := domain.NewIdFromString(cmd.MessageID)
-	if err != nil {
-		return err
-	}
-
 	return c.txProvider.Transact(ctx, func(adapters TransactableAdapters) error {
-		endpoint, err := adapters.EndpointRepository.ByID(ctx, endpointID)
+		endpoint, err := adapters.EndpointRepository.ByID(ctx, cmd.EndpointID)
 		if err != nil {
 			return fmt.Errorf("error querying the endpoint by id '%s': %v", cmd.EndpointID, err)
 		}
 
-		message, err := adapters.MessageRepository.ByID(ctx, messageID.ToMessageID())
+		message, err := adapters.MessageRepository.ByID(ctx, cmd.MessageID)
 		if err != nil {
 			return fmt.Errorf("error querying message by id '%s': %v", cmd.MessageID, err)
 		}
@@ -79,7 +69,7 @@ func (c CallWebhookEndpointHandler) Execute(ctx context.Context, cmd CallWebhook
 		}
 
 		req.Header.Set("user-agent", "subscribed-backend")
-		req.Header.Set("x-sbs-id", cmd.MessageID)
+		req.Header.Set("x-sbs-id", cmd.MessageID.String())
 		req.Header.Set("x-sbs-timestamp", fmt.Sprintf("%d", timestamp.Unix()))
 		req.Header.Set("x-sbs-signature", signature)
 		for name, value := range endpoint.Headers() {
@@ -104,8 +94,8 @@ func (c CallWebhookEndpointHandler) Execute(ctx context.Context, cmd CallWebhook
 		}
 
 		attempt, err := domain.NewMessageSendAttempt(
-			endpointID,
-			messageID,
+			cmd.EndpointID,
+			cmd.MessageID,
 			string(body[:n]),
 			domain.StatusCode(resp.StatusCode),
 			reqHeaders,

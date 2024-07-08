@@ -25,7 +25,7 @@ func (i LoginProviderID) Validate() error {
 
 type Member struct {
 	id              domain.ID
-	organizationID  domain.ID
+	organizationID  OrgID
 	loginProviderId LoginProviderID
 	firstName       string
 	lastName        string
@@ -34,13 +34,13 @@ type Member struct {
 }
 
 func NewMember(
-	organizationID domain.ID,
+	organizationID OrgID,
 	loginProviderId LoginProviderID,
 	firstName,
 	lastName string,
 	email Email,
 ) (*Member, error) {
-	if organizationID.IsEmpty() {
+	if organizationID.String() == "" {
 		return nil, errors.New("organizationID cannot be empty")
 	}
 
@@ -67,7 +67,7 @@ func (m *Member) Id() domain.ID {
 	return m.id
 }
 
-func (m *Member) OrganizationID() domain.ID {
+func (m *Member) OrgID() OrgID {
 	return m.organizationID
 }
 
@@ -91,13 +91,8 @@ func (m *Member) CreatedAt() time.Time {
 	return m.createdAt
 }
 
-func UnMarshallMember(id, orgID string, lpi LoginProviderID, firstName, lastName, email string, createdAt time.Time) (*Member, error) {
+func UnMarshallMember(id string, orgID OrgID, lpi LoginProviderID, firstName, lastName, email string, createdAt time.Time) (*Member, error) {
 	mID, err := domain.NewIdFromString(id)
-	if err != nil {
-		return nil, err
-	}
-
-	oID, err := domain.NewIdFromString(orgID)
 	if err != nil {
 		return nil, err
 	}
@@ -117,7 +112,7 @@ func UnMarshallMember(id, orgID string, lpi LoginProviderID, firstName, lastName
 
 	return &Member{
 		id:              mID,
-		organizationID:  oID,
+		organizationID:  orgID,
 		loginProviderId: lpi,
 		firstName:       firstName,
 		lastName:        lastName,

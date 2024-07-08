@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/subscribeddotdev/subscribed-backend/internal/domain"
+	"github.com/subscribeddotdev/subscribed-backend/internal/domain/iam"
 )
 
 func TestNewMessage(t *testing.T) {
@@ -14,41 +15,41 @@ func TestNewMessage(t *testing.T) {
 		name        string
 		expectedErr string
 
-		eventTypeID   domain.ID
-		orgID         domain.ID
-		applicationID domain.ID
+		eventTypeID   domain.EventTypeID
+		orgID         string
+		applicationID domain.ApplicationID
 		payload       string
 	}{
 		{
 			name:          "create_new_message",
 			expectedErr:   "",
-			eventTypeID:   domain.NewID(),
-			orgID:         domain.NewID(),
-			applicationID: domain.NewID(),
+			eventTypeID:   domain.NewEventTypeID(),
+			orgID:         iam.NewOrgID().String(),
+			applicationID: domain.NewApplicationID(),
 			payload:       gofakeit.Sentence(10),
 		},
 		{
 			name:          "error_invalid_event_type_id",
 			expectedErr:   "eventTypeID cannot be empty",
-			eventTypeID:   domain.ID(""),
-			orgID:         domain.NewID(),
-			applicationID: domain.NewID(),
+			eventTypeID:   domain.EventTypeID(""),
+			orgID:         iam.NewOrgID().String(),
+			applicationID: domain.NewApplicationID(),
 			payload:       gofakeit.Sentence(10),
 		},
 		{
 			name:          "error_invalid_org_id",
 			expectedErr:   "orgID cannot be empty",
-			eventTypeID:   domain.NewID(),
-			orgID:         domain.ID(""),
-			applicationID: domain.NewID(),
+			eventTypeID:   domain.NewEventTypeID(),
+			orgID:         "",
+			applicationID: domain.NewApplicationID(),
 			payload:       gofakeit.Sentence(10),
 		},
 		{
 			name:          "error_invalid_application_id",
 			expectedErr:   "applicationID cannot be empty",
-			eventTypeID:   domain.NewID(),
-			orgID:         domain.NewID(),
-			applicationID: domain.ID(""),
+			eventTypeID:   domain.NewEventTypeID(),
+			orgID:         iam.NewOrgID().String(),
+			applicationID: domain.ApplicationID(""),
 			payload:       gofakeit.Sentence(10),
 		},
 	}

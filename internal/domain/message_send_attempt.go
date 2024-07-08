@@ -28,10 +28,20 @@ var (
 	sendAttemptStatusFailed    = SendAttemptStatus("failed")
 )
 
+type MsgSendAttemptID string
+
+func (i MsgSendAttemptID) String() string {
+	return string(i)
+}
+
+func NewMsgSendAttemptID() MsgSendAttemptID {
+	return MsgSendAttemptID(NewID().WithPrefix("msa"))
+}
+
 type MessageSendAttempt struct {
-	id             ID
-	messageID      ID
-	endpointID     ID
+	id             MsgSendAttemptID
+	messageID      MessageID
+	endpointID     EndpointID
 	timestamp      time.Time
 	status         SendAttemptStatus
 	response       string // TODO: make this value-object
@@ -40,16 +50,17 @@ type MessageSendAttempt struct {
 }
 
 func NewMessageSendAttempt(
-	endpointID, messageID ID,
+	endpointID EndpointID,
+	messageID MessageID,
 	response string,
 	statusCode StatusCode,
 	requestHeaders Headers,
 ) (*MessageSendAttempt, error) {
-	if endpointID.IsEmpty() {
+	if endpointID.String() == "" {
 		return nil, errors.New("endpointURL cannot be empty")
 	}
 
-	if messageID.IsEmpty() {
+	if messageID.String() == "" {
 		return nil, errors.New("messageID cannot be empty")
 	}
 
@@ -59,7 +70,7 @@ func NewMessageSendAttempt(
 	}
 
 	return &MessageSendAttempt{
-		id:             NewID(),
+		id:             NewMsgSendAttemptID(),
 		messageID:      messageID,
 		endpointID:     endpointID,
 		timestamp:      time.Now().UTC(),
@@ -70,15 +81,15 @@ func NewMessageSendAttempt(
 	}, nil
 }
 
-func (m *MessageSendAttempt) Id() ID {
+func (m *MessageSendAttempt) ID() MsgSendAttemptID {
 	return m.id
 }
 
-func (m *MessageSendAttempt) MessageID() ID {
+func (m *MessageSendAttempt) MessageID() MessageID {
 	return m.messageID
 }
 
-func (m *MessageSendAttempt) EndpointID() ID {
+func (m *MessageSendAttempt) EndpointID() EndpointID {
 	return m.endpointID
 }
 

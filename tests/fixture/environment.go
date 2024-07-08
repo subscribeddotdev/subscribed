@@ -7,7 +7,6 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/subscribeddotdev/subscribed-backend/internal/adapters/models"
 	"github.com/subscribeddotdev/subscribed-backend/internal/domain"
-	"github.com/subscribeddotdev/subscribed-backend/tests"
 	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 )
@@ -68,7 +67,7 @@ func (e *Environment) NewDomainModel() *domain.Environment {
 
 	newEnv, err := domain.NewEnvironment(
 		env.name,
-		tests.MustID(e.factory.t, e.model.OrganizationID),
+		e.model.OrganizationID,
 		env.envType,
 	)
 	require.NoError(e.factory.t, err)

@@ -55,7 +55,7 @@ func (m *Member) Save() models.Member {
 
 func (m *Member) NewDomainModel() *iam.Member {
 	member, err := iam.NewMember(
-		tests.MustID(m.factory.t, m.model.OrganizationID),
+		iam.OrgID(m.model.OrganizationID),
 		iam.LoginProviderID(m.model.LoginProviderID),
 		m.model.FirstName.String,
 		m.model.LastName.String,

@@ -10,7 +10,7 @@ import (
 type CreateApiKey struct {
 	OrgID         string
 	Name          string
-	EnvironmentID string
+	EnvironmentID domain.EnvironmentID
 	ExpiresAt     *time.Time
 }
 
@@ -30,22 +30,12 @@ func NewCreateApiKeyHandler(
 }
 
 func (c CreateApiKeyHandler) Execute(ctx context.Context, cmd CreateApiKey) error {
-	envID, err := domain.NewIdFromString(cmd.EnvironmentID)
+	env, err := c.envRepo.ByID(ctx, cmd.EnvironmentID)
 	if err != nil {
 		return err
 	}
 
-	orgID, err := domain.NewIdFromString(cmd.OrgID)
-	if err != nil {
-		return err
-	}
-
-	env, err := c.envRepo.ByID(ctx, envID)
-	if err != nil {
-		return err
-	}
-
-	apiKey, err := domain.NewApiKey(cmd.Name, orgID, envID, cmd.ExpiresAt, env.Type() == domain.EnvTypeDevelopment)
+	apiKey, err := domain.NewApiKey(cmd.Name, cmd.OrgID, cmd.EnvironmentID, cmd.ExpiresAt, env.Type() == domain.EnvTypeDevelopment)
 	if err != nil {
 		return err
 	}

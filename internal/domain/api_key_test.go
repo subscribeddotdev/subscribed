@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/subscribeddotdev/subscribed-backend/internal/domain"
+	"github.com/subscribeddotdev/subscribed-backend/internal/domain/iam"
 	"github.com/subscribeddotdev/subscribed-backend/tests"
 )
 
@@ -17,8 +18,8 @@ func TestNewApiKey(t *testing.T) {
 		expectedErr string
 
 		apiKeyName   string
-		envID        domain.ID
-		orgID        domain.ID
+		envID        domain.EnvironmentID
+		orgID        string
 		expiresAt    *time.Time
 		isTestApiKey bool
 	}{
@@ -26,46 +27,46 @@ func TestNewApiKey(t *testing.T) {
 			name:         "create_new_api_key",
 			expectedErr:  "",
 			apiKeyName:   gofakeit.AppName(),
-			envID:        domain.NewID(),
+			envID:        domain.NewEnvironmentID(),
 			expiresAt:    nil,
 			isTestApiKey: false,
-			orgID:        domain.NewID(),
+			orgID:        iam.NewOrgID().String(),
 		},
 		{
 			name:         "create_new_test_api_key",
 			expectedErr:  "",
 			apiKeyName:   gofakeit.AppName(),
-			envID:        domain.NewID(),
+			envID:        domain.NewEnvironmentID(),
 			expiresAt:    nil,
 			isTestApiKey: true,
-			orgID:        domain.NewID(),
+			orgID:        iam.NewOrgID().String(),
 		},
 		{
 			name:         "error_empty_name",
 			expectedErr:  "name cannot be empty",
 			apiKeyName:   "",
-			envID:        domain.NewID(),
+			envID:        domain.NewEnvironmentID(),
 			expiresAt:    nil,
 			isTestApiKey: false,
-			orgID:        domain.NewID(),
+			orgID:        iam.NewOrgID().String(),
 		},
 		{
 			name:         "error_empty_or_invalid_env_id",
 			expectedErr:  "envID cannot be empty",
 			apiKeyName:   gofakeit.AppName(),
-			envID:        domain.ID(""),
+			envID:        domain.EnvironmentID(""),
 			expiresAt:    nil,
 			isTestApiKey: false,
-			orgID:        domain.NewID(),
+			orgID:        iam.NewOrgID().String(),
 		},
 		{
 			name:         "error_expires_at_set_in_the_past",
 			expectedErr:  "expiresAt cannot be set in the past",
 			apiKeyName:   gofakeit.AppName(),
-			envID:        domain.NewID(),
+			envID:        domain.NewEnvironmentID(),
 			expiresAt:    tests.ToPtr(time.Date(2020, 1, 1, 1, 1, 1, 1, time.UTC)),
 			isTestApiKey: false,
-			orgID:        domain.NewID(),
+			orgID:        iam.NewOrgID().String(),
 		},
 	}
 

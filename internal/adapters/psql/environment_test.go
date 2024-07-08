@@ -8,7 +8,6 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/subscribeddotdev/subscribed-backend/internal/adapters/models"
 	"github.com/subscribeddotdev/subscribed-backend/internal/domain"
-	"github.com/subscribeddotdev/subscribed-backend/tests"
 	"github.com/subscribeddotdev/subscribed-backend/tests/fixture"
 )
 
@@ -26,11 +25,11 @@ func TestEnvironmentRepository_ByID(t *testing.T) {
 	org := ff.NewOrganization().Save()
 	env := ff.NewEnvironment().WithOrganizationID(org.ID).Save()
 
-	foundEnv, err := environmentRepo.ByID(ctx, tests.MustID(t, env.ID))
+	foundEnv, err := environmentRepo.ByID(ctx, domain.EnvironmentID(env.ID))
 	require.NoError(t, err)
 
 	assert.Equal(t, env.Name, foundEnv.Name())
-	assert.Equal(t, env.OrganizationID, foundEnv.OrgID().String())
+	assert.Equal(t, env.OrganizationID, foundEnv.OrgID())
 	assert.Equal(t, env.EnvType, foundEnv.Type().String())
 
 	if env.ArchivedAt.Ptr() != nil {
@@ -42,7 +41,7 @@ func TestEnvironmentRepository_ByID(t *testing.T) {
 func assertEnvironment(t *testing.T, env *domain.Environment) {
 	t.Helper()
 
-	model, err := models.FindEnvironment(ctx, db, env.Id().String())
+	model, err := models.FindEnvironment(ctx, db, env.ID().String())
 	require.NoError(t, err)
 
 	assert.Equal(t, env.Name(), model.Name)

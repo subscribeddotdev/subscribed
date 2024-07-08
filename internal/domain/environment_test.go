@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/subscribeddotdev/subscribed-backend/internal/domain"
+	"github.com/subscribeddotdev/subscribed-backend/internal/domain/iam"
 )
 
 func TestNewEnvironment(t *testing.T) {
@@ -16,34 +17,34 @@ func TestNewEnvironment(t *testing.T) {
 
 		envName string
 		envType domain.EnvType
-		orgID   domain.ID
+		orgID   string
 	}{
 		{
 			name:        "create_new_environment",
 			expectedErr: "",
 			envName:     "Development",
-			orgID:       domain.NewID(),
+			orgID:       iam.NewOrgID().String(),
 			envType:     domain.EnvTypeDevelopment,
 		},
 		{
 			name:        "error_empty_name",
 			expectedErr: "name cannot be empty",
 			envName:     "  ",
-			orgID:       domain.NewID(),
+			orgID:       iam.NewOrgID().String(),
 			envType:     domain.EnvTypeDevelopment,
 		},
 		{
 			name:        "error_empty_or_invalid_org_id",
 			expectedErr: "orgID cannot be empty",
 			envName:     "Production",
-			orgID:       domain.ID(""),
+			orgID:       "",
 			envType:     domain.EnvTypeProduction,
 		},
 		{
 			name:        "error_empty_env_type",
 			expectedErr: "environment type cannot be empty",
 			envName:     "Production",
-			orgID:       domain.NewID(),
+			orgID:       iam.NewOrgID().String(),
 			envType:     domain.EnvType{},
 		},
 	}

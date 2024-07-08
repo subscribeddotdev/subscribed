@@ -24,8 +24,8 @@ func NewEnvironmentRepository(db boil.ContextExecutor) *EnvironmentRepository {
 
 func (o EnvironmentRepository) Insert(ctx context.Context, env *domain.Environment) error {
 	model := models.Environment{
-		ID:             env.Id().String(),
-		OrganizationID: env.OrgID().String(),
+		ID:             env.ID().String(),
+		OrganizationID: env.OrgID(),
 		Name:           env.Name(),
 		EnvType:        env.Type().String(),
 		CreatedAt:      env.CreatedAt(),
@@ -40,7 +40,7 @@ func (o EnvironmentRepository) Insert(ctx context.Context, env *domain.Environme
 	return nil
 }
 
-func (o EnvironmentRepository) ByID(ctx context.Context, id domain.ID) (*domain.Environment, error) {
+func (o EnvironmentRepository) ByID(ctx context.Context, id domain.EnvironmentID) (*domain.Environment, error) {
 	model, err := models.FindEnvironment(ctx, o.db, id.String())
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, domain.ErrEnvironmentNotFound
@@ -51,7 +51,7 @@ func (o EnvironmentRepository) ByID(ctx context.Context, id domain.ID) (*domain.
 	}
 
 	return domain.UnMarshallEnvironment(
-		model.ID,
+		domain.EnvironmentID(model.ID),
 		model.OrganizationID,
 		model.Name,
 		model.EnvType,

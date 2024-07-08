@@ -30,7 +30,7 @@ func (o MemberRepository) Insert(ctx context.Context, member *iam.Member) error 
 		LastName:        null.StringFrom(member.LastName()),
 		Email:           member.Email().String(),
 		LoginProviderID: member.LoginProviderId().String(),
-		OrganizationID:  member.OrganizationID().String(),
+		OrganizationID:  member.OrgID().String(),
 		CreatedAt:       member.CreatedAt(),
 	}
 
@@ -72,7 +72,7 @@ func (o MemberRepository) ByLoginProviderID(ctx context.Context, lpi iam.LoginPr
 
 	return iam.UnMarshallMember(
 		model.ID,
-		model.OrganizationID,
+		iam.OrgID(model.OrganizationID),
 		iam.LoginProviderID(model.LoginProviderID),
 		model.FirstName.String,
 		model.LastName.String,

@@ -6,8 +6,18 @@ import (
 	"time"
 )
 
+type ApplicationID string
+
+func (i ApplicationID) String() string {
+	return string(i)
+}
+
+func NewApplicationID() ApplicationID {
+	return ApplicationID(NewID().WithPrefix("app"))
+}
+
 type Application struct {
-	id        ID
+	id        ApplicationID
 	name      string
 	envID     ID
 	createdAt time.Time
@@ -24,7 +34,7 @@ func NewApplication(name string, envID ID) (*Application, error) {
 	}
 
 	return &Application{
-		id:        NewID(),
+		id:        NewApplicationID(),
 		name:      name,
 		envID:     envID,
 		createdAt: time.Now().UTC(),
@@ -35,7 +45,7 @@ func (a *Application) EnvID() ID {
 	return a.envID
 }
 
-func (a *Application) Id() ID {
+func (a *Application) ID() ApplicationID {
 	return a.id
 }
 

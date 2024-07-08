@@ -31,7 +31,7 @@ CREATE TABLE environments (
 );
 
 CREATE TABLE applications (
-    id VARCHAR(26) NOT NULL PRIMARY KEY,
+    id TEXT NOT NULL PRIMARY KEY,
     environment_id VARCHAR(26) NOT NULL,
     name TEXT NOT NULL,
     created_at TIMESTAMPTZ NOT NULL,
@@ -41,7 +41,7 @@ CREATE TABLE applications (
 
 CREATE TABLE endpoints (
     id VARCHAR(26) NOT NULL PRIMARY KEY,
-    application_id VARCHAR(26) NOT NULL,
+    application_id TEXT NOT NULL,
     url TEXT NOT NULL,
     description TEXT,
     signing_secret TEXT NOT NULL,

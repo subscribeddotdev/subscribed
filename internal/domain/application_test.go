@@ -51,7 +51,7 @@ func TestNewApplication(t *testing.T) {
 
 			require.NoError(t, err)
 
-			assert.NotNil(t, application.Id())
+			assert.NotNil(t, application.ID())
 			assert.Equal(t, tc.appName, application.Name())
 			assert.Equal(t, tc.envID, application.EnvID())
 			assert.True(t, application.CreatedAt().Before(time.Now()))

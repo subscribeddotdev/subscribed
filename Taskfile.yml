@@ -56,11 +56,8 @@ tasks:
   test:all:
     cmds:
       - go clean -testcache
-      - task wait-for -- 8080
-      - task wait-for -- 8090
-      - task wait-for -- 8091
       - task test
-      # - task test:components
+      - task test:components
 
   test:
     cmds:
@@ -68,6 +65,7 @@ tasks:
 
   test:components:
     cmds:
+      - go clean -testcache
       - go test -v -race ./tests/components/...
 
   lint:docker:
@@ -116,6 +114,12 @@ tasks:
         done
         
         echo "Service launched"
+
+  wait:all:
+    cmds:
+      - task wait-for -- 8080
+      - task wait-for -- 8090
+      - task wait-for -- 8091
 
   openapi:
     cmds:

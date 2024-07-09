@@ -23,7 +23,6 @@ services:
     restart: on-failure
     links:
       - postgres
-      - rabbitmq
     depends_on:
       postgres:
         condition: service_healthy

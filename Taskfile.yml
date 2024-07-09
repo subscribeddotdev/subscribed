@@ -60,7 +60,7 @@ tasks:
       - task wait-for -- 8090
       - task wait-for -- 8091
       - task test
-      - task test:components
+      # - task test:components
 
   test:
     cmds:

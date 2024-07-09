@@ -4,6 +4,11 @@ services:
     ports:
       - "5672:5672"
       - "15672:15672"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:15672" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   postgres:
     image: postgres:16.3-alpine
@@ -20,12 +25,11 @@ services:
   app:
     build: ./misc/tools/reflex
     stop_grace_period: 1s
-    restart: on-failure
-    links:
-      - postgres
     depends_on:
       postgres:
         condition: service_healthy
+      rabbitmq:
+        condition: service_started
     environment:
       APP_NAME: backend
     env_file:

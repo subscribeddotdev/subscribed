@@ -105,7 +105,8 @@ tasks:
 
   wait:all:
     cmds:
-      - task wait-for -- 8081
+      - go run ./misc/tools/wait-for
+      # - task wait-for -- 8081
       - task wait-for -- 8090
       - task wait-for -- 8091
 

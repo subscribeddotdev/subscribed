@@ -16,7 +16,7 @@ func main() {
 		select {
 		case <-timeout.C:
 			log.Printf("waiting for '%s' timed out", address)
-			return
+			os.Exit(1)
 		default:
 			//nolint:all
 			resp, err := http.Get(address)

@@ -19,8 +19,7 @@ jobs:
         run: task docker:up
 
       - name: Wait for
-        run:
-          task wait:all
+        run: task wait:all
         timeout-minutes: 1
 
       - name: Download deps

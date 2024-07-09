@@ -51,7 +51,7 @@ func (c CallWebhookEndpointHandler) Execute(ctx context.Context, cmd CallWebhook
 			Timeout: time.Second * 30,
 		}
 
-		// TODO: retrieve the notification from the endpoint itself
+		// TODO: retrieve the method from the endpoint itself
 		req, err := http.NewRequestWithContext(
 			ctx,
 			http.MethodPost,

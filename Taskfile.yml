@@ -56,9 +56,6 @@ tasks:
   test:all:
     cmds:
       - go clean -testcache
-      - task wait-for -- 8080
-      - task wait-for -- 8090
-      - task wait-for -- 8091
       - task test
       - task test:components
 
@@ -68,6 +65,7 @@ tasks:
 
   test:components:
     cmds:
+      - go clean -testcache
       - go test -v -race ./tests/components/...
 
   lint:docker:
@@ -94,18 +92,6 @@ tasks:
     cmds:
       - docker-compose up -d {{.CLI_ARGS}}
 
-  docker:build:
-    cmds:
-      - docker build -t dobermann.dev/backend:latest .
-
-  docker:build-simulator:
-    cmds:
-      - docker build -t dobermann.dev/simulator:latest -f simulator.Dockerfile .
-
-  docker:run:
-    cmds:
-      - docker run --env-file ./.env.local dobermann.dev/backend:latest
-
   wait-for:
     cmds:
       - |
@@ -116,6 +102,13 @@ tasks:
         done
         
         echo "Service launched"
+
+  wait:all:
+    cmds:
+      - go run ./misc/tools/wait-for
+      # - task wait-for -- 8081
+      - task wait-for -- 8090
+      - task wait-for -- 8091
 
   openapi:
     cmds:
@@ -143,4 +136,4 @@ tasks:
   # NGROK_URL must be set in your local .env.secrets
   webhook:
     cmds:
-      - ngrok http --domain=$NGROK_URL 8080
+      - ngrok http --domain=$NGROK_URL 8081

@@ -30,6 +30,7 @@ type EventType struct {
 }
 
 func NewEventType(orgID, name, description, schema, schemaExample string) (*EventType, error) {
+	orgID = strings.TrimSpace(orgID)
 	if orgID == "" {
 		return nil, errors.New("orgID cannot be empty")
 	}

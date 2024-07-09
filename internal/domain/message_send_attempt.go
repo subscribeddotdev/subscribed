@@ -9,6 +9,14 @@ const httpLastSuccessStatusCode = 299
 
 type StatusCode uint
 
+func (c StatusCode) validate() error {
+	if c < 200 || c > 599 {
+		return errors.New("invalid status code")
+	}
+
+	return nil
+}
+
 type SendAttemptStatus string
 
 func (s SendAttemptStatus) String() string {
@@ -57,11 +65,15 @@ func NewMessageSendAttempt(
 	requestHeaders Headers,
 ) (*MessageSendAttempt, error) {
 	if endpointID.String() == "" {
-		return nil, errors.New("endpointURL cannot be empty")
+		return nil, errors.New("endpointID cannot be empty")
 	}
 
 	if messageID.String() == "" {
 		return nil, errors.New("messageID cannot be empty")
+	}
+
+	if err := statusCode.validate(); err != nil {
+		return nil, err
 	}
 
 	status := sendAttemptStatusFailed

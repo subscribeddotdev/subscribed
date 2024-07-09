@@ -94,21 +94,13 @@ tasks:
 
   wait-for:
     cmds:
-      - |
-        echo "Waiting service to launch on {{.CLI_ARGS}}..."
-        
-        while ! nc -z localhost {{.CLI_ARGS}}; do
-          sleep 0.1 # wait for 1/10 of the second before check again
-        done
-        
-        echo "Service launched"
+      - ./misc/tools/wait-for/wait-for.sh {{.CLI_ARGS}}
 
   wait:all:
     cmds:
-      - go run ./misc/tools/wait-for
-      # - task wait-for -- 8081
-      - task wait-for -- 8090
-      - task wait-for -- 8091
+      - task wait-for -- localhost:8080
+      - task wait-for -- localhost:8090
+      - task wait-for -- localhost:8091
 
   openapi:
     cmds:

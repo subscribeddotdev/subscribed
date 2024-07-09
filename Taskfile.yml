@@ -92,18 +92,6 @@ tasks:
     cmds:
       - docker-compose up -d {{.CLI_ARGS}}
 
-  docker:build:
-    cmds:
-      - docker build -t dobermann.dev/backend:latest .
-
-  docker:build-simulator:
-    cmds:
-      - docker build -t dobermann.dev/simulator:latest -f simulator.Dockerfile .
-
-  docker:run:
-    cmds:
-      - docker run --env-file ./.env.local dobermann.dev/backend:latest
-
   wait-for:
     cmds:
       - |
@@ -117,7 +105,7 @@ tasks:
 
   wait:all:
     cmds:
-      - task wait-for -- 8080
+      - task wait-for -- 8081
       - task wait-for -- 8090
       - task wait-for -- 8091
 
@@ -147,4 +135,4 @@ tasks:
   # NGROK_URL must be set in your local .env.secrets
   webhook:
     cmds:
-      - ngrok http --domain=$NGROK_URL 8080
+      - ngrok http --domain=$NGROK_URL 8081

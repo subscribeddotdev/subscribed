@@ -1,6 +1,6 @@
 services:
   rabbitmq:
-    image: heidiks/rabbitmq-delayed-message-exchange:3.13.0-management
+    image: heidiks/rabbitmq-delayed-message-exchange:3.13.3-management
     ports:
       - "5672:5672"
       - "15672:15672"

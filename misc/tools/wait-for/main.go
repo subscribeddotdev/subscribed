@@ -18,6 +18,7 @@ func main() {
 			log.Printf("waiting for '%s' timed out", address)
 			return
 		default:
+			//nolint:all
 			resp, err := http.Get(address)
 			if err != nil {
 				log.Printf("error waiting for '%s': %v\n", address, err)
@@ -25,6 +26,7 @@ func main() {
 				continue
 			}
 
+			_ = resp.Body.Close()
 			if resp.StatusCode > 0 {
 				log.Printf("%s is ready\n", address)
 				return

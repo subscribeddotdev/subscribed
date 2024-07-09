@@ -20,6 +20,7 @@ services:
   app:
     build: ./misc/tools/reflex
     stop_grace_period: 1s
+    restart: on-failure
     links:
       - postgres
       - rabbitmq

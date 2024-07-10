@@ -23,31 +23,7 @@ func NewWaitFor(logger *logs.Logger) *WaitFor {
 	}
 }
 
-// Run Wait for other containers to start responding before running the service
-func Run() {
-	w := NewWaitFor(logs.New())
-	w.do(func() error {
-		db, err := postgres.Connect(os.Getenv("DATABASE_URL"))
-		if err != nil {
-			return err
-		}
-
-		return db.Ping()
-	}, "postgres", time.Second*30)
-
-	w.do(func() error {
-		_, err := amqp091.Dial(os.Getenv("AMQP_URL"))
-		if err != nil {
-			return err
-		}
-
-		return nil
-	}, "rabbitmq", time.Second*30)
-
-	w.Wait()
-}
-
-func (w *WaitFor) do(handler func() error, svcName string, timeout time.Duration) {
+func (w *WaitFor) Do(handler func() error, svcName string, timeout time.Duration) {
 	w.wg.Add(1)
 
 	go func() {
@@ -64,8 +40,8 @@ func (w *WaitFor) do(handler func() error, svcName string, timeout time.Duration
 			default:
 				err := handler()
 				if err != nil {
-					w.logger.Error("⚠️ Check failed, trying again...", "service", svcName, "error", err)
-					time.Sleep(time.Second * 1)
+					w.logger.Error("⚠️ Check failed, trying again...in 250ms", "service", svcName, "error", err)
+					time.Sleep(time.Millisecond * 250)
 					continue
 				}
 
@@ -81,4 +57,28 @@ func (w *WaitFor) do(handler func() error, svcName string, timeout time.Duration
 
 func (w *WaitFor) Wait() {
 	w.wg.Wait()
+}
+
+// Run Wait for other containers to start responding before running the service
+func Run() {
+	w := NewWaitFor(logs.New())
+	w.Do(func() error {
+		db, err := postgres.Connect(os.Getenv("DATABASE_URL"))
+		if err != nil {
+			return err
+		}
+
+		return db.Ping()
+	}, "postgres", time.Second*30)
+
+	w.Do(func() error {
+		_, err := amqp091.Dial(os.Getenv("AMQP_URL"))
+		if err != nil {
+			return err
+		}
+
+		return nil
+	}, "rabbitmq", time.Second*30)
+
+	w.Wait()
 }

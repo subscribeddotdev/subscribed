@@ -1,4 +1,5 @@
 #!/bin/bash
 
 cd /usr/app
-task run:$APP_NAME
+go run ./misc/tools/wait/ &&
+  task run:$APP_NAME

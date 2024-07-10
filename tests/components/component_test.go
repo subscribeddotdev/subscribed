@@ -13,7 +13,9 @@ import (
 	"github.com/labstack/echo/v4"
 	_ "github.com/lib/pq"
 	"github.com/stretchr/testify/require"
+	"github.com/subscribeddotdev/subscribed-backend/internal/common/logs"
 	"github.com/subscribeddotdev/subscribed-backend/internal/common/postgres"
+	"github.com/subscribeddotdev/subscribed-backend/misc/tools/wait/wait_for"
 	"github.com/subscribeddotdev/subscribed-backend/tests/client"
 )
 
@@ -26,6 +28,25 @@ func TestMain(m *testing.M) {
 	var cancel context.CancelFunc
 	ctx, cancel = context.WithTimeout(context.Background(), time.Minute*2)
 	defer cancel()
+
+	// Wait for postgres and rabbitmq and other default dependencies running in containers
+	wait_for.Run()
+
+	// Wait for the backend to be spun up
+	waitfor := wait_for.NewWaitFor(logs.New())
+	waitfor.Do(func() error {
+		req, err := http.Get(fmt.Sprintf("http://localhost:%s/health", os.Getenv("HTTP_PORT")))
+		if err != nil {
+			return err
+		}
+
+		if req.StatusCode != http.StatusOK {
+			return fmt.Errorf("expected status code 200 instead got %d", req.StatusCode)
+		}
+
+		return nil
+	}, "subscribed-backend", time.Second*30)
+	waitfor.Wait()
 
 	var err error
 	db, err = postgres.Connect(os.Getenv("DATABASE_URL"))

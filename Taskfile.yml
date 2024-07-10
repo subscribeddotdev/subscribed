@@ -98,8 +98,6 @@ tasks:
 
   wait:all:
     cmds:
-      - task wait-for -- localhost:5672
-      - task wait-for -- localhost:5432
       - task wait-for -- localhost:8080
       - task wait-for -- localhost:8090
       - task wait-for -- localhost:8091

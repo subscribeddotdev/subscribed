@@ -1,4 +1,4 @@
-package main
+package wait_for
 
 import (
 	"os"
@@ -23,8 +23,8 @@ func NewWaitFor(logger *logs.Logger) *WaitFor {
 	}
 }
 
-// Wait for other containers to start responding before running the service
-func main() {
+// Run Wait for other containers to start responding before running the service
+func Run() {
 	w := NewWaitFor(logs.New())
 	w.do(func() error {
 		db, err := postgres.Connect(os.Getenv("DATABASE_URL"))

@@ -10,6 +10,7 @@ import (
 
 	"github.com/subscribeddotdev/subscribed-backend/internal/adapters/psql"
 	"github.com/subscribeddotdev/subscribed-backend/internal/common/postgres"
+	"github.com/subscribeddotdev/subscribed-backend/misc/tools/wait/wait_for"
 )
 
 var (
@@ -28,6 +29,8 @@ func TestMain(m *testing.M) {
 	var cancel context.CancelFunc
 	ctx, cancel = context.WithTimeout(context.Background(), time.Minute*1)
 	defer cancel()
+
+	wait_for.Run()
 
 	var err error
 	db, err = postgres.Connect(os.Getenv("DATABASE_URL"))

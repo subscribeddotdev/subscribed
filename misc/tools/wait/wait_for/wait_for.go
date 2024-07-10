@@ -33,7 +33,7 @@ func Run() {
 		}
 
 		return db.Ping()
-	}, "postgres", time.Second*5)
+	}, "postgres", time.Second*30)
 
 	w.do(func() error {
 		_, err := amqp091.Dial(os.Getenv("AMQP_URL"))
@@ -42,7 +42,7 @@ func Run() {
 		}
 
 		return nil
-	}, "rabbitmq", time.Second*5)
+	}, "rabbitmq", time.Second*30)
 
 	w.Wait()
 }

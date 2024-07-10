@@ -15,50 +15,29 @@ jobs:
         with:
           go-version: "1.22.3"
 
-      #- id: go-paths
-      #  run: |
-      #    echo "gocache=$(go env GOCACHE)" >>"$GITHUB_OUTPUT"
-      #    echo "gomodcache=$(go env GOMODCACHE)" >>"$GITHUB_OUTPUT"
-      #  shell: bash
-
-      #- uses: actions/cache@v3
-      #  with:
-      #    path: |
-      #      ${{ steps.go-paths.outputs.gocache }}
-      #      ${{ steps.go-paths.outputs.gomodcache }}
-      #    key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-      #    restore-keys: |
-      #      ${{ runner.os }}-go-
-
       - name: Download deps
         run: go mod download
 
       - name: Spin up Docker
         run: task docker:up
-        # env:
-        #   GOCACHE: ${{ steps.go-paths.outputs.gocache }}
-        #   GOMODCACHE: ${{ steps.go-paths.outputs.gomodcache }}
 
       - name: Test all
         run: task test:all
         timeout-minutes: 4
-        # env:
-        #   GOCACHE: ${{ steps.go-paths.outputs.gocache }}
-        #   GOMODCACHE: ${{ steps.go-paths.outputs.gomodcache }}
 
       - run: docker-compose logs || true
         if: always()
 
-  #golangci:
-  #  name: lint
-  #  runs-on: ubuntu-latest
-  #  steps:
-  #    - uses: actions/setup-go@v5
-  #      with:
-  #        go-version: "1.22.3"
-  #    - uses: actions/checkout@v4
-  #    - name: golangci-lint
-  #      uses: golangci/golangci-lint-action@v6.0.1
-  #      with:
-  #        version: latest
-  #        args: --timeout 3m --verbose
+  golangci:
+    name: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.22.3"
+      - uses: actions/checkout@v4
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v6.0.1
+        with:
+          version: latest
+          args: --timeout 3m --verbose

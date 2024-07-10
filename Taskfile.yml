@@ -92,16 +92,6 @@ tasks:
     cmds:
       - docker-compose up -d {{.CLI_ARGS}}
 
-  wait-for:
-    cmds:
-      - ./misc/tools/wait-for/wait-for.sh {{.CLI_ARGS}}
-
-  wait:all:
-    cmds:
-      - task wait-for -- localhost:8080
-      - task wait-for -- localhost:8090
-      - task wait-for -- localhost:8091
-
   openapi:
     cmds:
       - |

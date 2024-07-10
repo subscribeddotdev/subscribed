@@ -39,10 +39,6 @@ jobs:
         #   GOCACHE: ${{ steps.go-paths.outputs.gocache }}
         #   GOMODCACHE: ${{ steps.go-paths.outputs.gomodcache }}
 
-      - name: Wait for
-        run: task wait:all
-        timeout-minutes: 1
-
       - name: Test all
         run: task test:all
         timeout-minutes: 4

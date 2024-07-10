@@ -30,6 +30,8 @@ services:
     build: ./misc/tools/reflex
     stop_grace_period: 1s
     restart: always
+    env_file:
+      - ./.env
     environment:
       APP_NAME: emulators
     ports:

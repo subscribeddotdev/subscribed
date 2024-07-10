@@ -3,6 +3,7 @@ package psql_test
 import (
 	"context"
 	"database/sql"
+	"log"
 	"os"
 	"testing"
 	"time"
@@ -31,12 +32,14 @@ func TestMain(m *testing.M) {
 	var err error
 	db, err = postgres.Connect(os.Getenv("DATABASE_URL"))
 	if err != nil {
-		panic(err)
+		log.Println(err)
+		os.Exit(1)
 	}
 
 	err = postgres.ApplyMigrations(db, "../../../misc/sql/migrations")
 	if err != nil {
-		panic(err)
+		log.Println(err)
+		os.Exit(1)
 	}
 
 	environmentRepo = psql.NewEnvironmentRepository(db)

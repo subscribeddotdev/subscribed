@@ -26,6 +26,8 @@ func NewWaitFor(logger *logs.Logger) *WaitFor {
 func (w *WaitFor) Do(handler func() error, svcName string, timeout time.Duration) {
 	w.wg.Add(1)
 
+	w.logger.Info("⏱️ WaitFor started", "service", svcName)
+
 	go func() {
 		until := time.NewTimer(timeout)
 
@@ -40,7 +42,7 @@ func (w *WaitFor) Do(handler func() error, svcName string, timeout time.Duration
 			default:
 				err := handler()
 				if err != nil {
-					w.logger.Error("⚠️ Check failed, trying again...in 250ms", "service", svcName, "error", err)
+					w.logger.Debug("⚠️ Check failed, trying again...in 250ms", "service", svcName, "error", err)
 					time.Sleep(time.Millisecond * 250)
 					continue
 				}

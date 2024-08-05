@@ -519,8 +519,8 @@ github.com/stretchr/testify v1.9.0 h1:HtqpIVDClZ4nwg75+f6Lvsy/wHu+3BoSGCbBAcpTsT
 github.com/stretchr/testify v1.9.0/go.mod h1:r2ic/lqez/lEtzL7wO/rwa5dbSLXVDPFyf8C91i36aY=
 github.com/subosito/gotenv v1.3.0/go.mod h1:YzJjq/33h7nrwdY+iHMhEOEEbW0ovIz0tB6t6PwAXzs=
 github.com/subosito/gotenv v1.4.1/go.mod h1:ayKnFf/c6rvx/2iiLrJUk1e6plDbT3edrFNGqEflhK0=
-github.com/svix/svix-webhooks v1.25.0 h1:y2ZX2uHS5hEyrErsKdMN0zDcff3NziI/hEJ0ccqOzK8=
-github.com/svix/svix-webhooks v1.25.0/go.mod h1:CteUj578U/Mmem33Hda4lhzQ6mIs8pwmgj3f9NAG7vQ=
+github.com/svix/svix-webhooks v1.28.0 h1:wl1jafzdEiJ4mh0oqfRhwijiga15cgp1Yl+EuAFw6CY=
+github.com/svix/svix-webhooks v1.28.0/go.mod h1:CteUj578U/Mmem33Hda4lhzQ6mIs8pwmgj3f9NAG7vQ=
 github.com/tv42/httpunix v0.0.0-20150427012821-b75d8614f926/go.mod h1:9ESjWnEqriFuLhtthL60Sar/7RFoluCcXsuvEwTV5KM=
 github.com/ugorji/go/codec v1.2.11 h1:BMaWp1Bb6fHwEtbplGBGJ498wD+LKlNSl25MjdZY4dU=
 github.com/ugorji/go/codec v1.2.11/go.mod h1:UNopzCgEMSXjBc6AOMqYvWC1ktqTAfzJZUZgYf6w6lg=

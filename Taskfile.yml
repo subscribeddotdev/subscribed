@@ -16,8 +16,7 @@ tasks:
 
   watch:
     cmds:
-      - |
-        reflex -r '\.go' -s -- sh -c '{{.CLI_ARGS}}'
+      - reflex -r '\.go' -s -- sh -c '{{.CLI_ARGS}}'
 
   mig:up:
     cmds:
@@ -86,11 +85,11 @@ tasks:
 
   logs:
     cmds:
-      - docker-compose logs -f --tail 10
+      - docker compose logs -f --tail 10
 
   docker:up:
     cmds:
-      - docker-compose up -d {{.CLI_ARGS}}
+      - docker compose up -d {{.CLI_ARGS}}
 
   openapi:
     cmds:
@@ -118,4 +117,4 @@ tasks:
   # NGROK_URL must be set in your local .env.secrets
   webhook:
     cmds:
-      - ngrok http --domain=$NGROK_URL 8081
+      - ngrok http --domain=$NGROK_URL 8080

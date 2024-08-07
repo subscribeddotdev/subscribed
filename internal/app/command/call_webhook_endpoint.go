@@ -63,11 +63,13 @@ func (c CallWebhookEndpointHandler) Execute(ctx context.Context, cmd CallWebhook
 		}
 
 		timestamp := time.Now()
+		// TODO: move this to the domain
 		signature, err := createSignature(message, endpoint, timestamp)
 		if err != nil {
 			return err
 		}
 
+		// Move this to a helper
 		req.Header.Set("user-agent", "subscribed-backend")
 		req.Header.Set("x-sbs-id", cmd.MessageID.String())
 		req.Header.Set("x-sbs-timestamp", fmt.Sprintf("%d", timestamp.Unix()))

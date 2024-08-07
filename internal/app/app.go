@@ -12,7 +12,7 @@ type CommandHandler[C any] interface {
 }
 
 type QueryHandler[Q, R any] interface {
-	Execute(ctx context.Context, q Q) error
+	Execute(ctx context.Context, q Q) (R, error)
 }
 
 type Command struct {

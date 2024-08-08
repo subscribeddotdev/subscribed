@@ -17,7 +17,11 @@ func TestEnvironmentRepository_Insert(t *testing.T) {
 	env := ff.NewEnvironment().WithOrganizationID(org.ID).NewDomainModel()
 	err := environmentRepo.Insert(ctx, env)
 	require.NoError(t, err)
-	assertEnvironment(t, env)
+
+	model, err := models.FindEnvironment(ctx, db, env.ID().String())
+	require.NoError(t, err)
+
+	assertEnvironment(t, model, env)
 }
 
 func TestEnvironmentRepository_ByID(t *testing.T) {
@@ -28,24 +32,39 @@ func TestEnvironmentRepository_ByID(t *testing.T) {
 	foundEnv, err := environmentRepo.ByID(ctx, domain.EnvironmentID(env.ID))
 	require.NoError(t, err)
 
-	assert.Equal(t, env.Name, foundEnv.Name())
-	assert.Equal(t, env.OrganizationID, foundEnv.OrgID())
-	assert.Equal(t, env.EnvType, foundEnv.Type().String())
-
-	if env.ArchivedAt.Ptr() != nil {
-		assert.Equal(t, env.ArchivedAt.Ptr().Truncate(time.Second), foundEnv.ArchivedAt().Truncate(time.Second))
-	}
-	assert.Equal(t, env.CreatedAt.Truncate(time.Second), foundEnv.CreatedAt().Truncate(time.Second))
+	assertEnvironment(t, &env, foundEnv)
 }
 
-func assertEnvironment(t *testing.T, env *domain.Environment) {
-	t.Helper()
+func TestNewEnvironmentRepository_FindAll(t *testing.T) {
+	ff := fixture.NewFactory(t, ctx, db)
+	org := ff.NewOrganization().Save()
 
-	model, err := models.FindEnvironment(ctx, db, env.ID().String())
+	envs := make(map[string]models.Environment)
+	for i := 0; i < 3; i++ {
+		e := ff.NewEnvironment().WithOrganizationID(org.ID).Save()
+		envs[e.ID] = e
+	}
+
+	foundEnvs, err := environmentRepo.FindAll(ctx, org.ID)
 	require.NoError(t, err)
 
+	for _, foundEnv := range foundEnvs {
+		env, exists := envs[foundEnv.ID().String()]
+		require.True(t, exists)
+		assertEnvironment(t, &env, foundEnv)
+	}
+}
+
+func assertEnvironment(t *testing.T, model *models.Environment, env *domain.Environment) {
+	t.Helper()
+
+	assert.Equal(t, env.ID().String(), model.ID)
+	assert.Equal(t, env.OrgID(), model.OrganizationID)
 	assert.Equal(t, env.Name(), model.Name)
 	assert.Equal(t, env.Type().String(), model.EnvType)
-	assert.Nil(t, model.ArchivedAt.Ptr())
-	assert.True(t, model.CreatedAt.UTC().Before(time.Now().UTC()))
+	assert.True(t, model.CreatedAt.Before(time.Now()))
+
+	if model.ArchivedAt.Ptr() != nil {
+		assert.Nil(t, env.ArchivedAt(), model.ArchivedAt.Ptr())
+	}
 }

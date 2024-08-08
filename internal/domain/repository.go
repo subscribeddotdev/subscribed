@@ -17,6 +17,7 @@ var (
 type EnvironmentRepository interface {
 	ByID(ctx context.Context, id EnvironmentID) (*Environment, error)
 	Insert(ctx context.Context, env *Environment) error
+	FindAll(ctx context.Context, orgID string) ([]*Environment, error)
 }
 
 type ApplicationRepository interface {

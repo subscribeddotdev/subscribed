@@ -5,6 +5,8 @@ import (
 
 	"github.com/subscribeddotdev/subscribed-backend/internal/app/auth"
 	"github.com/subscribeddotdev/subscribed-backend/internal/app/command"
+	"github.com/subscribeddotdev/subscribed-backend/internal/app/query"
+	"github.com/subscribeddotdev/subscribed-backend/internal/domain"
 )
 
 type CommandHandler[C any] interface {
@@ -25,7 +27,12 @@ type Command struct {
 	CallWebhookEndpoint CommandHandler[command.CallWebhookEndpoint]
 }
 
+type Query struct {
+	Environments QueryHandler[query.Environments, []*domain.Environment]
+}
+
 type App struct {
 	Authorization *auth.Service
 	Command       Command
+	Query         Query
 }

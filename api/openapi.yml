@@ -171,6 +171,24 @@ paths:
           description: CREATED
         default:
           $ref: '#/components/responses/DefaultError'
+  /environments:
+    get:
+      tags:
+        - Environments
+      operationId: getEnvironments
+      summary: Get all environments
+      security:
+        - BearerAuth: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetAllEnvironmentsPayload'
+        default:
+          $ref: '#/components/responses/DefaultError'
+
 components:
   schemas:
     ClerkWebhookEmailAddress:
@@ -356,6 +374,35 @@ components:
         expires_at:
           type: string
           format: date-time
+    # Environments
+    Environment:
+      required: [id, name, organization_id, name, type, created_at]
+      properties:
+        id:
+          type: string
+        organization_id:
+          type: string
+        name:
+          type: string
+        type:
+          type: string
+          enum:
+            - production
+            - development
+        created_at:
+          type: string
+          format: date-time
+        archived_at:
+          type: string
+          format: date-time
+    GetAllEnvironmentsPayload:
+      required: [data]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Environment'
+    # Generic responses and errors
     GenericResponse:
       type: object
       required:

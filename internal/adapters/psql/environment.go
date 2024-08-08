@@ -59,3 +59,28 @@ func (o EnvironmentRepository) ByID(ctx context.Context, id domain.EnvironmentID
 		model.ArchivedAt.Ptr(),
 	)
 }
+
+func (o EnvironmentRepository) FindAll(ctx context.Context, orgID string) ([]*domain.Environment, error) {
+	rows, err := models.Environments(models.EnvironmentWhere.OrganizationID.EQ(orgID)).All(ctx, o.db)
+	if err != nil {
+		return nil, err
+	}
+
+	envs := make([]*domain.Environment, len(rows))
+	for i, row := range rows {
+		env, err := domain.UnMarshallEnvironment(
+			domain.EnvironmentID(row.ID),
+			row.OrganizationID,
+			row.Name,
+			row.EnvType,
+			row.CreatedAt,
+			row.ArchivedAt.Ptr(),
+		)
+		if err != nil {
+			return nil, fmt.Errorf("error mapping row with id '%s' to environment: %v", row.ID, err)
+		}
+
+		envs[i] = env
+	}
+	return envs, nil
+}

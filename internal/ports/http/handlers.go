@@ -7,6 +7,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/subscribeddotdev/subscribed-backend/internal/app"
 	"github.com/subscribeddotdev/subscribed-backend/internal/app/command"
+	"github.com/subscribeddotdev/subscribed-backend/internal/app/query"
 	"github.com/subscribeddotdev/subscribed-backend/internal/common/clerkhttp"
 	"github.com/subscribeddotdev/subscribed-backend/internal/domain"
 	"github.com/subscribeddotdev/subscribed-backend/internal/domain/iam"
@@ -15,6 +16,14 @@ import (
 type handlers struct {
 	application                  *app.App
 	loginProviderWebhookVerifier LoginProviderWebhookVerifier
+}
+
+type LoginProviderWebhookVerifier interface {
+	Verify(payload []byte, headers http.Header) error
+}
+
+func (h handlers) HealthCheck(c echo.Context) error {
+	return c.String(http.StatusOK, "ok")
 }
 
 func (h handlers) AddEndpoint(c echo.Context, applicationID string) error {
@@ -53,14 +62,6 @@ func (h handlers) AddEndpoint(c echo.Context, applicationID string) error {
 	}
 
 	return c.NoContent(http.StatusNoContent)
-}
-
-type LoginProviderWebhookVerifier interface {
-	Verify(payload []byte, headers http.Header) error
-}
-
-func (h handlers) HealthCheck(c echo.Context) error {
-	return c.String(http.StatusOK, "ok")
 }
 
 func (h handlers) CreateApplication(c echo.Context) error {
@@ -157,6 +158,35 @@ func (h handlers) CreateApiKey(c echo.Context, params CreateApiKeyParams) error 
 	}
 
 	return c.NoContent(http.StatusCreated)
+}
+
+func (h handlers) GetEnvironments(c echo.Context) error {
+	member, err := h.resolveMemberFromCtx(c)
+	if err != nil {
+		return err
+	}
+
+	envs, err := h.application.Query.Environments.Execute(c.Request().Context(), query.Environments{
+		OrgID: member.OrgID().String(),
+	})
+	if err != nil {
+		return err
+	}
+
+	data := make([]Environment, len(envs))
+
+	for i, env := range envs {
+		data[i] = Environment{
+			ArchivedAt:     env.ArchivedAt(),
+			CreatedAt:      env.CreatedAt(),
+			Id:             env.ID().String(),
+			Name:           env.Name(),
+			OrganizationId: env.OrgID(),
+			Type:           EnvironmentType(env.Type().String()),
+		}
+	}
+
+	return c.JSON(http.StatusOK, GetAllEnvironmentsPayload{Data: data})
 }
 
 func (h handlers) resolveMemberFromCtx(c echo.Context) (*iam.Member, error) {

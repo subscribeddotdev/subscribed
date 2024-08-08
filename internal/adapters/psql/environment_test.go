@@ -53,7 +53,6 @@ func TestNewEnvironmentRepository_FindAll(t *testing.T) {
 		require.True(t, exists)
 		assertEnvironment(t, &env, foundEnv)
 	}
-
 }
 
 func assertEnvironment(t *testing.T, model *models.Environment, env *domain.Environment) {

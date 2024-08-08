@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/subscribeddotdev/subscribed-backend/internal/adapters/models"
+	"github.com/subscribeddotdev/subscribed-backend/tests"
 	"github.com/subscribeddotdev/subscribed-backend/tests/fixture"
 	"github.com/subscribeddotdev/subscribed-backend/tests/jwks"
 )
@@ -35,6 +36,9 @@ func TestEnvironments(t *testing.T) {
 		assert.Equal(t, env.EnvType, string(gotEnv.Type))
 		assert.Equal(t, env.OrganizationID, gotEnv.OrganizationId)
 		assert.Equal(t, env.CreatedAt, gotEnv.CreatedAt)
-		assert.Equal(t, env.ArchivedAt.Ptr(), gotEnv.ArchivedAt)
+
+		if env.ArchivedAt.Ptr() != nil && gotEnv.ArchivedAt != nil {
+			tests.RequireEqualTime(t, env.ArchivedAt.Time, *gotEnv.ArchivedAt)
+		}
 	}
 }

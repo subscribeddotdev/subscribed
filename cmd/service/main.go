@@ -16,7 +16,9 @@ import (
 	"github.com/ThreeDotsLabs/watermill/message/router/plugin"
 	"github.com/kelseyhightower/envconfig"
 	_ "github.com/lib/pq"
+	"github.com/subscribeddotdev/subscribed-backend/internal/app/query"
 	"github.com/subscribeddotdev/subscribed-backend/internal/common/messaging"
+	"github.com/subscribeddotdev/subscribed-backend/internal/domain"
 	svix "github.com/svix/svix-webhooks/go"
 	"golang.org/x/sync/errgroup"
 
@@ -113,6 +115,9 @@ func run(logger *logs.Logger) error {
 			CreateEventType:     observability.NewCommandDecorator[command.CreateEventType](command.NewCreateEventTypeHandler(eventTypeRepo), logger),
 			CreateApiKey:        observability.NewCommandDecorator[command.CreateApiKey](command.NewCreateApiKeyHandler(apiKeyRepo, envRepo), logger),
 			CallWebhookEndpoint: observability.NewCommandDecorator[command.CallWebhookEndpoint](command.NewCallWebhookEndpointHandler(txProvider), logger),
+		},
+		Query: app.Query{
+			Environments: observability.NewQueryDecorator[query.Environments, []*domain.Environment](query.NewEnvironmentsHandler(envRepo), logger),
 		},
 	}
 

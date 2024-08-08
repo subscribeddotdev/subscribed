@@ -35,7 +35,7 @@ func TestEnvironments(t *testing.T) {
 		assert.Equal(t, env.Name, gotEnv.Name)
 		assert.Equal(t, env.EnvType, string(gotEnv.Type))
 		assert.Equal(t, env.OrganizationID, gotEnv.OrganizationId)
-		assert.Equal(t, env.CreatedAt, gotEnv.CreatedAt)
+		tests.RequireEqualTime(t, env.CreatedAt, gotEnv.CreatedAt)
 
 		if env.ArchivedAt.Ptr() != nil && gotEnv.ArchivedAt != nil {
 			tests.RequireEqualTime(t, env.ArchivedAt.Time, *gotEnv.ArchivedAt)

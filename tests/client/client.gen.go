@@ -39,6 +39,16 @@ type AddEndpointRequest struct {
 	Url          string    `json:"url"`
 }
 
+// ApiKey defines model for ApiKey.
+type ApiKey struct {
+	CreatedAt       time.Time  `json:"created_at"`
+	EnvironmentId   string     `json:"environment_id"`
+	ExpiresAt       *time.Time `json:"expires_at,omitempty"`
+	MaskedSecretKey string     `json:"masked_secret_key"`
+	Name            string     `json:"name"`
+	OrganizationId  string     `json:"organization_id"`
+}
+
 // ClerkWebhookEmailAddress defines model for ClerkWebhookEmailAddress.
 type ClerkWebhookEmailAddress struct {
 	// EmailAddress User's email address
@@ -189,6 +199,11 @@ type ErrorResponse struct {
 	Message string `json:"message"`
 }
 
+// GetAllApiKeysPayload defines model for GetAllApiKeysPayload.
+type GetAllApiKeysPayload struct {
+	Data []ApiKey `json:"data"`
+}
+
 // GetAllEnvironmentsPayload defines model for GetAllEnvironmentsPayload.
 type GetAllEnvironmentsPayload struct {
 	Data []Environment `json:"data"`
@@ -202,6 +217,11 @@ type SendMessageRequest struct {
 
 // DefaultError defines model for DefaultError.
 type DefaultError = ErrorResponse
+
+// GetAllApiKeysParams defines parameters for GetAllApiKeys.
+type GetAllApiKeysParams struct {
+	EnvironmentId string `form:"environment_id" json:"environment_id"`
+}
 
 // CreateApiKeyParams defines parameters for CreateApiKey.
 type CreateApiKeyParams struct {
@@ -306,6 +326,9 @@ func WithRequestEditorFn(fn RequestEditorFn) ClientOption {
 
 // The interface specification for the client above.
 type ClientInterface interface {
+	// GetAllApiKeys request
+	GetAllApiKeys(ctx context.Context, params *GetAllApiKeysParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// CreateApiKeyWithBody request with any body
 	CreateApiKeyWithBody(ctx context.Context, params *CreateApiKeyParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -341,6 +364,18 @@ type ClientInterface interface {
 	CreateAccountWithBody(ctx context.Context, params *CreateAccountParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	CreateAccount(ctx context.Context, params *CreateAccountParams, body CreateAccountJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+}
+
+func (c *Client) GetAllApiKeys(ctx context.Context, params *GetAllApiKeysParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetAllApiKeysRequest(c.Server, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
 }
 
 func (c *Client) CreateApiKeyWithBody(ctx context.Context, params *CreateApiKeyParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -509,6 +544,51 @@ func (c *Client) CreateAccount(ctx context.Context, params *CreateAccountParams,
 		return nil, err
 	}
 	return c.Client.Do(req)
+}
+
+// NewGetAllApiKeysRequest generates requests for GetAllApiKeys
+func NewGetAllApiKeysRequest(server string, params *GetAllApiKeysParams) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/api-keys")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "environment_id", runtime.ParamLocationQuery, params.EnvironmentId); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
 }
 
 // NewCreateApiKeyRequest calls the generic CreateApiKey builder with application/json body
@@ -906,6 +986,9 @@ func WithBaseURL(baseURL string) ClientOption {
 
 // ClientWithResponsesInterface is the interface specification for the client with responses above.
 type ClientWithResponsesInterface interface {
+	// GetAllApiKeysWithResponse request
+	GetAllApiKeysWithResponse(ctx context.Context, params *GetAllApiKeysParams, reqEditors ...RequestEditorFn) (*GetAllApiKeysResponse, error)
+
 	// CreateApiKeyWithBodyWithResponse request with any body
 	CreateApiKeyWithBodyWithResponse(ctx context.Context, params *CreateApiKeyParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateApiKeyResponse, error)
 
@@ -941,6 +1024,29 @@ type ClientWithResponsesInterface interface {
 	CreateAccountWithBodyWithResponse(ctx context.Context, params *CreateAccountParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateAccountResponse, error)
 
 	CreateAccountWithResponse(ctx context.Context, params *CreateAccountParams, body CreateAccountJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateAccountResponse, error)
+}
+
+type GetAllApiKeysResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *GetAllApiKeysPayload
+	JSONDefault  *DefaultError
+}
+
+// Status returns HTTPResponse.Status
+func (r GetAllApiKeysResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetAllApiKeysResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
 }
 
 type CreateApiKeyResponse struct {
@@ -1120,6 +1226,15 @@ func (r CreateAccountResponse) StatusCode() int {
 	return 0
 }
 
+// GetAllApiKeysWithResponse request returning *GetAllApiKeysResponse
+func (c *ClientWithResponses) GetAllApiKeysWithResponse(ctx context.Context, params *GetAllApiKeysParams, reqEditors ...RequestEditorFn) (*GetAllApiKeysResponse, error) {
+	rsp, err := c.GetAllApiKeys(ctx, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetAllApiKeysResponse(rsp)
+}
+
 // CreateApiKeyWithBodyWithResponse request with arbitrary body returning *CreateApiKeyResponse
 func (c *ClientWithResponses) CreateApiKeyWithBodyWithResponse(ctx context.Context, params *CreateApiKeyParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateApiKeyResponse, error) {
 	rsp, err := c.CreateApiKeyWithBody(ctx, params, contentType, body, reqEditors...)
@@ -1238,6 +1353,39 @@ func (c *ClientWithResponses) CreateAccountWithResponse(ctx context.Context, par
 		return nil, err
 	}
 	return ParseCreateAccountResponse(rsp)
+}
+
+// ParseGetAllApiKeysResponse parses an HTTP response from a GetAllApiKeysWithResponse call
+func ParseGetAllApiKeysResponse(rsp *http.Response) (*GetAllApiKeysResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetAllApiKeysResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest GetAllApiKeysPayload
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest DefaultError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
 }
 
 // ParseCreateApiKeyResponse parses an HTTP response from a CreateApiKeyWithResponse call
@@ -1458,38 +1606,40 @@ func ParseCreateAccountResponse(rsp *http.Response) (*CreateAccountResponse, err
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
+	"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",
+	"AP//Ik5LIT0oAAA=",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

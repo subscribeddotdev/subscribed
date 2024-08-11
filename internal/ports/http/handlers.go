@@ -189,6 +189,35 @@ func (h handlers) GetEnvironments(c echo.Context) error {
 	return c.JSON(http.StatusOK, GetAllEnvironmentsPayload{Data: data})
 }
 
+func (h handlers) GetAllApiKeys(c echo.Context, params GetAllApiKeysParams) error {
+	member, err := h.resolveMemberFromCtx(c)
+	if err != nil {
+		return err
+	}
+
+	apiKeys, err := h.application.Query.AllApiKeys.Execute(c.Request().Context(), query.AllApiKeys{
+		OrgID:         member.OrgID().String(),
+		EnvironmentID: params.EnvironmentId,
+	})
+	if err != nil {
+		return NewHandlerError(err, "error-fetching-api-keys")
+	}
+
+	data := make([]ApiKey, len(apiKeys))
+	for i, apiKey := range apiKeys {
+		data[i] = ApiKey{
+			CreatedAt:       apiKey.CreatedAt(),
+			EnvironmentId:   apiKey.EnvID().String(),
+			ExpiresAt:       apiKey.ExpiresAt(),
+			MaskedSecretKey: apiKey.SecretKey().String(),
+			Name:            apiKey.Name(),
+			OrganizationId:  apiKey.OrgID(),
+		}
+	}
+
+	return c.JSON(http.StatusOK, GetAllApiKeysPayload{Data: data})
+}
+
 func (h handlers) resolveMemberFromCtx(c echo.Context) (*iam.Member, error) {
 	claims, ok := clerkhttp.SessionClaimsFromContext(c)
 	if !ok {

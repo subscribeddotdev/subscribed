@@ -29,6 +29,7 @@ type Command struct {
 
 type Query struct {
 	Environments QueryHandler[query.Environments, []*domain.Environment]
+	AllApiKeys   QueryHandler[query.AllApiKeys, []*domain.ApiKey]
 }
 
 type App struct {

@@ -26,7 +26,7 @@ type EchoOapiAuthMiddleware struct {
 }
 
 func NewEchoOapiAuthMiddleware(clerkSecretKey string) *EchoOapiAuthMiddleware {
-	// clerk.SetKey(clerkSecretKey)
+	clerk.SetKey(clerkSecretKey)
 	return &EchoOapiAuthMiddleware{}
 }
 

@@ -95,6 +95,28 @@ paths:
         default:
           $ref: '#/components/responses/DefaultError'
   /api-keys:
+    get:
+      tags:
+        - ApiKeys
+      operationId: getAllApiKeys
+      summary: Get all api keys
+      security:
+        - BearerAuth: [ ]
+      parameters:
+        - name: environment_id
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetAllApiKeysPayload'
+        default:
+          $ref: '#/components/responses/DefaultError'
     post:
       tags:
         - ApiKeys
@@ -374,6 +396,30 @@ components:
         expires_at:
           type: string
           format: date-time
+    ApiKey:
+      required: [name, masked_secret_key, organization_id, environment_id, created_at]
+      properties:
+        name:
+          type: string
+        organization_id:
+          type: string
+        environment_id:
+          type: string
+        masked_secret_key:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        expires_at:
+          type: string
+          format: date-time
+    GetAllApiKeysPayload:
+      required: [ data ]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/ApiKey'
     # Environments
     Environment:
       required: [id, name, organization_id, name, type, created_at]

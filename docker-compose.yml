@@ -19,6 +19,7 @@ services:
       APP_NAME: backend
     env_file:
       - ./.env
+      - ./.env.secrets
     ports:
       - "8080:8080"
     volumes:
@@ -31,7 +32,7 @@ services:
     stop_grace_period: 1s
     restart: always
     env_file:
-      - ./.env
+      ./.env
     environment:
       APP_NAME: emulators
     ports:

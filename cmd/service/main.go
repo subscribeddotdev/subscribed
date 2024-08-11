@@ -74,6 +74,11 @@ func run(logger *logs.Logger) error {
 		return err
 	}
 
+	err = postgres.ApplyMigrations(db, "misc/sql/migrations")
+	if err != nil {
+		return err
+	}
+
 	if !config.ProductionMode {
 		logger.Info("[LOGIN PROVIDER] setting up clerk to work with the simulator", "emulator_url", config.ClerkEmulatorServerURL)
 		clerkhttp.SetupClerkForTestingMode(config.ClerkEmulatorServerURL)
@@ -118,6 +123,7 @@ func run(logger *logs.Logger) error {
 		},
 		Query: app.Query{
 			Environments: observability.NewQueryDecorator[query.Environments, []*domain.Environment](query.NewEnvironmentsHandler(envRepo), logger),
+			AllApiKeys:   observability.NewQueryDecorator[query.AllApiKeys, []*domain.ApiKey](query.NewAllApiKeysHandler(apiKeyRepo), logger),
 		},
 	}
 
@@ -163,6 +169,8 @@ func run(logger *logs.Logger) error {
 
 	var webhookVerifier http.LoginProviderWebhookVerifier
 	if config.ProductionMode {
+
+		logger.Info("### clerk wh secret", "key", config.ClerkWebhookSecret)
 		webhookVerifier, err = svix.NewWebhook(config.ClerkWebhookSecret)
 		if err != nil {
 			return fmt.Errorf("unable to create a webhook verifier: %v", err)

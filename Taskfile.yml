@@ -1,9 +1,9 @@
 version: 3
 
 dotenv:
+  - ./.env.secrets
   - ./.env.local
   - ./.env
-  - ./.env.secrets
 
 tasks:
   run:backend:

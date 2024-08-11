@@ -19,7 +19,6 @@ services:
       APP_NAME: backend
     env_file:
       - ./.env
-      - ./.env.secrets
     ports:
       - "8080:8080"
     volumes:

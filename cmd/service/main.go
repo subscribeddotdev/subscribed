@@ -169,8 +169,6 @@ func run(logger *logs.Logger) error {
 
 	var webhookVerifier http.LoginProviderWebhookVerifier
 	if config.ProductionMode {
-
-		logger.Info("### clerk wh secret", "key", config.ClerkWebhookSecret)
 		webhookVerifier, err = svix.NewWebhook(config.ClerkWebhookSecret)
 		if err != nil {
 			return fmt.Errorf("unable to create a webhook verifier: %v", err)

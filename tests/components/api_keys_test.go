@@ -39,4 +39,15 @@ func TestApiKeys_Lifecycle(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, http.StatusCreated, resp.StatusCode)
 	})
+
+	t.Run("get_all_api_keys_by_environment", func(t *testing.T) {
+		for i := 0; i < 10; i++ {
+			ff.NewApiKey().WithEnvironmentID(env.ID).WithOrgID(org.ID).Save()
+		}
+
+		resp, err := getClient(t, token).GetAllApiKeysWithResponse(ctx, &client.GetAllApiKeysParams{EnvironmentId: env.ID})
+		require.NoError(t, err)
+		require.Equal(t, http.StatusOK, resp.StatusCode())
+		require.NotEmpty(t, resp.JSON200.Data)
+	})
 }

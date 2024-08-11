@@ -23,7 +23,7 @@ func NewApiKeyRepository(db boil.ContextExecutor) *ApiKeyRepository {
 	}
 }
 
-func (o ApiKeyRepository) Insert(ctx context.Context, apiKey *domain.ApiKey) error {
+func (a ApiKeyRepository) Insert(ctx context.Context, apiKey *domain.ApiKey) error {
 	model := models.APIKey{
 		SecretKey:     apiKey.SecretKey().FullKey(),
 		Suffix:        apiKey.SecretKey().String(),
@@ -34,7 +34,7 @@ func (o ApiKeyRepository) Insert(ctx context.Context, apiKey *domain.ApiKey) err
 		ExpiresAt:     null.TimeFromPtr(apiKey.ExpiresAt()),
 	}
 
-	err := model.Insert(ctx, o.db, boil.Infer())
+	err := model.Insert(ctx, a.db, boil.Infer())
 	var pqErr *pq.Error
 	if err != nil {
 		if ok := errors.As(err, &pqErr); ok {
@@ -47,8 +47,8 @@ func (o ApiKeyRepository) Insert(ctx context.Context, apiKey *domain.ApiKey) err
 	return nil
 }
 
-func (o ApiKeyRepository) FindBySecretKey(ctx context.Context, sk domain.SecretKey) (*domain.ApiKey, error) {
-	model, err := models.APIKeys(models.APIKeyWhere.SecretKey.EQ(sk.FullKey())).One(ctx, o.db)
+func (a ApiKeyRepository) FindBySecretKey(ctx context.Context, sk domain.SecretKey) (*domain.ApiKey, error) {
+	model, err := models.APIKeys(models.APIKeyWhere.SecretKey.EQ(sk.FullKey())).One(ctx, a.db)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, domain.ErrApiKeyNotFound
 	}
@@ -64,4 +64,35 @@ func (o ApiKeyRepository) FindBySecretKey(ctx context.Context, sk domain.SecretK
 		model.CreatedAt,
 		model.ExpiresAt.Ptr(),
 	)
+}
+
+func (a ApiKeyRepository) FindAll(
+	ctx context.Context,
+	orgID string,
+	envID domain.EnvironmentID,
+) ([]*domain.ApiKey, error) {
+	rows, err := models.APIKeys(
+		models.APIKeyWhere.EnvironmentID.EQ(envID.String()),
+		models.APIKeyWhere.OrgID.EQ(orgID),
+	).All(ctx, a.db)
+	if err != nil {
+		return nil, err
+	}
+
+	apiKeys := make([]*domain.ApiKey, len(rows))
+	for i, row := range rows {
+		sk, err := domain.UnMarshallSecretKey(row.SecretKey)
+		if err != nil {
+			return nil, err
+		}
+
+		ak, err := domain.UnMarshallApiKey(envID, orgID, row.Name, sk, row.CreatedAt, row.ExpiresAt.Ptr())
+		if err != nil {
+			return nil, err
+		}
+
+		apiKeys[i] = ak
+	}
+
+	return apiKeys, nil
 }

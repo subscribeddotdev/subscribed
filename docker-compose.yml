@@ -31,7 +31,7 @@ services:
     stop_grace_period: 1s
     restart: always
     env_file:
-      - ./.env
+      ./.env
     environment:
       APP_NAME: emulators
     ports:

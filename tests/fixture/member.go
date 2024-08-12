@@ -56,10 +56,10 @@ func (m *Member) Save() models.Member {
 func (m *Member) NewDomainModel() *iam.Member {
 	member, err := iam.NewMember(
 		iam.OrgID(m.model.OrganizationID),
-		iam.LoginProviderID(m.model.LoginProviderID),
 		m.model.FirstName.String,
 		m.model.LastName.String,
 		tests.MustEmail(m.factory.t, m.model.Email),
+		tests.FixturePassword(m.factory.t),
 	)
 	require.NoError(m.factory.t, err)
 	return member

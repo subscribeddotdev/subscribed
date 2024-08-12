@@ -14,12 +14,7 @@ import (
 )
 
 type handlers struct {
-	application                  *app.App
-	loginProviderWebhookVerifier LoginProviderWebhookVerifier
-}
-
-type LoginProviderWebhookVerifier interface {
-	Verify(payload []byte, headers http.Header) error
+	application *app.App
 }
 
 func (h handlers) HealthCheck(c echo.Context) error {

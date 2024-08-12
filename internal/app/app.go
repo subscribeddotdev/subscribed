@@ -21,7 +21,7 @@ type Command struct {
 	AddEndpoint         CommandHandler[command.AddEndpoint]
 	SendMessage         CommandHandler[command.SendMessage]
 	CreateApplication   CommandHandler[command.CreateApplication]
-	CreateOrganization  CommandHandler[command.CreateOrganization]
+	CreateOrganization  CommandHandler[command.Signup]
 	CreateEventType     CommandHandler[command.CreateEventType]
 	CreateApiKey        CommandHandler[command.CreateApiKey]
 	CallWebhookEndpoint CommandHandler[command.CallWebhookEndpoint]

@@ -13,8 +13,6 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	oapimiddleware "github.com/oapi-codegen/echo-middleware"
-	"github.com/subscribeddotdev/subscribed-backend/internal/common/clerkhttp"
-
 	"github.com/subscribeddotdev/subscribed-backend/internal/app"
 	"github.com/subscribeddotdev/subscribed-backend/internal/common/logs"
 )
@@ -30,14 +28,12 @@ type Server struct {
 }
 
 type Config struct {
-	Application                  *app.App
-	Port                         int
-	AllowedCorsOrigin            []string
-	Logger                       *logs.Logger
-	IsDebug                      bool
-	Ctx                          context.Context
-	ClerkSecretKey               string
-	LoginProviderWebhookVerifier LoginProviderWebhookVerifier
+	Application       *app.App
+	Port              int
+	AllowedCorsOrigin []string
+	Logger            *logs.Logger
+	IsDebug           bool
+	Ctx               context.Context
 }
 
 func NewServer(config Config) (*Server, error) {
@@ -49,8 +45,7 @@ func NewServer(config Config) (*Server, error) {
 	}
 
 	routerHandlers := &handlers{
-		loginProviderWebhookVerifier: config.LoginProviderWebhookVerifier,
-		application:                  config.Application,
+		application: config.Application,
 	}
 
 	registerMiddlewares(router, spec, config)
@@ -104,7 +99,6 @@ func registerMiddlewares(router *echo.Echo, spec *openapi3.T, config Config) {
 	}))
 
 	authApiKeyMiddleware := apiKeyMiddleware{auth: config.Application.Authorization}
-	authJwtMiddleware := clerkhttp.NewEchoOapiAuthMiddleware(config.ClerkSecretKey)
 
 	spec.Servers = nil
 	router.Use(oapimiddleware.OapiRequestValidatorWithOptions(spec, &oapimiddleware.Options{
@@ -114,9 +108,7 @@ func registerMiddlewares(router *echo.Echo, spec *openapi3.T, config Config) {
 					return authApiKeyMiddleware.Middleware(ctx, input)
 				}
 
-				if input.SecuritySchemeName == jwtSecurityScheme {
-					return authJwtMiddleware.JwtMiddleware(ctx, input)
-				}
+				// todo: implement a jwt middleware
 
 				return fmt.Errorf("unable to recognise '%s' as the security scheme", input.SecuritySchemeName)
 			},

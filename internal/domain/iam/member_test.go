@@ -3,9 +3,11 @@ package iam_test
 import (
 	"testing"
 
+	"github.com/brianvoe/gofakeit/v6"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/subscribeddotdev/subscribed-backend/internal/domain/iam"
+	"github.com/subscribeddotdev/subscribed-backend/tests"
 )
 
 func TestNewMember(t *testing.T) {
@@ -13,28 +15,59 @@ func TestNewMember(t *testing.T) {
 		name        string
 		expectedErr string
 
-		address string
+		organizationID iam.OrgID
+		firstName      string
+		lastName       string
+		email          iam.Email
+		password       iam.Password
 	}{
 		{
-			name:        "valid_email_address",
-			expectedErr: "",
-			address:     "john.doe@gmail.com",
+			name:           "new_member",
+			expectedErr:    "",
+			organizationID: iam.NewOrgID(),
+			firstName:      gofakeit.FirstName(),
+			lastName:       gofakeit.LastName(),
+			email:          tests.MustEmail(t, gofakeit.Email()),
+			password:       tests.FixturePassword(t),
 		},
 		{
-			name:        "error_missing_@_sign",
-			expectedErr: "mail: missing '@' or angle-addr",
-			address:     "john.doegmail.com",
+			name:           "error_empty_organization_id",
+			expectedErr:    "organizationID cannot be empty",
+			organizationID: iam.OrgID(""),
+			firstName:      gofakeit.FirstName(),
+			lastName:       gofakeit.LastName(),
+			email:          tests.MustEmail(t, gofakeit.Email()),
+			password:       tests.FixturePassword(t),
 		},
 		{
-			name:        "error_empty_address",
-			expectedErr: "mail: no address",
-			address:     " ",
+			name:           "error_empty_email_address",
+			expectedErr:    "email cannot be empty",
+			organizationID: iam.NewOrgID(),
+			firstName:      gofakeit.FirstName(),
+			lastName:       gofakeit.LastName(),
+			email:          iam.Email{},
+			password:       tests.FixturePassword(t),
+		},
+		{
+			name:           "error_empty_password",
+			expectedErr:    "password cannot be empty",
+			organizationID: iam.NewOrgID(),
+			firstName:      gofakeit.FirstName(),
+			lastName:       gofakeit.LastName(),
+			email:          tests.MustEmail(t, gofakeit.Email()),
+			password:       iam.Password{},
 		},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			email, err := iam.NewEmail(tc.address)
+			member, err := iam.NewMember(
+				tc.organizationID,
+				tc.firstName,
+				tc.lastName,
+				tc.email,
+				tc.password,
+			)
 
 			if tc.expectedErr != "" {
 				assert.EqualError(t, err, tc.expectedErr)
@@ -42,8 +75,10 @@ func TestNewMember(t *testing.T) {
 			}
 
 			require.NoError(t, err)
-			assert.Equal(t, tc.address, email.String())
-			assert.False(t, email.IsEmpty())
+			assert.Equal(t, tc.firstName, member.FirstName())
+			assert.Equal(t, tc.lastName, member.LastName())
+			assert.Equal(t, tc.email, member.Email())
+			assert.Equal(t, tc.password.String(), member.Password().String())
 		})
 	}
 }

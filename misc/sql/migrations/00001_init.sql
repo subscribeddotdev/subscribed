@@ -11,7 +11,7 @@ CREATE TABLE members (
     first_name TEXT,
     last_name TEXT,
     email TEXT NOT NULL UNIQUE,
-    login_provider_id TEXT NOT NULL UNIQUE,
+    password TEXT NOT NULL,
     organization_id TEXT NOT NULL,
     created_at TIMESTAMPTZ NOT NULL,
 

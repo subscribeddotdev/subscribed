@@ -8,54 +8,28 @@ import (
 	"github.com/subscribeddotdev/subscribed-backend/internal/domain/iam"
 )
 
-type CreateOrganization struct {
-	FirstName       string
-	LastName        string
-	Email           iam.Email
-	LoginProviderID iam.LoginProviderID
+type Signup struct {
+	FirstName string
+	LastName  string
+	Email     iam.Email
+	Password  iam.Password
 }
 
-func (o CreateOrganization) validate() error {
-	if err := o.LoginProviderID.Validate(); err != nil {
-		return err
-	}
-
-	if o.Email.IsEmpty() {
-		return fmt.Errorf("email is empty")
-	}
-
-	return nil
-}
-
-type CreateOrganizationHandler struct {
+type SignupHandler struct {
 	txProvider TransactionProvider
 }
 
-func NewCreateOrganizationHandler(txProvider TransactionProvider) CreateOrganizationHandler {
-	return CreateOrganizationHandler{
+func NewSignupHandler(txProvider TransactionProvider) SignupHandler {
+	return SignupHandler{
 		txProvider: txProvider,
 	}
 }
 
-func (c CreateOrganizationHandler) Execute(ctx context.Context, cmd CreateOrganization) error {
-	if err := cmd.validate(); err != nil {
-		return err
-	}
-
+func (c SignupHandler) Execute(ctx context.Context, cmd Signup) error {
 	return c.txProvider.Transact(ctx, func(adapters TransactableAdapters) error {
-		exists, err := adapters.MemberRepository.ExistsByOr(ctx, cmd.Email, cmd.LoginProviderID)
-		if err != nil {
-			return err
-		}
-
-		if exists {
-			// idempotent-friendliness
-			return nil
-		}
-
 		org := iam.NewOrganization()
 
-		err = adapters.OrganizationRepository.Insert(ctx, org)
+		err := adapters.OrganizationRepository.Insert(ctx, org)
 		if err != nil {
 			return fmt.Errorf("unable to save organization: %v", err)
 		}
@@ -72,7 +46,7 @@ func (c CreateOrganizationHandler) Execute(ctx context.Context, cmd CreateOrgani
 			}
 		}
 
-		member, err := iam.NewMember(org.ID(), cmd.LoginProviderID, cmd.FirstName, cmd.LastName, cmd.Email)
+		member, err := iam.NewMember(org.ID(), cmd.FirstName, cmd.LastName, cmd.Email, cmd.Password)
 		if err != nil {
 			return err
 		}

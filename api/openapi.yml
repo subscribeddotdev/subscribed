@@ -160,34 +160,18 @@ paths:
           description: CREATED
         default:
           $ref: '#/components/responses/DefaultError'
-  /webhooks/account:
+  /signup:
     post:
       tags:
         - Auth
-      operationId: createAccount
-      summary: Creates a new account
-      parameters:
-        - in: header
-          name: svix-id
-          schema:
-            type: string
-          required: true
-        - in: header
-          name: svix-timestamp
-          schema:
-            type: string
-          required: true
-        - in: header
-          name: svix-signature
-          schema:
-            type: string
-          required: true
+      operationId: signup
+      summary: Creates a new organization and it's first member
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateAccountRequest'
+              $ref: '#/components/schemas/SignupRequest'
       responses:
         '201':
           description: CREATED
@@ -337,18 +321,18 @@ components:
           items:
             type: object
             # Add properties for web3 wallets if needed
-    CreateAccountRequest:
-      required: [data, object, type]
+    SignupRequest:
+      required: [email, password, first_name, last_name]
       type: object
       properties:
-        data:
-          $ref: '#/components/schemas/ClerkWebhookUserCreatedData'
-        object:
+        email:
           type: string
-          description: Event type (always "user.created" for this event)
-        type:
+        password:
           type: string
-          description: Event type (always "user.created" for this event)
+        first_name:
+          type: string
+        last_name:
+          type: string
     # Endpoints
     AddEndpointRequest:
       required: [ url ]

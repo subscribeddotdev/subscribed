@@ -8,7 +8,6 @@ import (
 	_ "github.com/lib/pq"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/subscribeddotdev/subscribed-backend/internal/adapters/models"
 	"github.com/subscribeddotdev/subscribed-backend/internal/adapters/psql"
 	"github.com/subscribeddotdev/subscribed-backend/internal/domain"
 	"github.com/subscribeddotdev/subscribed-backend/internal/domain/iam"
@@ -23,10 +22,7 @@ func TestMemberRepository_Lifecycle(t *testing.T) {
 	member := ff.NewMember().WithOrganizationID(org.ID).NewDomainModel()
 
 	t.Run("insert_new_member", func(t *testing.T) {
-		err := repo.Insert(ctx, member)
-
-		require.NoError(t, err)
-		assertMemberExists(t, member.LoginProviderId().String())
+		require.NoError(t, repo.Insert(ctx, member))
 	})
 
 	t.Run("member_does_not_exist", func(t *testing.T) {
@@ -47,23 +43,6 @@ func TestMemberRepository_Lifecycle(t *testing.T) {
 		require.NoError(t, err)
 		assert.True(t, exists)
 	})
-
-	t.Run("find_member_by_login_provider_id", func(t *testing.T) {
-		// When
-		exists, err := repo.ExistsByOr(ctx, tests.MustEmail(t, gofakeit.Email()), member.LoginProviderId())
-
-		// Then
-		require.NoError(t, err)
-		assert.True(t, exists)
-	})
-}
-
-func assertMemberExists(t *testing.T, loginProviderId string) {
-	exists, err := models.Members(
-		models.MemberWhere.LoginProviderID.EQ(loginProviderId),
-	).Exists(ctx, db)
-	require.NoError(t, err)
-	assert.True(t, exists)
 }
 
 func fixtureLoginProviderID() iam.LoginProviderID {

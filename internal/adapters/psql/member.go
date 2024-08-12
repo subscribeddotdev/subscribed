@@ -25,13 +25,13 @@ func NewMemberRepository(db boil.ContextExecutor) *MemberRepository {
 
 func (o MemberRepository) Insert(ctx context.Context, member *iam.Member) error {
 	model := models.Member{
-		ID:              member.ID().String(),
-		FirstName:       null.StringFrom(member.FirstName()),
-		LastName:        null.StringFrom(member.LastName()),
-		Email:           member.Email().String(),
-		LoginProviderID: member.LoginProviderId().String(),
-		OrganizationID:  member.OrgID().String(),
-		CreatedAt:       member.CreatedAt(),
+		ID:             member.ID().String(),
+		FirstName:      null.StringFrom(member.FirstName()),
+		LastName:       null.StringFrom(member.LastName()),
+		Email:          member.Email().String(),
+		Password:       member.Password().String(),
+		OrganizationID: member.OrgID().String(),
+		CreatedAt:      member.CreatedAt(),
 	}
 
 	err := model.Insert(ctx, o.db, boil.Infer())
@@ -77,6 +77,7 @@ func (o MemberRepository) ByLoginProviderID(ctx context.Context, lpi iam.LoginPr
 		model.FirstName.String,
 		model.LastName.String,
 		model.Email,
+		model.Password,
 		model.CreatedAt,
 	)
 }

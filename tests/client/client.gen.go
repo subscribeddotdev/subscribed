@@ -49,115 +49,6 @@ type ApiKey struct {
 	OrganizationId  string     `json:"organization_id"`
 }
 
-// ClerkWebhookEmailAddress defines model for ClerkWebhookEmailAddress.
-type ClerkWebhookEmailAddress struct {
-	// EmailAddress User's email address
-	EmailAddress string `json:"email_address"`
-
-	// Id Unique identifier for the email address
-	Id string `json:"id"`
-
-	// LinkedTo (Array is empty for this event)
-	LinkedTo *[]map[string]interface{} `json:"linked_to"`
-
-	// Object Object type (always "email_address" for this event)
-	Object       *string `json:"object,omitempty"`
-	Verification *struct {
-		// Status Verification status (e.g., "verified", "unverified")
-		Status *string `json:"status,omitempty"`
-
-		// Strategy Verification strategy (e.g., "ticket", "link")
-		Strategy *string `json:"strategy,omitempty"`
-	} `json:"verification,omitempty"`
-}
-
-// ClerkWebhookUserCreatedData defines model for ClerkWebhookUserCreatedData.
-type ClerkWebhookUserCreatedData struct {
-	// Birthday User's birthday (empty string if not set)
-	Birthday *string `json:"birthday,omitempty"`
-
-	// CreatedAt Timestamp (epoch milliseconds) representing user creation time
-	CreatedAt      int                        `json:"created_at"`
-	EmailAddresses []ClerkWebhookEmailAddress `json:"email_addresses"`
-
-	// ExternalAccounts (Array is empty for this event)
-	ExternalAccounts *[]map[string]interface{} `json:"external_accounts,omitempty"`
-
-	// ExternalId User's external identifier
-	ExternalId *string `json:"external_id"`
-
-	// FirstName User's first name
-	FirstName *string `json:"first_name"`
-
-	// Gender User's gender (empty string if not set)
-	Gender *string `json:"gender,omitempty"`
-
-	// Id Unique identifier for the user
-	Id string `json:"id"`
-
-	// ImageUrl User's image URL (may be redacted)
-	ImageUrl *string `json:"image_url,omitempty"`
-
-	// LastName User's last name
-	LastName *string `json:"last_name"`
-
-	// LastSignInAt Timestamp (epoch milliseconds) representing last sign-in time
-	LastSignInAt *int `json:"last_sign_in_at"`
-
-	// Object Object type (always "user" for this event)
-	Object *string `json:"object,omitempty"`
-
-	// PasswordEnabled Whether the user has password authentication enabled
-	PasswordEnabled bool `json:"password_enabled"`
-
-	// PhoneNumbers (Array is empty for this event)
-	PhoneNumbers *[]map[string]interface{} `json:"phone_numbers,omitempty"`
-
-	// PrimaryEmailAddressId Unique identifier for the primary email address
-	PrimaryEmailAddressId *string `json:"primary_email_address_id"`
-
-	// PrimaryPhoneNumberId Unique identifier for the primary phone number (null if not set)
-	PrimaryPhoneNumberId *string `json:"primary_phone_number_id"`
-
-	// PrimaryWeb3WalletId Unique identifier for the primary web3 wallet (null if not set)
-	PrimaryWeb3WalletId *string `json:"primary_web3_wallet_id"`
-
-	// PrivateMetadata User's private metadata (empty object for this event)
-	PrivateMetadata *map[string]interface{} `json:"private_metadata,omitempty"`
-
-	// ProfileImageUrl User's profile image URL (may be redacted)
-	ProfileImageUrl *string `json:"profile_image_url,omitempty"`
-
-	// PublicMetadata User's public metadata (empty object for this event)
-	PublicMetadata *map[string]interface{} `json:"public_metadata,omitempty"`
-
-	// TwoFactorEnabled Whether two-factor authentication is enabled
-	TwoFactorEnabled bool `json:"two_factor_enabled"`
-
-	// UnsafeMetadata User's unsafe metadata (empty object for this event)
-	UnsafeMetadata *map[string]interface{} `json:"unsafe_metadata,omitempty"`
-
-	// UpdatedAt Timestamp (epoch milliseconds) representing user update time
-	UpdatedAt *int `json:"updated_at,omitempty"`
-
-	// Username Username (null if not set)
-	Username *string `json:"username"`
-
-	// Web3Wallets (Array is empty for this event)
-	Web3Wallets *[]map[string]interface{} `json:"web3_wallets,omitempty"`
-}
-
-// CreateAccountRequest defines model for CreateAccountRequest.
-type CreateAccountRequest struct {
-	Data ClerkWebhookUserCreatedData `json:"data"`
-
-	// Object Event type (always "user.created" for this event)
-	Object string `json:"object"`
-
-	// Type Event type (always "user.created" for this event)
-	Type string `json:"type"`
-}
-
 // CreateApiKeyRequest defines model for CreateApiKeyRequest.
 type CreateApiKeyRequest struct {
 	ExpiresAt *time.Time `json:"expires_at,omitempty"`
@@ -215,6 +106,14 @@ type SendMessageRequest struct {
 	Payload     string `json:"payload"`
 }
 
+// SignupRequest defines model for SignupRequest.
+type SignupRequest struct {
+	Email     string `json:"email"`
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
+	Password  string `json:"password"`
+}
+
 // DefaultError defines model for DefaultError.
 type DefaultError = ErrorResponse
 
@@ -226,13 +125,6 @@ type GetAllApiKeysParams struct {
 // CreateApiKeyParams defines parameters for CreateApiKey.
 type CreateApiKeyParams struct {
 	EnvironmentId string `json:"environment_id"`
-}
-
-// CreateAccountParams defines parameters for CreateAccount.
-type CreateAccountParams struct {
-	SvixId        string `json:"svix-id"`
-	SvixTimestamp string `json:"svix-timestamp"`
-	SvixSignature string `json:"svix-signature"`
 }
 
 // CreateApiKeyJSONRequestBody defines body for CreateApiKey for application/json ContentType.
@@ -250,8 +142,8 @@ type SendMessageJSONRequestBody = SendMessageRequest
 // CreateEventTypeJSONRequestBody defines body for CreateEventType for application/json ContentType.
 type CreateEventTypeJSONRequestBody = CreateEventTypeRequest
 
-// CreateAccountJSONRequestBody defines body for CreateAccount for application/json ContentType.
-type CreateAccountJSONRequestBody = CreateAccountRequest
+// SignupJSONRequestBody defines body for Signup for application/json ContentType.
+type SignupJSONRequestBody = SignupRequest
 
 // RequestEditorFn  is the function signature for the RequestEditor callback function
 type RequestEditorFn func(ctx context.Context, req *http.Request) error
@@ -360,10 +252,10 @@ type ClientInterface interface {
 	// HealthCheck request
 	HealthCheck(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// CreateAccountWithBody request with any body
-	CreateAccountWithBody(ctx context.Context, params *CreateAccountParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// SignupWithBody request with any body
+	SignupWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	CreateAccount(ctx context.Context, params *CreateAccountParams, body CreateAccountJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+	Signup(ctx context.Context, body SignupJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 }
 
 func (c *Client) GetAllApiKeys(ctx context.Context, params *GetAllApiKeysParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -522,8 +414,8 @@ func (c *Client) HealthCheck(ctx context.Context, reqEditors ...RequestEditorFn)
 	return c.Client.Do(req)
 }
 
-func (c *Client) CreateAccountWithBody(ctx context.Context, params *CreateAccountParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewCreateAccountRequestWithBody(c.Server, params, contentType, body)
+func (c *Client) SignupWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewSignupRequestWithBody(c.Server, contentType, body)
 	if err != nil {
 		return nil, err
 	}
@@ -534,8 +426,8 @@ func (c *Client) CreateAccountWithBody(ctx context.Context, params *CreateAccoun
 	return c.Client.Do(req)
 }
 
-func (c *Client) CreateAccount(ctx context.Context, params *CreateAccountParams, body CreateAccountJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewCreateAccountRequest(c.Server, params, body)
+func (c *Client) Signup(ctx context.Context, body SignupJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewSignupRequest(c.Server, body)
 	if err != nil {
 		return nil, err
 	}
@@ -872,19 +764,19 @@ func NewHealthCheckRequest(server string) (*http.Request, error) {
 	return req, nil
 }
 
-// NewCreateAccountRequest calls the generic CreateAccount builder with application/json body
-func NewCreateAccountRequest(server string, params *CreateAccountParams, body CreateAccountJSONRequestBody) (*http.Request, error) {
+// NewSignupRequest calls the generic Signup builder with application/json body
+func NewSignupRequest(server string, body SignupJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
 	buf, err := json.Marshal(body)
 	if err != nil {
 		return nil, err
 	}
 	bodyReader = bytes.NewReader(buf)
-	return NewCreateAccountRequestWithBody(server, params, "application/json", bodyReader)
+	return NewSignupRequestWithBody(server, "application/json", bodyReader)
 }
 
-// NewCreateAccountRequestWithBody generates requests for CreateAccount with any type of body
-func NewCreateAccountRequestWithBody(server string, params *CreateAccountParams, contentType string, body io.Reader) (*http.Request, error) {
+// NewSignupRequestWithBody generates requests for Signup with any type of body
+func NewSignupRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
 	var err error
 
 	serverURL, err := url.Parse(server)
@@ -892,7 +784,7 @@ func NewCreateAccountRequestWithBody(server string, params *CreateAccountParams,
 		return nil, err
 	}
 
-	operationPath := fmt.Sprintf("/webhooks/account")
+	operationPath := fmt.Sprintf("/signup")
 	if operationPath[0] == '/' {
 		operationPath = "." + operationPath
 	}
@@ -908,37 +800,6 @@ func NewCreateAccountRequestWithBody(server string, params *CreateAccountParams,
 	}
 
 	req.Header.Add("Content-Type", contentType)
-
-	if params != nil {
-
-		var headerParam0 string
-
-		headerParam0, err = runtime.StyleParamWithLocation("simple", false, "svix-id", runtime.ParamLocationHeader, params.SvixId)
-		if err != nil {
-			return nil, err
-		}
-
-		req.Header.Set("svix-id", headerParam0)
-
-		var headerParam1 string
-
-		headerParam1, err = runtime.StyleParamWithLocation("simple", false, "svix-timestamp", runtime.ParamLocationHeader, params.SvixTimestamp)
-		if err != nil {
-			return nil, err
-		}
-
-		req.Header.Set("svix-timestamp", headerParam1)
-
-		var headerParam2 string
-
-		headerParam2, err = runtime.StyleParamWithLocation("simple", false, "svix-signature", runtime.ParamLocationHeader, params.SvixSignature)
-		if err != nil {
-			return nil, err
-		}
-
-		req.Header.Set("svix-signature", headerParam2)
-
-	}
 
 	return req, nil
 }
@@ -1020,10 +881,10 @@ type ClientWithResponsesInterface interface {
 	// HealthCheckWithResponse request
 	HealthCheckWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*HealthCheckResponse, error)
 
-	// CreateAccountWithBodyWithResponse request with any body
-	CreateAccountWithBodyWithResponse(ctx context.Context, params *CreateAccountParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateAccountResponse, error)
+	// SignupWithBodyWithResponse request with any body
+	SignupWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*SignupResponse, error)
 
-	CreateAccountWithResponse(ctx context.Context, params *CreateAccountParams, body CreateAccountJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateAccountResponse, error)
+	SignupWithResponse(ctx context.Context, body SignupJSONRequestBody, reqEditors ...RequestEditorFn) (*SignupResponse, error)
 }
 
 type GetAllApiKeysResponse struct {
@@ -1204,14 +1065,14 @@ func (r HealthCheckResponse) StatusCode() int {
 	return 0
 }
 
-type CreateAccountResponse struct {
+type SignupResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSONDefault  *DefaultError
 }
 
 // Status returns HTTPResponse.Status
-func (r CreateAccountResponse) Status() string {
+func (r SignupResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -1219,7 +1080,7 @@ func (r CreateAccountResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r CreateAccountResponse) StatusCode() int {
+func (r SignupResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -1338,21 +1199,21 @@ func (c *ClientWithResponses) HealthCheckWithResponse(ctx context.Context, reqEd
 	return ParseHealthCheckResponse(rsp)
 }
 
-// CreateAccountWithBodyWithResponse request with arbitrary body returning *CreateAccountResponse
-func (c *ClientWithResponses) CreateAccountWithBodyWithResponse(ctx context.Context, params *CreateAccountParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateAccountResponse, error) {
-	rsp, err := c.CreateAccountWithBody(ctx, params, contentType, body, reqEditors...)
+// SignupWithBodyWithResponse request with arbitrary body returning *SignupResponse
+func (c *ClientWithResponses) SignupWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*SignupResponse, error) {
+	rsp, err := c.SignupWithBody(ctx, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseCreateAccountResponse(rsp)
+	return ParseSignupResponse(rsp)
 }
 
-func (c *ClientWithResponses) CreateAccountWithResponse(ctx context.Context, params *CreateAccountParams, body CreateAccountJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateAccountResponse, error) {
-	rsp, err := c.CreateAccount(ctx, params, body, reqEditors...)
+func (c *ClientWithResponses) SignupWithResponse(ctx context.Context, body SignupJSONRequestBody, reqEditors ...RequestEditorFn) (*SignupResponse, error) {
+	rsp, err := c.Signup(ctx, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseCreateAccountResponse(rsp)
+	return ParseSignupResponse(rsp)
 }
 
 // ParseGetAllApiKeysResponse parses an HTTP response from a GetAllApiKeysWithResponse call
@@ -1577,15 +1438,15 @@ func ParseHealthCheckResponse(rsp *http.Response) (*HealthCheckResponse, error) 
 	return response, nil
 }
 
-// ParseCreateAccountResponse parses an HTTP response from a CreateAccountWithResponse call
-func ParseCreateAccountResponse(rsp *http.Response) (*CreateAccountResponse, error) {
+// ParseSignupResponse parses an HTTP response from a SignupWithResponse call
+func ParseSignupResponse(rsp *http.Response) (*SignupResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &CreateAccountResponse{
+	response := &SignupResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -1606,40 +1467,28 @@ func ParseCreateAccountResponse(rsp *http.Response) (*CreateAccountResponse, err
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
-	"AP//Ik5LIT0oAAA=",
+	"H4sIAAAAAAAC/9RYUW/bNhD+KwQ3IC+K5a4vhZ7mJt6WdVmHJMAeCsOgybPFRiJZknLjBfrvAynJkirK",
+	"ad1kS95EkTwev++745H3mMpcSQHCGpzcYw1GSWHAN85hTYrMzrWW2rWpFBaEdZ9EqYxTYrkU8Ucjhftn",
+	"aAo5cV8/aljjBP8Qt8bjqtfE3tpVvQwuyzLCDAzVXDljOMEztAEBmlMEbijS7dioXsN7N2NsLpiSXNgr",
+	"+FSA8Y4pLRVoy6sd9CzfY7tTgBNsrOZig8sIwxaEXbrfS878DG4hN8Gx9Q+iNdm5dqGzwLgywho+FVwD",
+	"w8kHP2hRRnim+DvYDR2kGogFtiTe+bXUufvCjFg4tTwHHAWcFluupcid65yF93WnuAbzTWZzYm6BLQ1Q",
+	"DXZ5W3k7GCVIDsEOqTdE8H+8JMJufQGNtxRadmhrsOeoC5zD98w3K5RH1XAMKiP7De2l68c+OkadOcrw",
+	"3On1ZqfgaMWP8tdG70jXEu5IrrJvcXresjb0lGia8u03av+YeBmJke9QcrPIPQZR5G7LSktWUI+6y2db",
+	"yKTy215ED4Dl1VzHwlD3dYc3MRB9P5UO5d7k7X5+9bMQLYyVeZ1iqWSATEFTRAw6gZzwbMnFsjBwEswU",
+	"YAzZwND0DHXaiKxkYZFNoVoFP4REM6ox30InVx+BWrf0r2BnWVbFufmL7DJJWCAIiCW9ZH7oQKpT8yDD",
+	"f+Gdt7nYu9CR9iP50Q2Wr3bmGgS7rPAaT3vdQy6oZtVu4AGKeqbaid4VvhGFGvfCqSq4+pprY5ej4ZiR",
+	"Q72KGPNZ6q/x3TvQmdFbubvOUHguCQItNLe7a0dXtaVKObPCpp5kFwEpEAa6CdwE350SxU+rU61hdK+3",
+	"t0A06Gb+yrd+aVLa73/f4Dr1ullVb2sltVZV1RPcWdCCZOeSDk8AP84kcbzhNi1WEyrz2BQrN2IFjEnL",
+	"YNv5cboi9BYEi6/ms/PL+SR3KPlC50hDPv+KtWzKR0JtRwyOgJwLOaEpES71/bxxHc44HtSF13vjJwY1",
+	"5iOccQp1+qsxv7y4+U6v4z8uzuZ/Xvv9u1AEnZv362vQW07heCwibLnNvERDnVvQptrqdDKdvPJHkQJB",
+	"FMcJfj2ZTl579drU0xzXwvKNDXhYXbz5w+OC4aSfK/1UTXKwoA1OPtR6/VSA3rVyHZRZbQBZXcCBKqFc",
+	"RP3Lw0/T6aPdGYJZP3B1eP+uko2/towZ3XsZ9+433Rj3+HSj88PC7c8UeU70roIWkSxDRHF0W6Frycbh",
+	"ihu8XUpU0gR46daqI7R8mUa+lxefk99Ktns0SkIFd9lPuc6zcqCKV8McdXY1n93Mz/8j7irPEUECPjcE",
+	"BvkrIxdke4C8/4cZ3Y/FTwv64HbxfJDvnolh5M0e+i5cLfwdwIccxPed1sV5GUP9BHCAnc5DwUi4uaTa",
+	"BltvhecQa4GXjpcRajPGEBGo4QhZ6Zph4ud7Ir+C9fqKcID0TmH8MkkPVPYvI8qd44igmqKDnF82NFaU",
+	"d065g1VN9+6Fn7zsCN30nkPtAX0U2jjq/K5xdbe2U6fbB8+w/QPTk55gg2esl1Q5NOeXRxXVLzN79Jud",
+	"NdinQLLqfhdU82+++ywFejui5MdVWeNntW7to/E39wO5tOp/ojzXezb4f4UwwnT3WQ4RwRC3Jwb5xwOU",
+	"Q76q7uVNAVNUuHph6W1z5LTX0SSOM0lJlkpjkzfTN1NcLsp/AwAA//96FIRmiBkAAA==",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

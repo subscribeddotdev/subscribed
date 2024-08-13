@@ -9,20 +9,6 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-/*type LoginProviderID string
-
-func (i LoginProviderID) String() string {
-	return string(i)
-}
-
-func (i LoginProviderID) Validate() error {
-	if strings.TrimSpace(string(i)) == "" {
-		return errors.New("loginProviderID cannot be empty")
-	}
-
-	return nil
-}*/
-
 type MemberID string
 
 func (i MemberID) String() string {

@@ -13,8 +13,6 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	oapimiddleware "github.com/oapi-codegen/echo-middleware"
-	"github.com/subscribeddotdev/subscribed-backend/internal/common/clerkhttp"
-
 	"github.com/subscribeddotdev/subscribed-backend/internal/app"
 	"github.com/subscribeddotdev/subscribed-backend/internal/common/logs"
 )
@@ -30,14 +28,13 @@ type Server struct {
 }
 
 type Config struct {
-	Application                  *app.App
-	Port                         int
-	AllowedCorsOrigin            []string
-	Logger                       *logs.Logger
-	IsDebug                      bool
-	Ctx                          context.Context
-	ClerkSecretKey               string
-	LoginProviderWebhookVerifier LoginProviderWebhookVerifier
+	Application       *app.App
+	Port              int
+	AllowedCorsOrigin []string
+	Logger            *logs.Logger
+	IsDebug           bool
+	Ctx               context.Context
+	JwtSecret         string
 }
 
 func NewServer(config Config) (*Server, error) {
@@ -49,8 +46,8 @@ func NewServer(config Config) (*Server, error) {
 	}
 
 	routerHandlers := &handlers{
-		loginProviderWebhookVerifier: config.LoginProviderWebhookVerifier,
-		application:                  config.Application,
+		application: config.Application,
+		jwtSecret:   config.JwtSecret,
 	}
 
 	registerMiddlewares(router, spec, config)
@@ -68,7 +65,6 @@ func NewServer(config Config) (*Server, error) {
 			BaseContext: func(listener net.Listener) context.Context {
 				return config.Ctx
 			},
-			ConnContext: nil,
 		},
 	}, nil
 }
@@ -104,7 +100,7 @@ func registerMiddlewares(router *echo.Echo, spec *openapi3.T, config Config) {
 	}))
 
 	authApiKeyMiddleware := apiKeyMiddleware{auth: config.Application.Authorization}
-	authJwtMiddleware := clerkhttp.NewEchoOapiAuthMiddleware(config.ClerkSecretKey)
+	authJwtMiddleware := jwtMiddleware{secret: config.JwtSecret}
 
 	spec.Servers = nil
 	router.Use(oapimiddleware.OapiRequestValidatorWithOptions(spec, &oapimiddleware.Options{
@@ -115,7 +111,7 @@ func registerMiddlewares(router *echo.Echo, spec *openapi3.T, config Config) {
 				}
 
 				if input.SecuritySchemeName == jwtSecurityScheme {
-					return authJwtMiddleware.JwtMiddleware(ctx, input)
+					return authJwtMiddleware.Middleware(ctx, input)
 				}
 
 				return fmt.Errorf("unable to recognise '%s' as the security scheme", input.SecuritySchemeName)

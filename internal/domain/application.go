@@ -37,7 +37,7 @@ func NewApplication(name string, envID EnvironmentID) (*Application, error) {
 		id:        NewApplicationID(),
 		name:      name,
 		envID:     envID,
-		createdAt: time.Now().UTC(),
+		createdAt: time.Now(),
 	}, nil
 }
 

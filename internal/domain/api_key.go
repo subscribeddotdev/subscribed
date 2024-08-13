@@ -51,7 +51,7 @@ func NewApiKey(name string, orgID string, envID EnvironmentID, expiresAt *time.T
 		name:      name,
 		envID:     envID,
 		orgID:     orgID,
-		createdAt: time.Now().UTC(),
+		createdAt: time.Now(),
 		expiresAt: expiresAt,
 	}, nil
 }
@@ -85,7 +85,7 @@ func (a *ApiKey) IsExpired() bool {
 		return false
 	}
 
-	return a.expiresAt.UTC().Before(time.Now().UTC())
+	return a.expiresAt.Before(time.Now())
 }
 
 func UnMarshallApiKey(

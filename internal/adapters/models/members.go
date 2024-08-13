@@ -14,7 +14,6 @@ import (
 	"time"
 
 	"github.com/friendsofgo/errors"
-	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
@@ -24,72 +23,72 @@ import (
 
 // Member is an object representing the database table.
 type Member struct {
-	ID              string      `boil:"id" json:"id" toml:"id" yaml:"id"`
-	FirstName       null.String `boil:"first_name" json:"first_name,omitempty" toml:"first_name" yaml:"first_name,omitempty"`
-	LastName        null.String `boil:"last_name" json:"last_name,omitempty" toml:"last_name" yaml:"last_name,omitempty"`
-	Email           string      `boil:"email" json:"email" toml:"email" yaml:"email"`
-	LoginProviderID string      `boil:"login_provider_id" json:"login_provider_id" toml:"login_provider_id" yaml:"login_provider_id"`
-	OrganizationID  string      `boil:"organization_id" json:"organization_id" toml:"organization_id" yaml:"organization_id"`
-	CreatedAt       time.Time   `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
+	ID             string    `boil:"id" json:"id" toml:"id" yaml:"id"`
+	FirstName      string    `boil:"first_name" json:"first_name" toml:"first_name" yaml:"first_name"`
+	LastName       string    `boil:"last_name" json:"last_name" toml:"last_name" yaml:"last_name"`
+	Email          string    `boil:"email" json:"email" toml:"email" yaml:"email"`
+	Password       string    `boil:"password" json:"password" toml:"password" yaml:"password"`
+	OrganizationID string    `boil:"organization_id" json:"organization_id" toml:"organization_id" yaml:"organization_id"`
+	CreatedAt      time.Time `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
 
 	R *memberR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L memberL  `boil:"-" json:"-" toml:"-" yaml:"-"`
 }
 
 var MemberColumns = struct {
-	ID              string
-	FirstName       string
-	LastName        string
-	Email           string
-	LoginProviderID string
-	OrganizationID  string
-	CreatedAt       string
+	ID             string
+	FirstName      string
+	LastName       string
+	Email          string
+	Password       string
+	OrganizationID string
+	CreatedAt      string
 }{
-	ID:              "id",
-	FirstName:       "first_name",
-	LastName:        "last_name",
-	Email:           "email",
-	LoginProviderID: "login_provider_id",
-	OrganizationID:  "organization_id",
-	CreatedAt:       "created_at",
+	ID:             "id",
+	FirstName:      "first_name",
+	LastName:       "last_name",
+	Email:          "email",
+	Password:       "password",
+	OrganizationID: "organization_id",
+	CreatedAt:      "created_at",
 }
 
 var MemberTableColumns = struct {
-	ID              string
-	FirstName       string
-	LastName        string
-	Email           string
-	LoginProviderID string
-	OrganizationID  string
-	CreatedAt       string
+	ID             string
+	FirstName      string
+	LastName       string
+	Email          string
+	Password       string
+	OrganizationID string
+	CreatedAt      string
 }{
-	ID:              "members.id",
-	FirstName:       "members.first_name",
-	LastName:        "members.last_name",
-	Email:           "members.email",
-	LoginProviderID: "members.login_provider_id",
-	OrganizationID:  "members.organization_id",
-	CreatedAt:       "members.created_at",
+	ID:             "members.id",
+	FirstName:      "members.first_name",
+	LastName:       "members.last_name",
+	Email:          "members.email",
+	Password:       "members.password",
+	OrganizationID: "members.organization_id",
+	CreatedAt:      "members.created_at",
 }
 
 // Generated where
 
 var MemberWhere = struct {
-	ID              whereHelperstring
-	FirstName       whereHelpernull_String
-	LastName        whereHelpernull_String
-	Email           whereHelperstring
-	LoginProviderID whereHelperstring
-	OrganizationID  whereHelperstring
-	CreatedAt       whereHelpertime_Time
+	ID             whereHelperstring
+	FirstName      whereHelperstring
+	LastName       whereHelperstring
+	Email          whereHelperstring
+	Password       whereHelperstring
+	OrganizationID whereHelperstring
+	CreatedAt      whereHelpertime_Time
 }{
-	ID:              whereHelperstring{field: "\"members\".\"id\""},
-	FirstName:       whereHelpernull_String{field: "\"members\".\"first_name\""},
-	LastName:        whereHelpernull_String{field: "\"members\".\"last_name\""},
-	Email:           whereHelperstring{field: "\"members\".\"email\""},
-	LoginProviderID: whereHelperstring{field: "\"members\".\"login_provider_id\""},
-	OrganizationID:  whereHelperstring{field: "\"members\".\"organization_id\""},
-	CreatedAt:       whereHelpertime_Time{field: "\"members\".\"created_at\""},
+	ID:             whereHelperstring{field: "\"members\".\"id\""},
+	FirstName:      whereHelperstring{field: "\"members\".\"first_name\""},
+	LastName:       whereHelperstring{field: "\"members\".\"last_name\""},
+	Email:          whereHelperstring{field: "\"members\".\"email\""},
+	Password:       whereHelperstring{field: "\"members\".\"password\""},
+	OrganizationID: whereHelperstring{field: "\"members\".\"organization_id\""},
+	CreatedAt:      whereHelpertime_Time{field: "\"members\".\"created_at\""},
 }
 
 // MemberRels is where relationship names are stored.
@@ -120,9 +119,9 @@ func (r *memberR) GetOrganization() *Organization {
 type memberL struct{}
 
 var (
-	memberAllColumns            = []string{"id", "first_name", "last_name", "email", "login_provider_id", "organization_id", "created_at"}
-	memberColumnsWithoutDefault = []string{"id", "email", "login_provider_id", "organization_id", "created_at"}
-	memberColumnsWithDefault    = []string{"first_name", "last_name"}
+	memberAllColumns            = []string{"id", "first_name", "last_name", "email", "password", "organization_id", "created_at"}
+	memberColumnsWithoutDefault = []string{"id", "first_name", "last_name", "email", "password", "organization_id", "created_at"}
+	memberColumnsWithDefault    = []string{}
 	memberPrimaryKeyColumns     = []string{"id"}
 	memberGeneratedColumns      = []string{}
 )

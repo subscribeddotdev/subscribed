@@ -48,7 +48,7 @@ func NewMessage(eventTypeID EventTypeID, orgID string, applicationID Application
 		orgID:         orgID,
 		eventTypeID:   eventTypeID,
 		applicationID: applicationID,
-		sentAt:        time.Now().UTC(),
+		sentAt:        time.Now(),
 		payload:       payload,
 		sendAttempts:  nil,
 	}, nil

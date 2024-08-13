@@ -8,10 +8,10 @@ CREATE TABLE organizations (
 
 CREATE TABLE members (
     id TEXT NOT NULL PRIMARY KEY,
-    first_name TEXT,
-    last_name TEXT,
+    first_name TEXT NOT NULL,
+    last_name TEXT NOT NULL,
     email TEXT NOT NULL UNIQUE,
-    login_provider_id TEXT NOT NULL UNIQUE,
+    password TEXT NOT NULL,
     organization_id TEXT NOT NULL,
     created_at TIMESTAMPTZ NOT NULL,
 

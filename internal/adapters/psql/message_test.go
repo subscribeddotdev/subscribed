@@ -37,7 +37,7 @@ func TestMessageRepository_Lifecycle(t *testing.T) {
 		assert.Equal(t, msg.EventTypeID().String(), foundMsg.EventTypeID().String())
 		assert.Equal(t, msg.Payload(), foundMsg.Payload())
 		assert.Equal(t, msg.ApplicationID().String(), foundMsg.ApplicationID().String())
-		assert.Equal(t, msg.SentAt().Truncate(time.Second), foundMsg.SentAt().Truncate(time.Second))
+		assert.Equal(t, msg.SentAt().UTC().Truncate(time.Second), foundMsg.SentAt().Truncate(time.Second))
 	})
 
 	t.Run("error_not_found_by_id", func(t *testing.T) {

@@ -15,6 +15,6 @@ func NewHeader(eventName, serviceName string) *events.Header {
 		Name:          eventName,
 		CorrelationId: "", // TODO: set the corr id via middleware
 		PublisherName: serviceName,
-		PublishedAt:   timestamppb.New(time.Now().UTC()),
+		PublishedAt:   timestamppb.New(time.Now()),
 	}
 }

@@ -19,7 +19,7 @@ import (
 	"github.com/subscribeddotdev/subscribed-backend/internal/app/query"
 	"github.com/subscribeddotdev/subscribed-backend/internal/common/messaging"
 	"github.com/subscribeddotdev/subscribed-backend/internal/domain"
-	svix "github.com/svix/svix-webhooks/go"
+	"github.com/subscribeddotdev/subscribed-backend/internal/domain/iam"
 	"golang.org/x/sync/errgroup"
 
 	"github.com/subscribeddotdev/subscribed-backend/internal/adapters/events"
@@ -28,7 +28,6 @@ import (
 	"github.com/subscribeddotdev/subscribed-backend/internal/app"
 	"github.com/subscribeddotdev/subscribed-backend/internal/app/auth"
 	"github.com/subscribeddotdev/subscribed-backend/internal/app/command"
-	"github.com/subscribeddotdev/subscribed-backend/internal/common/clerkhttp"
 	"github.com/subscribeddotdev/subscribed-backend/internal/common/logs"
 	"github.com/subscribeddotdev/subscribed-backend/internal/common/observability"
 	"github.com/subscribeddotdev/subscribed-backend/internal/common/postgres"
@@ -37,14 +36,12 @@ import (
 )
 
 type Config struct {
-	DatabaseUrl            string `envconfig:"DATABASE_URL" required:"true"`
-	Port                   int    `envconfig:"HTTP_PORT" required:"true"`
-	ProductionMode         bool   `envconfig:"PRODUCTION_MODE" required:"true"`
-	AllowedCorsOrigin      string `envconfig:"HTTP_ALLOWED_CORS" required:"true"`
-	AmqpURL                string `envconfig:"AMQP_URL" required:"true"`
-	ClerkSecretKey         string `envconfig:"CLERK_SECRET_KEY" required:"true"`
-	ClerkEmulatorServerURL string `envconfig:"CLERK_EMULATOR_SERVER_URL" required:"true"`
-	ClerkWebhookSecret     string `envconfig:"CLERK_WEBHOOK_SECRET" required:"true"`
+	DatabaseUrl       string `envconfig:"DATABASE_URL" required:"true"`
+	Port              int    `envconfig:"HTTP_PORT" required:"true"`
+	ProductionMode    bool   `envconfig:"PRODUCTION_MODE" required:"true"`
+	AllowedCorsOrigin string `envconfig:"HTTP_ALLOWED_CORS" required:"true"`
+	AmqpURL           string `envconfig:"AMQP_URL" required:"true"`
+	HttpJwtSecret     string `envconfig:"HTTP_JWT_SECRET" required:"true"`
 }
 
 func main() {
@@ -79,11 +76,6 @@ func run(logger *logs.Logger) error {
 		return err
 	}
 
-	if !config.ProductionMode {
-		logger.Info("[LOGIN PROVIDER] setting up clerk to work with the simulator", "emulator_url", config.ClerkEmulatorServerURL)
-		clerkhttp.SetupClerkForTestingMode(config.ClerkEmulatorServerURL)
-	}
-
 	applicationRepo := psql.NewApplicationRepository(db)
 	endpointRepo := psql.NewEndpointRepository(db)
 	eventTypeRepo := psql.NewEventTypeRepository(db)
@@ -113,7 +105,8 @@ func run(logger *logs.Logger) error {
 	application := &app.App{
 		Authorization: auth.NewService(memberRepo, apiKeyRepo),
 		Command: app.Command{
-			CreateOrganization:  observability.NewCommandDecorator[command.CreateOrganization](command.NewCreateOrganizationHandler(txProvider), logger),
+			SignUp:              observability.NewCommandDecorator[command.Signup](command.NewSignupHandler(txProvider), logger),
+			SignIn:              observability.NewCommandWithResultDecorator[command.SignIn, *iam.Member](command.NewSignInHandler(memberRepo), logger),
 			CreateApplication:   observability.NewCommandDecorator[command.CreateApplication](command.NewCreateApplicationHandler(applicationRepo), logger),
 			AddEndpoint:         observability.NewCommandDecorator[command.AddEndpoint](command.NewAddEndpointHandler(endpointRepo), logger),
 			SendMessage:         observability.NewCommandDecorator[command.SendMessage](command.NewSendMessageHandler(txProvider, endpointRepo), logger),
@@ -167,25 +160,14 @@ func run(logger *logs.Logger) error {
 		router.AddNoPublisherHandler(handler.HandlerName(), handler.EventName(), subscriber, handler.Handle)
 	}
 
-	var webhookVerifier http.LoginProviderWebhookVerifier
-	if config.ProductionMode {
-		webhookVerifier, err = svix.NewWebhook(config.ClerkWebhookSecret)
-		if err != nil {
-			return fmt.Errorf("unable to create a webhook verifier: %v", err)
-		}
-	} else {
-		webhookVerifier = &clerkhttp.MockWebHookVerifier{}
-	}
-
 	httpserver, err := http.NewServer(http.Config{
-		Ctx:                          ctx,
-		Logger:                       logger,
-		Application:                  application,
-		Port:                         config.Port,
-		IsDebug:                      !config.ProductionMode,
-		ClerkSecretKey:               config.ClerkSecretKey,
-		LoginProviderWebhookVerifier: webhookVerifier,
-		AllowedCorsOrigin:            strings.Split(config.AllowedCorsOrigin, ","),
+		Ctx:               ctx,
+		Logger:            logger,
+		Application:       application,
+		Port:              config.Port,
+		IsDebug:           !config.ProductionMode,
+		JwtSecret:         config.HttpJwtSecret,
+		AllowedCorsOrigin: strings.Split(config.AllowedCorsOrigin, ","),
 	})
 	if err != nil {
 		return err

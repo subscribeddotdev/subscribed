@@ -3,25 +3,11 @@ package iam
 import (
 	"errors"
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/subscribeddotdev/subscribed-backend/internal/domain"
+	"golang.org/x/crypto/bcrypt"
 )
-
-type LoginProviderID string
-
-func (i LoginProviderID) String() string {
-	return string(i)
-}
-
-func (i LoginProviderID) Validate() error {
-	if strings.TrimSpace(string(i)) == "" {
-		return errors.New("loginProviderID cannot be empty")
-	}
-
-	return nil
-}
 
 type MemberID string
 
@@ -34,21 +20,21 @@ func NewMemberID() MemberID {
 }
 
 type Member struct {
-	id              MemberID
-	organizationID  OrgID
-	loginProviderId LoginProviderID
-	firstName       string
-	lastName        string
-	email           Email
-	createdAt       time.Time
+	id             MemberID
+	organizationID OrgID
+	firstName      string
+	lastName       string
+	email          Email
+	password       Password
+	createdAt      time.Time
 }
 
 func NewMember(
 	organizationID OrgID,
-	loginProviderId LoginProviderID,
 	firstName,
 	lastName string,
 	email Email,
+	password Password,
 ) (*Member, error) {
 	if organizationID.String() == "" {
 		return nil, errors.New("organizationID cannot be empty")
@@ -58,18 +44,18 @@ func NewMember(
 		return nil, errors.New("email cannot be empty")
 	}
 
-	if err := loginProviderId.Validate(); err != nil {
-		return nil, err
+	if password.IsEmpty() {
+		return nil, errors.New("password cannot be empty")
 	}
 
 	return &Member{
-		id:              NewMemberID(),
-		organizationID:  organizationID,
-		loginProviderId: loginProviderId,
-		firstName:       firstName,
-		lastName:        lastName,
-		email:           email,
-		createdAt:       time.Now().UTC(),
+		id:             NewMemberID(),
+		organizationID: organizationID,
+		firstName:      firstName,
+		lastName:       lastName,
+		email:          email,
+		password:       password,
+		createdAt:      time.Now(),
 	}, nil
 }
 
@@ -79,10 +65,6 @@ func (m *Member) ID() MemberID {
 
 func (m *Member) OrgID() OrgID {
 	return m.organizationID
-}
-
-func (m *Member) LoginProviderId() LoginProviderID {
-	return m.loginProviderId
 }
 
 func (m *Member) FirstName() string {
@@ -97,6 +79,14 @@ func (m *Member) Email() Email {
 	return m.email
 }
 
+func (m *Member) Password() Password {
+	return m.password
+}
+
+func (m *Member) Authenticate(plainTextPassword string) error {
+	return bcrypt.CompareHashAndPassword([]byte(m.password.hash), []byte(plainTextPassword))
+}
+
 func (m *Member) CreatedAt() time.Time {
 	return m.createdAt
 }
@@ -104,14 +94,9 @@ func (m *Member) CreatedAt() time.Time {
 func UnMarshallMember(
 	id MemberID,
 	orgID OrgID,
-	lpi LoginProviderID,
-	firstName, lastName, email string,
+	firstName, lastName, email, password string,
 	createdAt time.Time,
 ) (*Member, error) {
-	if err := lpi.Validate(); err != nil {
-		return nil, err
-	}
-
 	mEmail, err := NewEmail(email)
 	if err != nil {
 		return nil, err
@@ -121,13 +106,18 @@ func UnMarshallMember(
 		return nil, fmt.Errorf("createdAt '%s' is set in the future", createdAt)
 	}
 
+	dPassword, err := NewPasswordFromHash(password)
+	if err != nil {
+		return nil, err
+	}
+
 	return &Member{
-		id:              id,
-		organizationID:  orgID,
-		loginProviderId: lpi,
-		firstName:       firstName,
-		lastName:        lastName,
-		email:           mEmail,
-		createdAt:       createdAt.UTC(),
+		id:             id,
+		organizationID: orgID,
+		firstName:      firstName,
+		lastName:       lastName,
+		email:          mEmail,
+		password:       dPassword,
+		createdAt:      createdAt,
 	}, nil
 }

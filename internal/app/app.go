@@ -7,10 +7,16 @@ import (
 	"github.com/subscribeddotdev/subscribed-backend/internal/app/command"
 	"github.com/subscribeddotdev/subscribed-backend/internal/app/query"
 	"github.com/subscribeddotdev/subscribed-backend/internal/domain"
+	"github.com/subscribeddotdev/subscribed-backend/internal/domain/iam"
 )
 
 type CommandHandler[C any] interface {
 	Execute(ctx context.Context, cmd C) error
+}
+
+// CommandHandlerWithResult To be used in rare occasions.
+type CommandHandlerWithResult[C, R any] interface {
+	Execute(ctx context.Context, cmd C) (result R, err error)
 }
 
 type QueryHandler[Q, R any] interface {
@@ -21,7 +27,8 @@ type Command struct {
 	AddEndpoint         CommandHandler[command.AddEndpoint]
 	SendMessage         CommandHandler[command.SendMessage]
 	CreateApplication   CommandHandler[command.CreateApplication]
-	CreateOrganization  CommandHandler[command.CreateOrganization]
+	SignUp              CommandHandler[command.Signup]
+	SignIn              CommandHandlerWithResult[command.SignIn, *iam.Member]
 	CreateEventType     CommandHandler[command.CreateEventType]
 	CreateApiKey        CommandHandler[command.CreateApiKey]
 	CallWebhookEndpoint CommandHandler[command.CallWebhookEndpoint]

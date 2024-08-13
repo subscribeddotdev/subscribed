@@ -55,8 +55,8 @@ func NewEndpoint(
 		applicationID: applicationID,
 		description:   description,
 		eventTypeIDs:  eventTypeIDs,
-		createdAt:     time.Now().UTC(),
-		updatedAt:     time.Now().UTC(),
+		createdAt:     time.Now(),
+		updatedAt:     time.Now(),
 		signingSecret: signingSecret,
 		headers:       nil,
 	}, nil

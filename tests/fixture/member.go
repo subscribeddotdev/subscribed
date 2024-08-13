@@ -9,8 +9,9 @@ import (
 )
 
 type Member struct {
-	factory *Factory
-	model   models.Member
+	factory           *Factory
+	plainTextPassword string
+	model             models.Member
 }
 
 func (m *Member) WithID(id string) *Member {
@@ -38,11 +39,11 @@ func (m *Member) WithOrganizationID(value string) *Member {
 	return m
 }
 
-func (m *Member) Save() models.Member {
+func (m *Member) Save() (models.Member, string) {
 	err := m.model.Insert(m.factory.ctx, m.factory.db, boil.Infer())
 	require.NoError(m.factory.t, err)
 
-	return m.model
+	return m.model, m.plainTextPassword
 }
 
 func (m *Member) NewDomainModel() *iam.Member {

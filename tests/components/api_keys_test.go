@@ -16,11 +16,12 @@ func TestApiKeys_Lifecycle(t *testing.T) {
 	ff := fixture.NewFactory(t, ctx, db)
 	org := ff.NewOrganization().Save()
 	env := ff.NewEnvironment().WithOrganizationID(org.ID).Save()
-	ff.NewMember().WithOrganizationID(org.ID).Save()
-	token := "" // jwks.JwtGenerator(t, member.LoginProviderID)
+	member, password := ff.NewMember().WithOrganizationID(org.ID).Save()
+	token := signIn(t, member.Email, password)
+	apiClient := getClient(t, token)
 
 	t.Run("create_api_key", func(t *testing.T) {
-		resp, err := getClient(t, token).CreateApiKey(
+		resp, err := apiClient.CreateApiKey(
 			ctx,
 			&client.CreateApiKeyParams{EnvironmentId: env.ID},
 			client.CreateApiKeyRequest{Name: gofakeit.AppName()},
@@ -30,7 +31,7 @@ func TestApiKeys_Lifecycle(t *testing.T) {
 	})
 
 	t.Run("create_api_key_with_expiration_date", func(t *testing.T) {
-		resp, err := getClient(t, token).CreateApiKey(
+		resp, err := apiClient.CreateApiKey(
 			ctx,
 			&client.CreateApiKeyParams{EnvironmentId: env.ID},
 			client.CreateApiKeyRequest{Name: gofakeit.AppName(), ExpiresAt: toPtr(time.Now().Add(time.Hour * 24))},
@@ -44,7 +45,7 @@ func TestApiKeys_Lifecycle(t *testing.T) {
 			ff.NewApiKey().WithEnvironmentID(env.ID).WithOrgID(org.ID).Save()
 		}
 
-		resp, err := getClient(t, token).GetAllApiKeysWithResponse(ctx, &client.GetAllApiKeysParams{EnvironmentId: env.ID})
+		resp, err := apiClient.GetAllApiKeysWithResponse(ctx, &client.GetAllApiKeysParams{EnvironmentId: env.ID})
 		require.NoError(t, err)
 		require.Equal(t, http.StatusOK, resp.StatusCode())
 		require.NotEmpty(t, resp.JSON200.Data)

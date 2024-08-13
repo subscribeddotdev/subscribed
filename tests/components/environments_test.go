@@ -14,8 +14,9 @@ import (
 func TestEnvironments(t *testing.T) {
 	ff := fixture.NewFactory(t, ctx, db)
 	org := ff.NewOrganization().Save()
-	ff.NewMember().WithOrganizationID(org.ID).Save()
-	token := "" // jwks.JwtGenerator(t, member.LoginProviderID)
+	member, password := ff.NewMember().WithOrganizationID(org.ID).Save()
+	token := signIn(t, member.Email, password)
+	apiClient := getClient(t, token)
 
 	// Fixture multiple environments
 	envs := make(map[string]models.Environment)
@@ -24,7 +25,7 @@ func TestEnvironments(t *testing.T) {
 		envs[env.ID] = env
 	}
 
-	resp, err := getClient(t, token).GetEnvironmentsWithResponse(ctx)
+	resp, err := apiClient.GetEnvironmentsWithResponse(ctx)
 	require.NoError(t, err)
 	require.Equal(t, http.StatusOK, resp.StatusCode())
 

@@ -30,7 +30,7 @@ func (p Publisher) PublishMessageSent(ctx context.Context, e command.MessageSent
 			Name:          command.MessageSentEvent,
 			CorrelationId: "", // TODO: retrieve it from ctx
 			PublisherName: "subscribed-backend",
-			PublishedAt:   timestamppb.New(time.Now().UTC()),
+			PublishedAt:   timestamppb.New(time.Now()),
 		},
 		MessageId:  e.MessageID,
 		EndpointId: e.EndpointID,

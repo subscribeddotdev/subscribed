@@ -5,44 +5,34 @@ import (
 	"testing"
 
 	"github.com/brianvoe/gofakeit/v6"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/subscribeddotdev/subscribed-backend/internal/adapters/models"
 	"github.com/subscribeddotdev/subscribed-backend/tests/client"
-	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
 
 func TestSignup(t *testing.T) {
-	apiClient := getClient(t, "")
+	apiClient := getClient(t, noToken)
 
-	reqBody := client.SignupRequest{
+	req := client.SignupRequest{
 		FirstName: gofakeit.FirstName(),
 		LastName:  gofakeit.LastName(),
 		Email:     gofakeit.Email(),
 		Password:  gofakeit.Password(true, true, true, true, false, 12),
 	}
 
-	resp1, err := apiClient.SignUp(ctx, reqBody)
+	resp1, err := apiClient.SignUp(ctx, req)
 	require.NoError(t, err)
-
-	assert.Equal(t, http.StatusCreated, resp1.StatusCode)
-	assertMemberCreated(t, reqBody)
+	require.Equal(t, http.StatusCreated, resp1.StatusCode)
+	token := signIn(t, req.Email, req.Password)
+	require.NotEmpty(t, token)
 }
 
-func assertMemberCreated(t *testing.T, reqBody client.SignupRequest) {
-	member := findMemberByEmail(t, reqBody.Email)
-	require.NotNil(t, member.R.Organization)
-	assert.Equal(t, reqBody.FirstName, member.FirstName)
-	assert.Equal(t, reqBody.LastName, member.LastName)
-	assert.Equal(t, reqBody.Email, member.Email)
-}
-
-func findMemberByEmail(t *testing.T, email string) *models.Member {
-	member, err := models.Members(
-		models.MemberWhere.Email.EQ(email),
-		qm.Load(models.MemberRels.Organization),
-	).One(ctx, db)
+func signIn(t *testing.T, email, password string) string {
+	resp, err := getClient(t, noToken).SignInWithResponse(ctx, client.SigninRequest{
+		Email:    email,
+		Password: password,
+	})
 	require.NoError(t, err)
+	require.Equal(t, http.StatusOK, resp.StatusCode())
 
-	return member
+	return resp.JSON200.Token
 }

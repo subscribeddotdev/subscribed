@@ -34,6 +34,7 @@ type Config struct {
 	Logger            *logs.Logger
 	IsDebug           bool
 	Ctx               context.Context
+	JwtSecret         string
 }
 
 func NewServer(config Config) (*Server, error) {
@@ -46,6 +47,7 @@ func NewServer(config Config) (*Server, error) {
 
 	routerHandlers := &handlers{
 		application: config.Application,
+		jwtSecret:   config.JwtSecret,
 	}
 
 	registerMiddlewares(router, spec, config)
@@ -63,7 +65,6 @@ func NewServer(config Config) (*Server, error) {
 			BaseContext: func(listener net.Listener) context.Context {
 				return config.Ctx
 			},
-			ConnContext: nil,
 		},
 	}, nil
 }
@@ -99,6 +100,7 @@ func registerMiddlewares(router *echo.Echo, spec *openapi3.T, config Config) {
 	}))
 
 	authApiKeyMiddleware := apiKeyMiddleware{auth: config.Application.Authorization}
+	authJwtMiddleware := jwtMiddleware{secret: config.JwtSecret}
 
 	spec.Servers = nil
 	router.Use(oapimiddleware.OapiRequestValidatorWithOptions(spec, &oapimiddleware.Options{
@@ -108,7 +110,9 @@ func registerMiddlewares(router *echo.Echo, spec *openapi3.T, config Config) {
 					return authApiKeyMiddleware.Middleware(ctx, input)
 				}
 
-				// todo: implement a jwt middleware
+				if input.SecuritySchemeName == jwtSecurityScheme {
+					return authJwtMiddleware.Middleware(ctx, input)
+				}
 
 				return fmt.Errorf("unable to recognise '%s' as the security scheme", input.SecuritySchemeName)
 			},

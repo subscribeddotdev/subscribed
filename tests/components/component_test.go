@@ -20,8 +20,9 @@ import (
 )
 
 var (
-	db  *sql.DB
-	ctx context.Context
+	db      *sql.DB
+	ctx     context.Context
+	noToken = ""
 )
 
 func TestMain(m *testing.M) {

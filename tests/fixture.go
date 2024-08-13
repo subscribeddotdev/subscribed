@@ -34,5 +34,5 @@ func ToPtr[T any](v T) *T {
 
 func RequireEqualTime(t *testing.T, t1, t2 time.Time) {
 	t.Helper()
-	require.Equal(t, t1.Truncate(time.Second), t2.Truncate(time.Second))
+	require.Equal(t, t1.UTC().Truncate(time.Second), t2.Truncate(time.Second))
 }

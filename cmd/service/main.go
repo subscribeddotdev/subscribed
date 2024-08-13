@@ -41,6 +41,7 @@ type Config struct {
 	ProductionMode    bool   `envconfig:"PRODUCTION_MODE" required:"true"`
 	AllowedCorsOrigin string `envconfig:"HTTP_ALLOWED_CORS" required:"true"`
 	AmqpURL           string `envconfig:"AMQP_URL" required:"true"`
+	HttpJwtSecret     string `envconfig:"HTTP_JWT_SECRET" required:"true"`
 }
 
 func main() {
@@ -165,6 +166,7 @@ func run(logger *logs.Logger) error {
 		Application:       application,
 		Port:              config.Port,
 		IsDebug:           !config.ProductionMode,
+		JwtSecret:         config.HttpJwtSecret,
 		AllowedCorsOrigin: strings.Split(config.AllowedCorsOrigin, ","),
 	})
 	if err != nil {

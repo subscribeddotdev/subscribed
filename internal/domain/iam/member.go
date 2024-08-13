@@ -132,6 +132,6 @@ func UnMarshallMember(
 		lastName:       lastName,
 		email:          mEmail,
 		password:       dPassword,
-		createdAt:      createdAt.UTC(),
+		createdAt:      createdAt,
 	}, nil
 }

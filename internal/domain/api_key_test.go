@@ -64,7 +64,7 @@ func TestNewApiKey(t *testing.T) {
 			expectedErr:  "expiresAt cannot be set in the past",
 			apiKeyName:   gofakeit.AppName(),
 			envID:        domain.NewEnvironmentID(),
-			expiresAt:    tests.ToPtr(time.Date(2020, 1, 1, 1, 1, 1, 1, time.UTC)),
+			expiresAt:    tests.ToPtr(time.Date(2020, 1, 1, 1, 1, 1, 1, time.Local)),
 			isTestApiKey: false,
 			orgID:        iam.NewOrgID().String(),
 		},

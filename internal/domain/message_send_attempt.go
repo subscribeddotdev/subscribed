@@ -85,7 +85,7 @@ func NewMessageSendAttempt(
 		id:             NewMsgSendAttemptID(),
 		messageID:      messageID,
 		endpointID:     endpointID,
-		timestamp:      time.Now().UTC(),
+		timestamp:      time.Now(),
 		status:         status,
 		response:       response,
 		statusCode:     statusCode,

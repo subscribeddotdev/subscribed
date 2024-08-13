@@ -12,13 +12,9 @@ import (
 	"github.com/subscribeddotdev/subscribed-backend/internal/domain/iam"
 )
 
-type jwtIssuer interface {
-	Issue(member *iam.Member) (string, error)
-}
-
 type handlers struct {
 	application *app.App
-	jwtIssuer   jwtIssuer
+	jwtSecret   string
 }
 
 func (h handlers) HealthCheck(c echo.Context) error {
@@ -93,7 +89,7 @@ func (h handlers) SendMessage(c echo.Context, applicationID string) error {
 }
 
 func (h handlers) CreateEventType(c echo.Context) error {
-	member, err := h.resolveMemberFromCtx(c)
+	claims, err := h.resolveJwtClaimsFromCtx(c)
 	if err != nil {
 		return err
 	}
@@ -121,7 +117,7 @@ func (h handlers) CreateEventType(c echo.Context) error {
 	}
 
 	err = h.application.Command.CreateEventType.Execute(c.Request().Context(), command.CreateEventType{
-		OrgID:         member.OrgID(),
+		OrgID:         iam.OrgID(claims.OrganizationID),
 		Name:          body.Name,
 		Description:   description,
 		Schema:        schema,
@@ -135,7 +131,7 @@ func (h handlers) CreateEventType(c echo.Context) error {
 }
 
 func (h handlers) CreateApiKey(c echo.Context, params CreateApiKeyParams) error {
-	member, err := h.resolveMemberFromCtx(c)
+	claims, err := h.resolveJwtClaimsFromCtx(c)
 	if err != nil {
 		return err
 	}
@@ -150,7 +146,7 @@ func (h handlers) CreateApiKey(c echo.Context, params CreateApiKeyParams) error 
 		Name:          body.Name,
 		ExpiresAt:     body.ExpiresAt,
 		EnvironmentID: domain.EnvironmentID(params.EnvironmentId),
-		OrgID:         member.OrgID().String(),
+		OrgID:         claims.OrganizationID,
 	})
 	if err != nil {
 		return NewHandlerError(err, "unable-to-create-api-key")
@@ -160,13 +156,13 @@ func (h handlers) CreateApiKey(c echo.Context, params CreateApiKeyParams) error 
 }
 
 func (h handlers) GetEnvironments(c echo.Context) error {
-	member, err := h.resolveMemberFromCtx(c)
+	claims, err := h.resolveJwtClaimsFromCtx(c)
 	if err != nil {
 		return err
 	}
 
 	envs, err := h.application.Query.Environments.Execute(c.Request().Context(), query.Environments{
-		OrgID: member.OrgID().String(),
+		OrgID: claims.OrganizationID,
 	})
 	if err != nil {
 		return err
@@ -189,13 +185,13 @@ func (h handlers) GetEnvironments(c echo.Context) error {
 }
 
 func (h handlers) GetAllApiKeys(c echo.Context, params GetAllApiKeysParams) error {
-	member, err := h.resolveMemberFromCtx(c)
+	claims, err := h.resolveJwtClaimsFromCtx(c)
 	if err != nil {
 		return err
 	}
 
 	apiKeys, err := h.application.Query.AllApiKeys.Execute(c.Request().Context(), query.AllApiKeys{
-		OrgID:         member.OrgID().String(),
+		OrgID:         claims.OrganizationID,
 		EnvironmentID: params.EnvironmentId,
 	})
 	if err != nil {
@@ -217,9 +213,13 @@ func (h handlers) GetAllApiKeys(c echo.Context, params GetAllApiKeysParams) erro
 	return c.JSON(http.StatusOK, GetAllApiKeysPayload{Data: data})
 }
 
-func (h handlers) resolveMemberFromCtx(c echo.Context) (*iam.Member, error) {
-	panic("implement me")
-	return &iam.Member{}, nil
+func (h handlers) resolveJwtClaimsFromCtx(c echo.Context) (*jwtCustomClaims, error) {
+	claims, ok := c.Get("user_claims").(*jwtCustomClaims)
+	if !ok {
+		return nil, NewHandlerErrorWithStatus(errors.New("unable-to-retrieve-claims"), "unable-to-retrieve-claims", http.StatusUnauthorized)
+	}
+
+	return claims, nil
 }
 
 func (h handlers) resolveOrgIdFromCtx(c echo.Context) (string, error) {

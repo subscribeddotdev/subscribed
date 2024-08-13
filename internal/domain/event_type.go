@@ -48,7 +48,7 @@ func NewEventType(orgID, name, description, schema, schemaExample string) (*Even
 		schema:        schema,
 		schemaExample: schemaExample,
 		archivedAt:    nil,
-		createdAt:     time.Now().UTC(),
+		createdAt:     time.Now(),
 	}, nil
 }
 
@@ -98,7 +98,7 @@ func UnMarshallEventType(
 		description:   description,
 		schema:        schema,
 		schemaExample: schemaExample,
-		createdAt:     createdAt.UTC(),
+		createdAt:     createdAt,
 		archivedAt:    archivedAt,
 	}
 }

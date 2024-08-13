@@ -58,7 +58,7 @@ func (h handlers) SignIn(c echo.Context) error {
 		return NewHandlerError(err, "error-authenticating")
 	}
 
-	token, err := h.jwtIssuer.Issue(member)
+	token, err := signJwt(member, h.jwtSecret)
 	if err != nil {
 		return NewHandlerError(err, "error-signing-jwt")
 	}

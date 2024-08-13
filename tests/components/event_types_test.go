@@ -12,12 +12,13 @@ import (
 )
 
 func TestEventTypes(t *testing.T) {
-	factory := fixture.NewFactory(t, ctx, db)
-	org := factory.NewOrganization().Save()
-	factory.NewMember().WithOrganizationID(org.ID).Save()
-	token := "" // jwks.JwtGenerator(t, member.LoginProviderID)
+	ff := fixture.NewFactory(t, ctx, db)
+	org := ff.NewOrganization().Save()
+	member, password := ff.NewMember().WithOrganizationID(org.ID).Save()
+	token := signIn(t, member.Email, password)
+	apiClient := getClient(t, token)
 
-	resp, err := getClient(t, token).CreateEventType(ctx, client.CreateEventTypeRequest{
+	resp, err := apiClient.CreateEventType(ctx, client.CreateEventTypeRequest{
 		Name:        gofakeit.AppName(),
 		Description: toPtr(gofakeit.Sentence(20)),
 	})

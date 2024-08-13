@@ -36,20 +36,25 @@ func (f *Factory) NewOrganization() *Organization {
 		factory: f,
 		model: models.Organization{
 			ID:        iam.NewOrgID().String(),
-			CreatedAt: time.Now().UTC(),
+			CreatedAt: time.Now(),
 		},
 	}
 }
 
 func (f *Factory) NewMember() *Member {
+	plainTextPassword := tests.FixturePassword(f.t).String()
+	password, err := iam.NewPassword(plainTextPassword)
+	require.NoError(f.t, err)
+
 	return &Member{
-		factory: f,
+		factory:           f,
+		plainTextPassword: plainTextPassword,
 		model: models.Member{
 			ID:             iam.NewMemberID().String(),
 			FirstName:      gofakeit.FirstName(),
 			LastName:       gofakeit.LastName(),
 			Email:          gofakeit.Email(),
-			Password:       tests.FixturePassword(f.t).String(),
+			Password:       password.String(),
 			OrganizationID: "",
 			CreatedAt:      time.Now(),
 		},
@@ -78,7 +83,7 @@ func (f *Factory) NewApplication() *Application {
 		model: models.Application{
 			ID:        domain.NewApplicationID().String(),
 			Name:      gofakeit.AppName(),
-			CreatedAt: time.Now().UTC(),
+			CreatedAt: time.Now(),
 		},
 	}
 }

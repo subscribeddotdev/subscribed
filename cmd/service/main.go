@@ -19,6 +19,7 @@ import (
 	"github.com/subscribeddotdev/subscribed-backend/internal/app/query"
 	"github.com/subscribeddotdev/subscribed-backend/internal/common/messaging"
 	"github.com/subscribeddotdev/subscribed-backend/internal/domain"
+	"github.com/subscribeddotdev/subscribed-backend/internal/domain/iam"
 	"golang.org/x/sync/errgroup"
 
 	"github.com/subscribeddotdev/subscribed-backend/internal/adapters/events"
@@ -103,7 +104,8 @@ func run(logger *logs.Logger) error {
 	application := &app.App{
 		Authorization: auth.NewService(memberRepo, apiKeyRepo),
 		Command: app.Command{
-			CreateOrganization:  observability.NewCommandDecorator[command.Signup](command.NewSignupHandler(txProvider), logger),
+			SignUp:              observability.NewCommandDecorator[command.Signup](command.NewSignupHandler(txProvider), logger),
+			SignIn:              observability.NewCommandWithResultDecorator[command.SignIn, *iam.Member](command.NewSignInHandler(memberRepo), logger),
 			CreateApplication:   observability.NewCommandDecorator[command.CreateApplication](command.NewCreateApplicationHandler(applicationRepo), logger),
 			AddEndpoint:         observability.NewCommandDecorator[command.AddEndpoint](command.NewAddEndpointHandler(endpointRepo), logger),
 			SendMessage:         observability.NewCommandDecorator[command.SendMessage](command.NewSendMessageHandler(txProvider, endpointRepo), logger),

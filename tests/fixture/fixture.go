@@ -3,7 +3,6 @@ package fixture
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"os"
 	"testing"
 	"time"
@@ -13,6 +12,7 @@ import (
 	"github.com/subscribeddotdev/subscribed-backend/internal/adapters/models"
 	"github.com/subscribeddotdev/subscribed-backend/internal/domain"
 	"github.com/subscribeddotdev/subscribed-backend/internal/domain/iam"
+	"github.com/subscribeddotdev/subscribed-backend/tests"
 	"github.com/volatiletech/null/v8"
 )
 
@@ -45,13 +45,13 @@ func (f *Factory) NewMember() *Member {
 	return &Member{
 		factory: f,
 		model: models.Member{
-			ID:              iam.NewMemberID().String(),
-			FirstName:       null.StringFrom(gofakeit.FirstName()),
-			LastName:        null.StringFrom(gofakeit.LastName()),
-			Email:           gofakeit.Email(),
-			LoginProviderID: fmt.Sprintf("user_%s", domain.NewID().String()),
-			OrganizationID:  "",
-			CreatedAt:       time.Now().UTC(),
+			ID:             iam.NewMemberID().String(),
+			FirstName:      gofakeit.FirstName(),
+			LastName:       gofakeit.LastName(),
+			Email:          gofakeit.Email(),
+			Password:       tests.FixturePassword(f.t).String(),
+			OrganizationID: "",
+			CreatedAt:      time.Now(),
 		},
 	}
 }
@@ -63,8 +63,11 @@ func (f *Factory) NewEnvironment() *Environment {
 			ID:             domain.NewEnvironmentID().String(),
 			OrganizationID: iam.NewOrgID().String(),
 			Name:           gofakeit.AppName(),
-			EnvType:        []string{models.EnvtypeDevelopment, models.EnvtypeProduction}[gofakeit.Number(0, 1)],
-			CreatedAt:      time.Now().UTC(),
+			EnvType: []string{
+				models.EnvtypeDevelopment,
+				models.EnvtypeProduction,
+			}[gofakeit.Number(0, 1)],
+			CreatedAt: time.Now(),
 		},
 	}
 }

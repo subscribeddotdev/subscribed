@@ -10,15 +10,14 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/subscribeddotdev/subscribed-backend/tests/client"
 	"github.com/subscribeddotdev/subscribed-backend/tests/fixture"
-	"github.com/subscribeddotdev/subscribed-backend/tests/jwks"
 )
 
 func TestApiKeys_Lifecycle(t *testing.T) {
 	ff := fixture.NewFactory(t, ctx, db)
 	org := ff.NewOrganization().Save()
 	env := ff.NewEnvironment().WithOrganizationID(org.ID).Save()
-	member := ff.NewMember().WithOrganizationID(org.ID).Save()
-	token := jwks.JwtGenerator(t, member.LoginProviderID)
+	ff.NewMember().WithOrganizationID(org.ID).Save()
+	token := "" // jwks.JwtGenerator(t, member.LoginProviderID)
 
 	t.Run("create_api_key", func(t *testing.T) {
 		resp, err := getClient(t, token).CreateApiKey(

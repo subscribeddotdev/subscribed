@@ -9,14 +9,13 @@ import (
 	"github.com/subscribeddotdev/subscribed-backend/internal/adapters/models"
 	"github.com/subscribeddotdev/subscribed-backend/tests"
 	"github.com/subscribeddotdev/subscribed-backend/tests/fixture"
-	"github.com/subscribeddotdev/subscribed-backend/tests/jwks"
 )
 
 func TestEnvironments(t *testing.T) {
 	ff := fixture.NewFactory(t, ctx, db)
 	org := ff.NewOrganization().Save()
-	member := ff.NewMember().WithOrganizationID(org.ID).Save()
-	token := jwks.JwtGenerator(t, member.LoginProviderID)
+	ff.NewMember().WithOrganizationID(org.ID).Save()
+	token := "" // jwks.JwtGenerator(t, member.LoginProviderID)
 
 	// Fixture multiple environments
 	envs := make(map[string]models.Environment)

@@ -106,6 +106,17 @@ type SendMessageRequest struct {
 	Payload     string `json:"payload"`
 }
 
+// SignInPayload defines model for SignInPayload.
+type SignInPayload struct {
+	Token string `json:"token"`
+}
+
+// SigninRequest defines model for SigninRequest.
+type SigninRequest struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
 // SignupRequest defines model for SignupRequest.
 type SignupRequest struct {
 	Email     string `json:"email"`
@@ -142,8 +153,11 @@ type SendMessageJSONRequestBody = SendMessageRequest
 // CreateEventTypeJSONRequestBody defines body for CreateEventType for application/json ContentType.
 type CreateEventTypeJSONRequestBody = CreateEventTypeRequest
 
-// SignupJSONRequestBody defines body for Signup for application/json ContentType.
-type SignupJSONRequestBody = SignupRequest
+// SignInJSONRequestBody defines body for SignIn for application/json ContentType.
+type SignInJSONRequestBody = SigninRequest
+
+// SignUpJSONRequestBody defines body for SignUp for application/json ContentType.
+type SignUpJSONRequestBody = SignupRequest
 
 // RequestEditorFn  is the function signature for the RequestEditor callback function
 type RequestEditorFn func(ctx context.Context, req *http.Request) error
@@ -252,10 +266,15 @@ type ClientInterface interface {
 	// HealthCheck request
 	HealthCheck(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// SignupWithBody request with any body
-	SignupWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// SignInWithBody request with any body
+	SignInWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	Signup(ctx context.Context, body SignupJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+	SignIn(ctx context.Context, body SignInJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// SignUpWithBody request with any body
+	SignUpWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	SignUp(ctx context.Context, body SignUpJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 }
 
 func (c *Client) GetAllApiKeys(ctx context.Context, params *GetAllApiKeysParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -414,8 +433,8 @@ func (c *Client) HealthCheck(ctx context.Context, reqEditors ...RequestEditorFn)
 	return c.Client.Do(req)
 }
 
-func (c *Client) SignupWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewSignupRequestWithBody(c.Server, contentType, body)
+func (c *Client) SignInWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewSignInRequestWithBody(c.Server, contentType, body)
 	if err != nil {
 		return nil, err
 	}
@@ -426,8 +445,32 @@ func (c *Client) SignupWithBody(ctx context.Context, contentType string, body io
 	return c.Client.Do(req)
 }
 
-func (c *Client) Signup(ctx context.Context, body SignupJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewSignupRequest(c.Server, body)
+func (c *Client) SignIn(ctx context.Context, body SignInJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewSignInRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) SignUpWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewSignUpRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) SignUp(ctx context.Context, body SignUpJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewSignUpRequest(c.Server, body)
 	if err != nil {
 		return nil, err
 	}
@@ -764,19 +807,59 @@ func NewHealthCheckRequest(server string) (*http.Request, error) {
 	return req, nil
 }
 
-// NewSignupRequest calls the generic Signup builder with application/json body
-func NewSignupRequest(server string, body SignupJSONRequestBody) (*http.Request, error) {
+// NewSignInRequest calls the generic SignIn builder with application/json body
+func NewSignInRequest(server string, body SignInJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
 	buf, err := json.Marshal(body)
 	if err != nil {
 		return nil, err
 	}
 	bodyReader = bytes.NewReader(buf)
-	return NewSignupRequestWithBody(server, "application/json", bodyReader)
+	return NewSignInRequestWithBody(server, "application/json", bodyReader)
 }
 
-// NewSignupRequestWithBody generates requests for Signup with any type of body
-func NewSignupRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+// NewSignInRequestWithBody generates requests for SignIn with any type of body
+func NewSignInRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/signin")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewSignUpRequest calls the generic SignUp builder with application/json body
+func NewSignUpRequest(server string, body SignUpJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewSignUpRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewSignUpRequestWithBody generates requests for SignUp with any type of body
+func NewSignUpRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
 	var err error
 
 	serverURL, err := url.Parse(server)
@@ -881,10 +964,15 @@ type ClientWithResponsesInterface interface {
 	// HealthCheckWithResponse request
 	HealthCheckWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*HealthCheckResponse, error)
 
-	// SignupWithBodyWithResponse request with any body
-	SignupWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*SignupResponse, error)
+	// SignInWithBodyWithResponse request with any body
+	SignInWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*SignInResponse, error)
 
-	SignupWithResponse(ctx context.Context, body SignupJSONRequestBody, reqEditors ...RequestEditorFn) (*SignupResponse, error)
+	SignInWithResponse(ctx context.Context, body SignInJSONRequestBody, reqEditors ...RequestEditorFn) (*SignInResponse, error)
+
+	// SignUpWithBodyWithResponse request with any body
+	SignUpWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*SignUpResponse, error)
+
+	SignUpWithResponse(ctx context.Context, body SignUpJSONRequestBody, reqEditors ...RequestEditorFn) (*SignUpResponse, error)
 }
 
 type GetAllApiKeysResponse struct {
@@ -1065,14 +1153,15 @@ func (r HealthCheckResponse) StatusCode() int {
 	return 0
 }
 
-type SignupResponse struct {
+type SignInResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
+	JSON200      *SignInPayload
 	JSONDefault  *DefaultError
 }
 
 // Status returns HTTPResponse.Status
-func (r SignupResponse) Status() string {
+func (r SignInResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -1080,7 +1169,29 @@ func (r SignupResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r SignupResponse) StatusCode() int {
+func (r SignInResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type SignUpResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSONDefault  *DefaultError
+}
+
+// Status returns HTTPResponse.Status
+func (r SignUpResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r SignUpResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -1199,21 +1310,38 @@ func (c *ClientWithResponses) HealthCheckWithResponse(ctx context.Context, reqEd
 	return ParseHealthCheckResponse(rsp)
 }
 
-// SignupWithBodyWithResponse request with arbitrary body returning *SignupResponse
-func (c *ClientWithResponses) SignupWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*SignupResponse, error) {
-	rsp, err := c.SignupWithBody(ctx, contentType, body, reqEditors...)
+// SignInWithBodyWithResponse request with arbitrary body returning *SignInResponse
+func (c *ClientWithResponses) SignInWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*SignInResponse, error) {
+	rsp, err := c.SignInWithBody(ctx, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseSignupResponse(rsp)
+	return ParseSignInResponse(rsp)
 }
 
-func (c *ClientWithResponses) SignupWithResponse(ctx context.Context, body SignupJSONRequestBody, reqEditors ...RequestEditorFn) (*SignupResponse, error) {
-	rsp, err := c.Signup(ctx, body, reqEditors...)
+func (c *ClientWithResponses) SignInWithResponse(ctx context.Context, body SignInJSONRequestBody, reqEditors ...RequestEditorFn) (*SignInResponse, error) {
+	rsp, err := c.SignIn(ctx, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseSignupResponse(rsp)
+	return ParseSignInResponse(rsp)
+}
+
+// SignUpWithBodyWithResponse request with arbitrary body returning *SignUpResponse
+func (c *ClientWithResponses) SignUpWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*SignUpResponse, error) {
+	rsp, err := c.SignUpWithBody(ctx, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseSignUpResponse(rsp)
+}
+
+func (c *ClientWithResponses) SignUpWithResponse(ctx context.Context, body SignUpJSONRequestBody, reqEditors ...RequestEditorFn) (*SignUpResponse, error) {
+	rsp, err := c.SignUp(ctx, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseSignUpResponse(rsp)
 }
 
 // ParseGetAllApiKeysResponse parses an HTTP response from a GetAllApiKeysWithResponse call
@@ -1438,15 +1566,48 @@ func ParseHealthCheckResponse(rsp *http.Response) (*HealthCheckResponse, error) 
 	return response, nil
 }
 
-// ParseSignupResponse parses an HTTP response from a SignupWithResponse call
-func ParseSignupResponse(rsp *http.Response) (*SignupResponse, error) {
+// ParseSignInResponse parses an HTTP response from a SignInWithResponse call
+func ParseSignInResponse(rsp *http.Response) (*SignInResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &SignupResponse{
+	response := &SignInResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest SignInPayload
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest DefaultError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseSignUpResponse parses an HTTP response from a SignUpWithResponse call
+func ParseSignUpResponse(rsp *http.Response) (*SignUpResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &SignUpResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -1467,28 +1628,29 @@ func ParseSignupResponse(rsp *http.Response) (*SignupResponse, error) {
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
+	"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",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

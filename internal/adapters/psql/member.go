@@ -8,9 +8,7 @@ import (
 	"github.com/friendsofgo/errors"
 	"github.com/subscribeddotdev/subscribed-backend/internal/adapters/models"
 	"github.com/subscribeddotdev/subscribed-backend/internal/domain/iam"
-	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
-	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
 
 type MemberRepository struct {
@@ -26,8 +24,8 @@ func NewMemberRepository(db boil.ContextExecutor) *MemberRepository {
 func (o MemberRepository) Insert(ctx context.Context, member *iam.Member) error {
 	model := models.Member{
 		ID:             member.ID().String(),
-		FirstName:      null.StringFrom(member.FirstName()),
-		LastName:       null.StringFrom(member.LastName()),
+		FirstName:      member.FirstName(),
+		LastName:       member.LastName(),
 		Email:          member.Email().String(),
 		Password:       member.Password().String(),
 		OrganizationID: member.OrgID().String(),
@@ -42,42 +40,25 @@ func (o MemberRepository) Insert(ctx context.Context, member *iam.Member) error 
 	return nil
 }
 
-func (o MemberRepository) ExistsByOr(
+func (o MemberRepository) FindByEmail(
 	ctx context.Context,
 	email iam.Email,
-	loginProviderID iam.LoginProviderID,
-) (bool, error) {
-	exists, err := models.Members(
-		models.MemberWhere.Email.EQ(email.String()),
-		qm.Or2(models.MemberWhere.LoginProviderID.EQ(loginProviderID.String())),
-	).Exists(ctx, o.db)
-	if err != nil {
-		return false, fmt.Errorf("unable to check for member via email '%s' or login provider id '%s': %v", email, loginProviderID, err)
-	}
-
-	return exists, nil
-}
-
-func (o MemberRepository) ByLoginProviderID(ctx context.Context, lpi iam.LoginProviderID) (*iam.Member, error) {
-	model, err := models.Members(
-		models.MemberWhere.LoginProviderID.EQ(lpi.String()),
-	).One(ctx, o.db)
+) (*iam.Member, error) {
+	row, err := models.Members(models.MemberWhere.Email.EQ(email.String())).One(ctx, o.db)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, iam.ErrMemberNotFound
 	}
-
 	if err != nil {
-		return nil, fmt.Errorf("error querying member via login provider id '%s': %v", lpi, err)
+		return nil, fmt.Errorf("unable to check for member via email '%s': %v", email, err)
 	}
 
 	return iam.UnMarshallMember(
-		iam.MemberID(model.ID),
-		iam.OrgID(model.OrganizationID),
-		iam.LoginProviderID(model.LoginProviderID),
-		model.FirstName.String,
-		model.LastName.String,
-		model.Email,
-		model.Password,
-		model.CreatedAt,
+		iam.MemberID(row.ID),
+		iam.OrgID(row.OrganizationID),
+		row.FirstName,
+		row.LastName,
+		row.Email,
+		row.Password,
+		row.CreatedAt,
 	)
 }

@@ -19,10 +19,6 @@ func NewService(memberRepo iam.MemberRepository, apiKeyRepo domain.ApiKeyReposit
 	}
 }
 
-func (s *Service) ResolveMemberByLoginProviderID(ctx context.Context, loginProviderID string) (*iam.Member, error) {
-	return s.memberRepo.ByLoginProviderID(ctx, iam.LoginProviderID(loginProviderID))
-}
-
 func (s *Service) resolveApiKeyFromSecretKey(ctx context.Context, secretKey string) (*domain.ApiKey, error) {
 	sk, err := domain.UnMarshallSecretKey(secretKey)
 	if err != nil {

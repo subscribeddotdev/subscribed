@@ -14,7 +14,6 @@ import (
 	"time"
 
 	"github.com/friendsofgo/errors"
-	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
@@ -24,13 +23,13 @@ import (
 
 // Member is an object representing the database table.
 type Member struct {
-	ID             string      `boil:"id" json:"id" toml:"id" yaml:"id"`
-	FirstName      null.String `boil:"first_name" json:"first_name,omitempty" toml:"first_name" yaml:"first_name,omitempty"`
-	LastName       null.String `boil:"last_name" json:"last_name,omitempty" toml:"last_name" yaml:"last_name,omitempty"`
-	Email          string      `boil:"email" json:"email" toml:"email" yaml:"email"`
-	Password       string      `boil:"password" json:"password" toml:"password" yaml:"password"`
-	OrganizationID string      `boil:"organization_id" json:"organization_id" toml:"organization_id" yaml:"organization_id"`
-	CreatedAt      time.Time   `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
+	ID             string    `boil:"id" json:"id" toml:"id" yaml:"id"`
+	FirstName      string    `boil:"first_name" json:"first_name" toml:"first_name" yaml:"first_name"`
+	LastName       string    `boil:"last_name" json:"last_name" toml:"last_name" yaml:"last_name"`
+	Email          string    `boil:"email" json:"email" toml:"email" yaml:"email"`
+	Password       string    `boil:"password" json:"password" toml:"password" yaml:"password"`
+	OrganizationID string    `boil:"organization_id" json:"organization_id" toml:"organization_id" yaml:"organization_id"`
+	CreatedAt      time.Time `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
 
 	R *memberR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L memberL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -76,16 +75,16 @@ var MemberTableColumns = struct {
 
 var MemberWhere = struct {
 	ID             whereHelperstring
-	FirstName      whereHelpernull_String
-	LastName       whereHelpernull_String
+	FirstName      whereHelperstring
+	LastName       whereHelperstring
 	Email          whereHelperstring
 	Password       whereHelperstring
 	OrganizationID whereHelperstring
 	CreatedAt      whereHelpertime_Time
 }{
 	ID:             whereHelperstring{field: "\"members\".\"id\""},
-	FirstName:      whereHelpernull_String{field: "\"members\".\"first_name\""},
-	LastName:       whereHelpernull_String{field: "\"members\".\"last_name\""},
+	FirstName:      whereHelperstring{field: "\"members\".\"first_name\""},
+	LastName:       whereHelperstring{field: "\"members\".\"last_name\""},
 	Email:          whereHelperstring{field: "\"members\".\"email\""},
 	Password:       whereHelperstring{field: "\"members\".\"password\""},
 	OrganizationID: whereHelperstring{field: "\"members\".\"organization_id\""},
@@ -121,8 +120,8 @@ type memberL struct{}
 
 var (
 	memberAllColumns            = []string{"id", "first_name", "last_name", "email", "password", "organization_id", "created_at"}
-	memberColumnsWithoutDefault = []string{"id", "email", "password", "organization_id", "created_at"}
-	memberColumnsWithDefault    = []string{"first_name", "last_name"}
+	memberColumnsWithoutDefault = []string{"id", "first_name", "last_name", "email", "password", "organization_id", "created_at"}
+	memberColumnsWithDefault    = []string{}
 	memberPrimaryKeyColumns     = []string{"id"}
 	memberGeneratedColumns      = []string{}
 )

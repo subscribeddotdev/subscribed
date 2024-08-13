@@ -15,6 +15,5 @@ type OrganizationRepository interface {
 
 type MemberRepository interface {
 	Insert(ctx context.Context, member *Member) error
-	ByLoginProviderID(ctx context.Context, lpi LoginProviderID) (*Member, error)
-	ExistsByOr(ctx context.Context, email Email, loginProviderID LoginProviderID) (bool, error)
+	FindByEmail(ctx context.Context, email Email) (*Member, error)
 }

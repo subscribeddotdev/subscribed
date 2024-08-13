@@ -8,13 +8,17 @@ import (
 	"github.com/subscribeddotdev/subscribed-backend/internal/app"
 	"github.com/subscribeddotdev/subscribed-backend/internal/app/command"
 	"github.com/subscribeddotdev/subscribed-backend/internal/app/query"
-	"github.com/subscribeddotdev/subscribed-backend/internal/common/clerkhttp"
 	"github.com/subscribeddotdev/subscribed-backend/internal/domain"
 	"github.com/subscribeddotdev/subscribed-backend/internal/domain/iam"
 )
 
+type jwtIssuer interface {
+	Issue(member *iam.Member) (string, error)
+}
+
 type handlers struct {
 	application *app.App
+	jwtIssuer   jwtIssuer
 }
 
 func (h handlers) HealthCheck(c echo.Context) error {
@@ -214,21 +218,8 @@ func (h handlers) GetAllApiKeys(c echo.Context, params GetAllApiKeysParams) erro
 }
 
 func (h handlers) resolveMemberFromCtx(c echo.Context) (*iam.Member, error) {
-	claims, ok := clerkhttp.SessionClaimsFromContext(c)
-	if !ok {
-		return nil, NewHandlerErrorWithStatus(errors.New("unauthorized"), "unauthorized", http.StatusUnauthorized)
-	}
-
-	m, err := h.application.Authorization.ResolveMemberByLoginProviderID(c.Request().Context(), claims.Subject)
-	if errors.Is(err, iam.ErrMemberNotFound) {
-		return nil, NewHandlerErrorWithStatus(errors.New("forbidden"), "member-not-found", http.StatusForbidden)
-	}
-
-	if err != nil {
-		return nil, NewHandlerErrorWithStatus(errors.New("unauthorized"), "unauthorized", http.StatusForbidden)
-	}
-
-	return m, nil
+	panic("implement me")
+	return &iam.Member{}, nil
 }
 
 func (h handlers) resolveOrgIdFromCtx(c echo.Context) (string, error) {

@@ -9,14 +9,13 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/subscribeddotdev/subscribed-backend/tests/client"
 	"github.com/subscribeddotdev/subscribed-backend/tests/fixture"
-	"github.com/subscribeddotdev/subscribed-backend/tests/jwks"
 )
 
 func TestEventTypes(t *testing.T) {
 	factory := fixture.NewFactory(t, ctx, db)
 	org := factory.NewOrganization().Save()
-	member := factory.NewMember().WithOrganizationID(org.ID).Save()
-	token := jwks.JwtGenerator(t, member.LoginProviderID)
+	factory.NewMember().WithOrganizationID(org.ID).Save()
+	token := "" // jwks.JwtGenerator(t, member.LoginProviderID)
 
 	resp, err := getClient(t, token).CreateEventType(ctx, client.CreateEventTypeRequest{
 		Name:        gofakeit.AppName(),

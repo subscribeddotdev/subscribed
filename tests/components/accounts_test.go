@@ -22,7 +22,7 @@ func TestSignup(t *testing.T) {
 		Password:  gofakeit.Password(true, true, true, true, false, 12),
 	}
 
-	resp1, err := apiClient.Signup(ctx, reqBody)
+	resp1, err := apiClient.SignUp(ctx, reqBody)
 	require.NoError(t, err)
 
 	assert.Equal(t, http.StatusCreated, resp1.StatusCode)
@@ -32,8 +32,8 @@ func TestSignup(t *testing.T) {
 func assertMemberCreated(t *testing.T, reqBody client.SignupRequest) {
 	member := findMemberByEmail(t, reqBody.Email)
 	require.NotNil(t, member.R.Organization)
-	assert.Equal(t, reqBody.FirstName, member.FirstName.Ptr())
-	assert.Equal(t, reqBody.LastName, member.LastName.Ptr())
+	assert.Equal(t, reqBody.FirstName, member.FirstName)
+	assert.Equal(t, reqBody.LastName, member.LastName)
 	assert.Equal(t, reqBody.Email, member.Email)
 }
 

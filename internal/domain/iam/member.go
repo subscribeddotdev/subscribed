@@ -3,13 +3,13 @@ package iam
 import (
 	"errors"
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/subscribeddotdev/subscribed-backend/internal/domain"
+	"golang.org/x/crypto/bcrypt"
 )
 
-type LoginProviderID string
+/*type LoginProviderID string
 
 func (i LoginProviderID) String() string {
 	return string(i)
@@ -21,7 +21,7 @@ func (i LoginProviderID) Validate() error {
 	}
 
 	return nil
-}
+}*/
 
 type MemberID string
 
@@ -34,14 +34,13 @@ func NewMemberID() MemberID {
 }
 
 type Member struct {
-	id              MemberID
-	organizationID  OrgID
-	loginProviderId LoginProviderID
-	firstName       string
-	lastName        string
-	email           Email
-	password        Password
-	createdAt       time.Time
+	id             MemberID
+	organizationID OrgID
+	firstName      string
+	lastName       string
+	email          Email
+	password       Password
+	createdAt      time.Time
 }
 
 func NewMember(
@@ -98,6 +97,10 @@ func (m *Member) Password() Password {
 	return m.password
 }
 
+func (m *Member) Authenticate(plainTextPassword string) error {
+	return bcrypt.CompareHashAndPassword([]byte(m.password.hash), []byte(plainTextPassword))
+}
+
 func (m *Member) CreatedAt() time.Time {
 	return m.createdAt
 }
@@ -105,14 +108,9 @@ func (m *Member) CreatedAt() time.Time {
 func UnMarshallMember(
 	id MemberID,
 	orgID OrgID,
-	lpi LoginProviderID,
 	firstName, lastName, email, password string,
 	createdAt time.Time,
 ) (*Member, error) {
-	if err := lpi.Validate(); err != nil {
-		return nil, err
-	}
-
 	mEmail, err := NewEmail(email)
 	if err != nil {
 		return nil, err
@@ -128,13 +126,12 @@ func UnMarshallMember(
 	}
 
 	return &Member{
-		id:              id,
-		organizationID:  orgID,
-		loginProviderId: lpi,
-		firstName:       firstName,
-		lastName:        lastName,
-		email:           mEmail,
-		password:        dPassword,
-		createdAt:       createdAt.UTC(),
+		id:             id,
+		organizationID: orgID,
+		firstName:      firstName,
+		lastName:       lastName,
+		email:          mEmail,
+		password:       dPassword,
+		createdAt:      createdAt.UTC(),
 	}, nil
 }

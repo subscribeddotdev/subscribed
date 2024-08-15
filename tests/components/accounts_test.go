@@ -24,7 +24,6 @@ func TestSignup(t *testing.T) {
 
 	token := signIn(t, req.Email, req.Password)
 	require.NotEmpty(t, token)
-
 }
 
 // TODO: to be removed

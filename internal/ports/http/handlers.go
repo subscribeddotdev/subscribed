@@ -130,7 +130,7 @@ func (h handlers) CreateEventType(c echo.Context) error {
 	return c.NoContent(http.StatusCreated)
 }
 
-func (h handlers) CreateApiKey(c echo.Context, params CreateApiKeyParams) error {
+func (h handlers) CreateApiKey(c echo.Context) error {
 	claims, err := h.resolveJwtClaimsFromCtx(c)
 	if err != nil {
 		return err
@@ -145,7 +145,7 @@ func (h handlers) CreateApiKey(c echo.Context, params CreateApiKeyParams) error 
 	err = h.application.Command.CreateApiKey.Execute(c.Request().Context(), command.CreateApiKey{
 		Name:          body.Name,
 		ExpiresAt:     body.ExpiresAt,
-		EnvironmentID: domain.EnvironmentID(params.EnvironmentId),
+		EnvironmentID: domain.EnvironmentID(body.EnvironmentId),
 		OrgID:         claims.OrganizationID,
 	})
 	if err != nil {

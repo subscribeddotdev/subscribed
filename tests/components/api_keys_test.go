@@ -23,8 +23,10 @@ func TestApiKeys_Lifecycle(t *testing.T) {
 	t.Run("create_api_key", func(t *testing.T) {
 		resp, err := apiClient.CreateApiKey(
 			ctx,
-			&client.CreateApiKeyParams{EnvironmentId: env.ID},
-			client.CreateApiKeyRequest{Name: gofakeit.AppName()},
+			client.CreateApiKeyRequest{
+				Name:          gofakeit.AppName(),
+				EnvironmentId: env.ID,
+			},
 		)
 		require.NoError(t, err)
 		assert.Equal(t, http.StatusCreated, resp.StatusCode)
@@ -33,8 +35,11 @@ func TestApiKeys_Lifecycle(t *testing.T) {
 	t.Run("create_api_key_with_expiration_date", func(t *testing.T) {
 		resp, err := apiClient.CreateApiKey(
 			ctx,
-			&client.CreateApiKeyParams{EnvironmentId: env.ID},
-			client.CreateApiKeyRequest{Name: gofakeit.AppName(), ExpiresAt: toPtr(time.Now().Add(time.Hour * 24))},
+			client.CreateApiKeyRequest{
+				Name:          gofakeit.AppName(),
+				ExpiresAt:     toPtr(time.Now().Add(time.Hour * 24)),
+				EnvironmentId: env.ID,
+			},
 		)
 		require.NoError(t, err)
 		assert.Equal(t, http.StatusCreated, resp.StatusCode)

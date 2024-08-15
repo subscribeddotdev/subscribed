@@ -3,6 +3,7 @@ package http
 import (
 	"net/http"
 
+	"github.com/friendsofgo/errors"
 	"github.com/labstack/echo/v4"
 	"github.com/subscribeddotdev/subscribed-backend/internal/app/command"
 	"github.com/subscribeddotdev/subscribed-backend/internal/domain/iam"
@@ -31,6 +32,11 @@ func (h handlers) SignUp(c echo.Context) error {
 		FirstName: body.FirstName,
 		LastName:  body.LastName,
 	})
+
+	if errors.Is(err, iam.ErrMemberAlreadyExists) {
+		return NewHandlerErrorWithStatus(err, "auth-member-exists", http.StatusBadRequest)
+	}
+
 	if err != nil {
 		return NewHandlerError(err, "unable-to-create-account")
 	}
@@ -54,6 +60,14 @@ func (h handlers) SignIn(c echo.Context) error {
 		Email:             email,
 		PlainTextPassword: body.Password,
 	})
+	if errors.Is(err, iam.ErrMemberNotFound) {
+		return NewHandlerErrorWithStatus(err, "auth-member-not-found", http.StatusUnauthorized)
+	}
+
+	if errors.Is(err, iam.ErrAuthenticationFailed) {
+		return NewHandlerErrorWithStatus(err, "auth-credentials-mismatch", http.StatusUnauthorized)
+	}
+
 	if err != nil {
 		return NewHandlerError(err, "error-authenticating")
 	}
@@ -63,5 +77,11 @@ func (h handlers) SignIn(c echo.Context) error {
 		return NewHandlerError(err, "error-signing-jwt")
 	}
 
-	return c.JSON(http.StatusOK, SignInPayload{token})
+	return c.JSON(http.StatusOK, SignInPayload{
+		Email:     member.Email().String(),
+		FirstName: member.FirstName(),
+		Id:        member.ID().String(),
+		LastName:  member.LastName(),
+		Token:     token,
+	})
 }

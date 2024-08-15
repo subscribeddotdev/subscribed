@@ -22,6 +22,15 @@ func NewMemberRepository(db boil.ContextExecutor) *MemberRepository {
 }
 
 func (o MemberRepository) Insert(ctx context.Context, member *iam.Member) error {
+	foundMember, err := o.FindByEmail(ctx, member.Email())
+	if err != nil && !errors.Is(err, iam.ErrMemberNotFound) {
+		return fmt.Errorf("error checking for '%s' before creating an account: %v", member.Email(), err)
+	}
+
+	if foundMember != nil {
+		return iam.ErrMemberAlreadyExists
+	}
+
 	model := models.Member{
 		ID:             member.ID().String(),
 		FirstName:      member.FirstName(),
@@ -32,7 +41,7 @@ func (o MemberRepository) Insert(ctx context.Context, member *iam.Member) error 
 		CreatedAt:      member.CreatedAt(),
 	}
 
-	err := model.Insert(ctx, o.db, boil.Infer())
+	err = model.Insert(ctx, o.db, boil.Infer())
 	if err != nil {
 		return err
 	}

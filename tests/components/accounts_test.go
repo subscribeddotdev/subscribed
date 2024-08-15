@@ -18,10 +18,28 @@ func TestSignup(t *testing.T) {
 		Email:     gofakeit.Email(),
 		Password:  gofakeit.Password(true, true, true, true, false, 12),
 	}
-
 	resp1, err := apiClient.SignUp(ctx, req)
 	require.NoError(t, err)
 	require.Equal(t, http.StatusCreated, resp1.StatusCode)
+
+	token := signIn(t, req.Email, req.Password)
+	require.NotEmpty(t, token)
+}
+
+// TODO: to be removed
+func TestSignupDemo(t *testing.T) {
+	apiClient := getClient(t, noToken)
+
+	req := client.SignupRequest{
+		FirstName: gofakeit.FirstName(),
+		LastName:  gofakeit.LastName(),
+		Email:     "firmino.changani@gmail.com",
+		Password:  "firmino.changani@gmail.com",
+	}
+	resp1, err := apiClient.SignUp(ctx, req)
+	require.NoError(t, err)
+	require.Equal(t, http.StatusCreated, resp1.StatusCode)
+
 	token := signIn(t, req.Email, req.Password)
 	require.NotEmpty(t, token)
 }

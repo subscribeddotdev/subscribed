@@ -51,12 +51,7 @@ func (c SignupHandler) Execute(ctx context.Context, cmd Signup) error {
 			return err
 		}
 
-		err = adapters.MemberRepository.Insert(ctx, member)
-		if err != nil {
-			return fmt.Errorf("unable to save member: %v", err)
-		}
-
-		return nil
+		return adapters.MemberRepository.Insert(ctx, member)
 	})
 }
 

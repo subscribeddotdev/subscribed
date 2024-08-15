@@ -124,12 +124,6 @@ paths:
       summary: Create a new api key
       security:
         - BearerAuth: [ ]
-      parameters:
-        - name: environment_id
-          in: header
-          required: true
-          schema:
-            type: string
       requestBody:
         required: true
         content:
@@ -292,13 +286,16 @@ components:
           type: string
     # API Keys
     CreateApiKeyRequest:
-      required: [name]
+      required: [name, environment_id]
       properties:
         name:
+          type: string
+        environment_id:
           type: string
         expires_at:
           type: string
           format: date-time
+          nullable: true
     ApiKey:
       required: [name, masked_secret_key, organization_id, environment_id, created_at]
       properties:

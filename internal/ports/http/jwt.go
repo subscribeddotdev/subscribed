@@ -20,6 +20,8 @@ type jwtCustomClaims struct {
 	OrganizationID string `json:"organization_id"`
 	MemberID       string `json:"member_id"`
 	Email          string `json:"email"`
+	FirstName      string `json:"first_name"`
+	LastName       string `json:"last_name"`
 }
 
 func signJwt(member *iam.Member, secret string) (string, error) {
@@ -29,14 +31,16 @@ func signJwt(member *iam.Member, secret string) (string, error) {
 	}
 
 	claims := jwtCustomClaims{
-		OrganizationID: member.OrgID().String(),
-		MemberID:       member.ID().String(),
-		Email:          member.Email().String(),
 		RegisteredClaims: jwt.RegisteredClaims{
 			Issuer:    "subscriber-backend",
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 24 * 7)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 		},
+		OrganizationID: member.OrgID().String(),
+		MemberID:       member.ID().String(),
+		Email:          member.Email().String(),
+		FirstName:      member.FirstName(),
+		LastName:       member.LastName(),
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)

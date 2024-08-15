@@ -9,6 +9,11 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+var (
+	ErrAuthenticationFailed = errors.New("error authenticating member")
+	ErrMemberAlreadyExists  = errors.New("error member already exists")
+)
+
 type MemberID string
 
 func (i MemberID) String() string {
@@ -84,7 +89,12 @@ func (m *Member) Password() Password {
 }
 
 func (m *Member) Authenticate(plainTextPassword string) error {
-	return bcrypt.CompareHashAndPassword([]byte(m.password.hash), []byte(plainTextPassword))
+	err := bcrypt.CompareHashAndPassword([]byte(m.password.hash), []byte(plainTextPassword))
+	if err != nil {
+		return ErrAuthenticationFailed
+	}
+
+	return nil
 }
 
 func (m *Member) CreatedAt() time.Time {

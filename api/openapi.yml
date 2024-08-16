@@ -133,6 +133,10 @@ paths:
       responses:
         '201':
           description: CREATED
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateApiKeyPayload'
         default:
           $ref: '#/components/responses/DefaultError'
   /event-types:
@@ -296,6 +300,11 @@ components:
           type: string
           format: date-time
           nullable: true
+    CreateApiKeyPayload:
+      required: [unmasked_api_key]
+      properties:
+        unmasked_api_key:
+          type: string
     ApiKey:
       required: [name, masked_secret_key, organization_id, environment_id, created_at]
       properties:

@@ -6,8 +6,9 @@ import (
 	"time"
 
 	"github.com/brianvoe/gofakeit/v6"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/subscribeddotdev/subscribed-backend/internal/adapters/models"
+	"github.com/subscribeddotdev/subscribed-backend/tests"
 	"github.com/subscribeddotdev/subscribed-backend/tests/client"
 	"github.com/subscribeddotdev/subscribed-backend/tests/fixture"
 )
@@ -21,28 +22,39 @@ func TestApiKeys_Lifecycle(t *testing.T) {
 	apiClient := getClient(t, token)
 
 	t.Run("create_api_key", func(t *testing.T) {
-		resp, err := apiClient.CreateApiKey(
+		reqBody := client.CreateApiKeyRequest{
+			Name:          gofakeit.AppName(),
+			EnvironmentId: env.ID,
+		}
+		resp, err := apiClient.CreateApiKeyWithResponse(
 			ctx,
-			client.CreateApiKeyRequest{
-				Name:          gofakeit.AppName(),
-				EnvironmentId: env.ID,
-			},
+			reqBody,
 		)
 		require.NoError(t, err)
-		assert.Equal(t, http.StatusCreated, resp.StatusCode)
+		require.Equal(t, http.StatusCreated, resp.StatusCode())
+		require.NotEmpty(t, resp.JSON201.UnmaskedApiKey)
+
+		savedApiKey := findApiKey(t, reqBody.Name, reqBody.EnvironmentId)
+		require.Equal(t, savedApiKey.SecretKey, resp.JSON201.UnmaskedApiKey)
 	})
 
 	t.Run("create_api_key_with_expiration_date", func(t *testing.T) {
-		resp, err := apiClient.CreateApiKey(
+		reqBody := client.CreateApiKeyRequest{
+			Name:          gofakeit.AppName(),
+			ExpiresAt:     toPtr(time.Now().Add(time.Hour * 24)),
+			EnvironmentId: env.ID,
+		}
+		resp, err := apiClient.CreateApiKeyWithResponse(
 			ctx,
-			client.CreateApiKeyRequest{
-				Name:          gofakeit.AppName(),
-				ExpiresAt:     toPtr(time.Now().Add(time.Hour * 24)),
-				EnvironmentId: env.ID,
-			},
+			reqBody,
 		)
 		require.NoError(t, err)
-		assert.Equal(t, http.StatusCreated, resp.StatusCode)
+		require.Equal(t, http.StatusCreated, resp.StatusCode())
+		require.NotEmpty(t, resp.JSON201.UnmaskedApiKey)
+
+		savedApiKey := findApiKey(t, reqBody.Name, reqBody.EnvironmentId)
+		require.Equal(t, savedApiKey.SecretKey, resp.JSON201.UnmaskedApiKey)
+		tests.RequireEqualTime(t, *reqBody.ExpiresAt, savedApiKey.ExpiresAt.Time)
 	})
 
 	t.Run("get_all_api_keys_by_environment", func(t *testing.T) {
@@ -55,4 +67,13 @@ func TestApiKeys_Lifecycle(t *testing.T) {
 		require.Equal(t, http.StatusOK, resp.StatusCode())
 		require.NotEmpty(t, resp.JSON200.Data)
 	})
+}
+
+func findApiKey(t *testing.T, name, environmentId string) *models.APIKey {
+	row, err := models.APIKeys(
+		models.APIKeyWhere.Name.EQ(name),
+		models.APIKeyWhere.EnvironmentID.EQ(environmentId),
+	).One(ctx, db)
+	require.NoError(t, err)
+	return row
 }

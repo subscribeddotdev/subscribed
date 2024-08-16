@@ -30,7 +30,7 @@ type Command struct {
 	SignUp              CommandHandler[command.Signup]
 	SignIn              CommandHandlerWithResult[command.SignIn, *iam.Member]
 	CreateEventType     CommandHandler[command.CreateEventType]
-	CreateApiKey        CommandHandler[command.CreateApiKey]
+	CreateApiKey        CommandHandlerWithResult[command.CreateApiKey, *domain.ApiKey]
 	CallWebhookEndpoint CommandHandler[command.CallWebhookEndpoint]
 }
 

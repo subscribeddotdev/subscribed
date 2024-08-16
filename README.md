@@ -1,14 +1,22 @@
-# subscribed-backend
+# subscribed.dev
 
 [![main](https://github.com/subscribeddotdev/subscribed-backend/actions/workflows/main.yml/badge.svg?branch=main)](https://github.com/subscribeddotdev/subscribed-backend/actions/workflows/main.yml)
 
-Early-stage development of a Webhooks provider platform... things will break, a lot.
+
+Subscribed is a webhook provider that allows software developers to quickly add webhook capabilities into their applications, without having to deal with common webhook-related challenges such as:
+
+- Unavailable webhook endpoint
+- Network issues
+- Retries
+- Schema validation
+
+> In early-stage development of a Webhooks provider platform... things will change, a lot.
 
 ## Local setup
 
-### Pre-requisites: Tools
+### Pre-requisites (tools)
 
-- Docker/Docker-compose
+- Docker
 - [Taskfile](https://taskfile.dev): An alternative to Make used to run custom tasks defined in [./Taskfile.yml](./Taskfile.yml)
 
 ### Running the project locally

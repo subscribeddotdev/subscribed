@@ -142,7 +142,7 @@ func (h handlers) CreateApiKey(c echo.Context) error {
 		return NewHandlerErrorWithStatus(err, "error-parsing-the-body", http.StatusBadRequest)
 	}
 
-	err = h.application.Command.CreateApiKey.Execute(c.Request().Context(), command.CreateApiKey{
+	ak, err := h.application.Command.CreateApiKey.Execute(c.Request().Context(), command.CreateApiKey{
 		Name:          body.Name,
 		ExpiresAt:     body.ExpiresAt,
 		EnvironmentID: domain.EnvironmentID(body.EnvironmentId),
@@ -152,7 +152,7 @@ func (h handlers) CreateApiKey(c echo.Context) error {
 		return NewHandlerError(err, "unable-to-create-api-key")
 	}
 
-	return c.NoContent(http.StatusCreated)
+	return c.JSON(http.StatusCreated, CreateApiKeyPayload{UnmaskedApiKey: ak.SecretKey().FullKey()})
 }
 
 func (h handlers) GetEnvironments(c echo.Context) error {

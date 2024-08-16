@@ -29,16 +29,27 @@ func NewCreateApiKeyHandler(
 	}
 }
 
-func (c CreateApiKeyHandler) Execute(ctx context.Context, cmd CreateApiKey) error {
+func (c CreateApiKeyHandler) Execute(ctx context.Context, cmd CreateApiKey) (*domain.ApiKey, error) {
 	env, err := c.envRepo.ByID(ctx, cmd.EnvironmentID)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	apiKey, err := domain.NewApiKey(cmd.Name, cmd.OrgID, cmd.EnvironmentID, cmd.ExpiresAt, env.Type() == domain.EnvTypeDevelopment)
+	apiKey, err := domain.NewApiKey(
+		cmd.Name,
+		cmd.OrgID,
+		cmd.EnvironmentID,
+		cmd.ExpiresAt,
+		env.Type() == domain.EnvTypeDevelopment,
+	)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return c.apiKeyRepo.Insert(ctx, apiKey)
+	err = c.apiKeyRepo.Insert(ctx, apiKey)
+	if err != nil {
+		return nil, err
+	}
+
+	return apiKey, nil
 }

@@ -24,6 +24,7 @@ import (
 
 // APIKey is an object representing the database table.
 type APIKey struct {
+	ID            string    `boil:"id" json:"id" toml:"id" yaml:"id"`
 	SecretKey     string    `boil:"secret_key" json:"secret_key" toml:"secret_key" yaml:"secret_key"`
 	Suffix        string    `boil:"suffix" json:"suffix" toml:"suffix" yaml:"suffix"`
 	OrgID         string    `boil:"org_id" json:"org_id" toml:"org_id" yaml:"org_id"`
@@ -37,6 +38,7 @@ type APIKey struct {
 }
 
 var APIKeyColumns = struct {
+	ID            string
 	SecretKey     string
 	Suffix        string
 	OrgID         string
@@ -45,6 +47,7 @@ var APIKeyColumns = struct {
 	CreatedAt     string
 	ExpiresAt     string
 }{
+	ID:            "id",
 	SecretKey:     "secret_key",
 	Suffix:        "suffix",
 	OrgID:         "org_id",
@@ -55,6 +58,7 @@ var APIKeyColumns = struct {
 }
 
 var APIKeyTableColumns = struct {
+	ID            string
 	SecretKey     string
 	Suffix        string
 	OrgID         string
@@ -63,6 +67,7 @@ var APIKeyTableColumns = struct {
 	CreatedAt     string
 	ExpiresAt     string
 }{
+	ID:            "api_keys.id",
 	SecretKey:     "api_keys.secret_key",
 	Suffix:        "api_keys.suffix",
 	OrgID:         "api_keys.org_id",
@@ -147,6 +152,7 @@ func (w whereHelpernull_Time) IsNull() qm.QueryMod    { return qmhelper.WhereIsN
 func (w whereHelpernull_Time) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
 
 var APIKeyWhere = struct {
+	ID            whereHelperstring
 	SecretKey     whereHelperstring
 	Suffix        whereHelperstring
 	OrgID         whereHelperstring
@@ -155,6 +161,7 @@ var APIKeyWhere = struct {
 	CreatedAt     whereHelpertime_Time
 	ExpiresAt     whereHelpernull_Time
 }{
+	ID:            whereHelperstring{field: "\"api_keys\".\"id\""},
 	SecretKey:     whereHelperstring{field: "\"api_keys\".\"secret_key\""},
 	Suffix:        whereHelperstring{field: "\"api_keys\".\"suffix\""},
 	OrgID:         whereHelperstring{field: "\"api_keys\".\"org_id\""},
@@ -202,10 +209,10 @@ func (r *apiKeyR) GetOrg() *Organization {
 type apiKeyL struct{}
 
 var (
-	apiKeyAllColumns            = []string{"secret_key", "suffix", "org_id", "environment_id", "name", "created_at", "expires_at"}
-	apiKeyColumnsWithoutDefault = []string{"secret_key", "suffix", "org_id", "environment_id", "name"}
+	apiKeyAllColumns            = []string{"id", "secret_key", "suffix", "org_id", "environment_id", "name", "created_at", "expires_at"}
+	apiKeyColumnsWithoutDefault = []string{"id", "secret_key", "suffix", "org_id", "environment_id", "name"}
 	apiKeyColumnsWithDefault    = []string{"created_at", "expires_at"}
-	apiKeyPrimaryKeyColumns     = []string{"secret_key"}
+	apiKeyPrimaryKeyColumns     = []string{"id"}
 	apiKeyGeneratedColumns      = []string{}
 )
 
@@ -765,7 +772,7 @@ func (o *APIKey) SetEnvironment(ctx context.Context, exec boil.ContextExecutor, 
 		strmangle.SetParamNames("\"", "\"", 1, []string{"environment_id"}),
 		strmangle.WhereClause("\"", "\"", 2, apiKeyPrimaryKeyColumns),
 	)
-	values := []interface{}{related.ID, o.SecretKey}
+	values := []interface{}{related.ID, o.ID}
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)
@@ -812,7 +819,7 @@ func (o *APIKey) SetOrg(ctx context.Context, exec boil.ContextExecutor, insert b
 		strmangle.SetParamNames("\"", "\"", 1, []string{"org_id"}),
 		strmangle.WhereClause("\"", "\"", 2, apiKeyPrimaryKeyColumns),
 	)
-	values := []interface{}{related.ID, o.SecretKey}
+	values := []interface{}{related.ID, o.ID}
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)
@@ -856,7 +863,7 @@ func APIKeys(mods ...qm.QueryMod) apiKeyQuery {
 
 // FindAPIKey retrieves a single record by ID with an executor.
 // If selectCols is empty Find will return all columns.
-func FindAPIKey(ctx context.Context, exec boil.ContextExecutor, secretKey string, selectCols ...string) (*APIKey, error) {
+func FindAPIKey(ctx context.Context, exec boil.ContextExecutor, iD string, selectCols ...string) (*APIKey, error) {
 	apiKeyObj := &APIKey{}
 
 	sel := "*"
@@ -864,10 +871,10 @@ func FindAPIKey(ctx context.Context, exec boil.ContextExecutor, secretKey string
 		sel = strings.Join(strmangle.IdentQuoteSlice(dialect.LQ, dialect.RQ, selectCols), ",")
 	}
 	query := fmt.Sprintf(
-		"select %s from \"api_keys\" where \"secret_key\"=$1", sel,
+		"select %s from \"api_keys\" where \"id\"=$1", sel,
 	)
 
-	q := queries.Raw(query, secretKey)
+	q := queries.Raw(query, iD)
 
 	err := q.Bind(ctx, exec, apiKeyObj)
 	if err != nil {
@@ -1233,7 +1240,7 @@ func (o *APIKey) Delete(ctx context.Context, exec boil.ContextExecutor) (int64, 
 	}
 
 	args := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(o)), apiKeyPrimaryKeyMapping)
-	sql := "DELETE FROM \"api_keys\" WHERE \"secret_key\"=$1"
+	sql := "DELETE FROM \"api_keys\" WHERE \"id\"=$1"
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)
@@ -1330,7 +1337,7 @@ func (o APIKeySlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (
 // Reload refetches the object from the database
 // using the primary keys with an executor.
 func (o *APIKey) Reload(ctx context.Context, exec boil.ContextExecutor) error {
-	ret, err := FindAPIKey(ctx, exec, o.SecretKey)
+	ret, err := FindAPIKey(ctx, exec, o.ID)
 	if err != nil {
 		return err
 	}
@@ -1369,16 +1376,16 @@ func (o *APIKeySlice) ReloadAll(ctx context.Context, exec boil.ContextExecutor) 
 }
 
 // APIKeyExists checks if the APIKey row exists.
-func APIKeyExists(ctx context.Context, exec boil.ContextExecutor, secretKey string) (bool, error) {
+func APIKeyExists(ctx context.Context, exec boil.ContextExecutor, iD string) (bool, error) {
 	var exists bool
-	sql := "select exists(select 1 from \"api_keys\" where \"secret_key\"=$1 limit 1)"
+	sql := "select exists(select 1 from \"api_keys\" where \"id\"=$1 limit 1)"
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)
 		fmt.Fprintln(writer, sql)
-		fmt.Fprintln(writer, secretKey)
+		fmt.Fprintln(writer, iD)
 	}
-	row := exec.QueryRowContext(ctx, sql, secretKey)
+	row := exec.QueryRowContext(ctx, sql, iD)
 
 	err := row.Scan(&exists)
 	if err != nil {
@@ -1390,5 +1397,5 @@ func APIKeyExists(ctx context.Context, exec boil.ContextExecutor, secretKey stri
 
 // Exists checks if the APIKey row exists.
 func (o *APIKey) Exists(ctx context.Context, exec boil.ContextExecutor) (bool, error) {
-	return APIKeyExists(ctx, exec, o.SecretKey)
+	return APIKeyExists(ctx, exec, o.ID)
 }

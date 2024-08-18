@@ -105,14 +105,26 @@ func run(logger *logs.Logger) error {
 	application := &app.App{
 		Authorization: auth.NewService(memberRepo, apiKeyRepo),
 		Command: app.Command{
-			SignUp:              observability.NewCommandDecorator[command.Signup](command.NewSignupHandler(txProvider), logger),
-			SignIn:              observability.NewCommandWithResultDecorator[command.SignIn, *iam.Member](command.NewSignInHandler(memberRepo), logger),
-			CreateApplication:   observability.NewCommandDecorator[command.CreateApplication](command.NewCreateApplicationHandler(applicationRepo), logger),
+			// IAM
+			SignUp: observability.NewCommandDecorator[command.Signup](command.NewSignupHandler(txProvider), logger),
+			SignIn: observability.NewCommandWithResultDecorator[command.SignIn, *iam.Member](command.NewSignInHandler(memberRepo), logger),
+
+			// Applications
+			CreateApplication: observability.NewCommandDecorator[command.CreateApplication](command.NewCreateApplicationHandler(applicationRepo), logger),
+
+			// Endpoints
 			AddEndpoint:         observability.NewCommandDecorator[command.AddEndpoint](command.NewAddEndpointHandler(endpointRepo), logger),
-			SendMessage:         observability.NewCommandDecorator[command.SendMessage](command.NewSendMessageHandler(txProvider, endpointRepo), logger),
-			CreateEventType:     observability.NewCommandDecorator[command.CreateEventType](command.NewCreateEventTypeHandler(eventTypeRepo), logger),
-			CreateApiKey:        observability.NewCommandWithResultDecorator[command.CreateApiKey, *domain.ApiKey](command.NewCreateApiKeyHandler(apiKeyRepo, envRepo), logger),
 			CallWebhookEndpoint: observability.NewCommandDecorator[command.CallWebhookEndpoint](command.NewCallWebhookEndpointHandler(txProvider), logger),
+
+			// Messages
+			SendMessage: observability.NewCommandDecorator[command.SendMessage](command.NewSendMessageHandler(txProvider, endpointRepo), logger),
+
+			// Event types
+			CreateEventType: observability.NewCommandDecorator[command.CreateEventType](command.NewCreateEventTypeHandler(eventTypeRepo), logger),
+
+			// API Keys
+			CreateApiKey:  observability.NewCommandWithResultDecorator[command.CreateApiKey, *domain.ApiKey](command.NewCreateApiKeyHandler(apiKeyRepo, envRepo), logger),
+			DestroyApiKey: observability.NewCommandDecorator[command.DestroyApiKey](command.NewDestroyApiKeyHandler(apiKeyRepo), logger),
 		},
 		Query: app.Query{
 			Environments: observability.NewQueryDecorator[query.Environments, []*domain.Environment](query.NewEnvironmentsHandler(envRepo), logger),

@@ -139,6 +139,25 @@ paths:
                 $ref: '#/components/schemas/CreateApiKeyPayload'
         default:
           $ref: '#/components/responses/DefaultError'
+  /api-keys/{apiKeyId}:
+    delete:
+      tags:
+        - ApiKeys
+      operationId: destroyApiKey
+      summary: Destroy a new api key given an id
+      security:
+        - BearerAuth: [ ]
+      parameters:
+        - name: apiKeyId
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '204':
+          description: DELETED
+        default:
+          $ref: '#/components/responses/DefaultError'
   /event-types:
     post:
       tags:
@@ -306,8 +325,10 @@ components:
         unmasked_api_key:
           type: string
     ApiKey:
-      required: [name, masked_secret_key, organization_id, environment_id, created_at]
+      required: [id, name, masked_secret_key, organization_id, environment_id, created_at]
       properties:
+        id:
+          type: string
         name:
           type: string
         organization_id:

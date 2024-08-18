@@ -14,16 +14,33 @@ var (
 	base64Encoder      = base64.NewEncoding("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_.")
 )
 
+type ApiKeyID string
+
+func (i ApiKeyID) String() string {
+	return string(i)
+}
+
+func NewApiKeyID() ApiKeyID {
+	return ApiKeyID(NewID().WithPrefix("apk"))
+}
+
 type ApiKey struct {
-	envID     EnvironmentID
+	id        ApiKeyID
 	orgID     string
 	name      string
 	secretKey SecretKey
+	envID     EnvironmentID
 	createdAt time.Time
 	expiresAt *time.Time
 }
 
-func NewApiKey(name string, orgID string, envID EnvironmentID, expiresAt *time.Time, isTestApiKey bool) (*ApiKey, error) {
+func NewApiKey(
+	name string,
+	orgID string,
+	envID EnvironmentID,
+	expiresAt *time.Time,
+	isTestApiKey bool,
+) (*ApiKey, error) {
 	name = strings.TrimSpace(name)
 	if name == "" {
 		return nil, errors.New("name cannot be empty")
@@ -47,6 +64,7 @@ func NewApiKey(name string, orgID string, envID EnvironmentID, expiresAt *time.T
 	}
 
 	return &ApiKey{
+		id:        NewApiKeyID(),
 		secretKey: sk,
 		name:      name,
 		envID:     envID,
@@ -54,6 +72,10 @@ func NewApiKey(name string, orgID string, envID EnvironmentID, expiresAt *time.T
 		createdAt: time.Now(),
 		expiresAt: expiresAt,
 	}, nil
+}
+
+func (a *ApiKey) Id() ApiKeyID {
+	return a.id
 }
 
 func (a *ApiKey) EnvID() EnvironmentID {
@@ -89,6 +111,7 @@ func (a *ApiKey) IsExpired() bool {
 }
 
 func UnMarshallApiKey(
+	id ApiKeyID,
 	envID EnvironmentID,
 	orgID,
 	name string,
@@ -97,6 +120,7 @@ func UnMarshallApiKey(
 	expiresAt *time.Time,
 ) (*ApiKey, error) {
 	return &ApiKey{
+		id:        id,
 		orgID:     orgID,
 		envID:     envID,
 		name:      name,

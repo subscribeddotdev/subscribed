@@ -870,7 +870,7 @@ func (o *Environment) AddAPIKeys(ctx context.Context, exec boil.ContextExecutor,
 				strmangle.SetParamNames("\"", "\"", 1, []string{"environment_id"}),
 				strmangle.WhereClause("\"", "\"", 2, apiKeyPrimaryKeyColumns),
 			)
-			values := []interface{}{o.ID, rel.SecretKey}
+			values := []interface{}{o.ID, rel.ID}
 
 			if boil.IsDebug(ctx) {
 				writer := boil.DebugWriterFrom(ctx)

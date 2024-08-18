@@ -67,6 +67,18 @@ func TestApiKeys_Lifecycle(t *testing.T) {
 		require.Equal(t, http.StatusOK, resp.StatusCode())
 		require.NotEmpty(t, resp.JSON200.Data)
 	})
+
+	t.Run("destroy_an_api_key_by_id", func(t *testing.T) {
+		apiKey := ff.NewApiKey().WithOrgID(org.ID).WithEnvironmentID(env.ID).Save()
+		resp, err := apiClient.DestroyApiKey(ctx, apiKey.ID)
+		require.NoError(t, err)
+		require.Equal(t, http.StatusNoContent, resp.StatusCode)
+
+		// Attempt to destroy an already destroyed api key
+		resp, err = apiClient.DestroyApiKey(ctx, apiKey.ID)
+		require.NoError(t, err)
+		require.Equal(t, http.StatusNotFound, resp.StatusCode)
+	})
 }
 
 func findApiKey(t *testing.T, name, environmentId string) *models.APIKey {

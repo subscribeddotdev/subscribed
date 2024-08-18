@@ -1075,7 +1075,7 @@ func (o *Organization) AddOrgAPIKeys(ctx context.Context, exec boil.ContextExecu
 				strmangle.SetParamNames("\"", "\"", 1, []string{"org_id"}),
 				strmangle.WhereClause("\"", "\"", 2, apiKeyPrimaryKeyColumns),
 			)
-			values := []interface{}{o.ID, rel.SecretKey}
+			values := []interface{}{o.ID, rel.ID}
 
 			if boil.IsDebug(ctx) {
 				writer := boil.DebugWriterFrom(ctx)

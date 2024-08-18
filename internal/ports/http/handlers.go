@@ -201,6 +201,7 @@ func (h handlers) GetAllApiKeys(c echo.Context, params GetAllApiKeysParams) erro
 	data := make([]ApiKey, len(apiKeys))
 	for i, apiKey := range apiKeys {
 		data[i] = ApiKey{
+			Id:              apiKey.Id().String(),
 			CreatedAt:       apiKey.CreatedAt(),
 			EnvironmentId:   apiKey.EnvID().String(),
 			ExpiresAt:       apiKey.ExpiresAt(),
@@ -211,6 +212,26 @@ func (h handlers) GetAllApiKeys(c echo.Context, params GetAllApiKeysParams) erro
 	}
 
 	return c.JSON(http.StatusOK, GetAllApiKeysPayload{Data: data})
+}
+
+func (h handlers) DestroyApiKey(c echo.Context, apiKeyId string) error {
+	claims, err := h.resolveJwtClaimsFromCtx(c)
+	if err != nil {
+		return err
+	}
+
+	err = h.application.Command.DestroyApiKey.Execute(c.Request().Context(), command.DestroyApiKey{
+		OrgID: claims.OrganizationID,
+		ID:    domain.ApiKeyID(apiKeyId),
+	})
+	if errors.Is(err, domain.ErrApiKeyNotFound) {
+		return NewHandlerErrorWithStatus(err, "api-key-not-found", http.StatusNotFound)
+	}
+	if err != nil {
+		return NewHandlerError(err, "error-destroying-api-key")
+	}
+
+	return c.NoContent(http.StatusNoContent)
 }
 
 func (h handlers) resolveJwtClaimsFromCtx(c echo.Context) (*jwtCustomClaims, error) {

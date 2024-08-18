@@ -25,18 +25,27 @@ type QueryHandler[Q, R any] interface {
 
 type Command struct {
 	AddEndpoint         CommandHandler[command.AddEndpoint]
-	SendMessage         CommandHandler[command.SendMessage]
-	CreateApplication   CommandHandler[command.CreateApplication]
-	SignUp              CommandHandler[command.Signup]
-	SignIn              CommandHandlerWithResult[command.SignIn, *iam.Member]
-	CreateEventType     CommandHandler[command.CreateEventType]
-	CreateApiKey        CommandHandlerWithResult[command.CreateApiKey, *domain.ApiKey]
 	CallWebhookEndpoint CommandHandler[command.CallWebhookEndpoint]
+	SendMessage         CommandHandler[command.SendMessage]
+
+	// Applications
+	CreateApplication CommandHandler[command.CreateApplication]
+
+	// IAM
+	SignUp CommandHandler[command.Signup]
+	SignIn CommandHandlerWithResult[command.SignIn, *iam.Member]
+
+	// Event types
+	CreateEventType CommandHandler[command.CreateEventType]
+
+	// Api keys
+	CreateApiKey  CommandHandlerWithResult[command.CreateApiKey, *domain.ApiKey]
+	DestroyApiKey CommandHandler[command.DestroyApiKey]
 }
 
 type Query struct {
-	Environments QueryHandler[query.Environments, []*domain.Environment]
 	AllApiKeys   QueryHandler[query.AllApiKeys, []*domain.ApiKey]
+	Environments QueryHandler[query.Environments, []*domain.Environment]
 }
 
 type App struct {

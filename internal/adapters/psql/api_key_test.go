@@ -31,6 +31,19 @@ func TestApiKeyRepository_Insert(t *testing.T) {
 	})
 }
 
+func TestApiKeyRepository_Destroy(t *testing.T) {
+	ff := fixture.NewFactory(t, ctx, db)
+	org := ff.NewOrganization().Save()
+	env := ff.NewEnvironment().WithOrganizationID(org.ID).Save()
+	apiKey := ff.NewApiKey().WithOrgID(org.ID).WithEnvironmentID(env.ID).Save()
+
+	err := apiKeyRepo.Destroy(ctx, org.ID, domain.ApiKeyID(apiKey.ID))
+	require.NoError(t, err)
+
+	err = apiKeyRepo.Destroy(ctx, org.ID, domain.ApiKeyID(apiKey.ID))
+	require.ErrorIs(t, err, domain.ErrApiKeyNotFound)
+}
+
 func TestApiKeyRepository_FindAll(t *testing.T) {
 	ff := fixture.NewFactory(t, ctx, db)
 	org := ff.NewOrganization().Save()

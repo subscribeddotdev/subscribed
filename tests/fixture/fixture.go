@@ -111,6 +111,7 @@ func (f *Factory) NewApiKey() *ApiKey {
 	return &ApiKey{
 		factory: f,
 		model: models.APIKey{
+			ID:        domain.NewApiKeyID().String(),
 			SecretKey: ak.SecretKey().FullKey(),
 			Suffix:    ak.SecretKey().String(),
 			Name:      ak.Name(),

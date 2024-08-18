@@ -2,4 +2,4 @@
 
 cd /usr/app
 go run ./misc/tools/wait/ &&
-  task run:$APP_NAME
+task run:$APP_NAME

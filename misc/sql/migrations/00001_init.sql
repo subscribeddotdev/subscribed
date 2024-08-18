@@ -103,7 +103,8 @@ CREATE TABLE message_send_attempts (
 );
 
 CREATE TABLE api_keys (
-    secret_key TEXT NOT NULL PRIMARY KEY,
+    id TEXT NOT NULL PRIMARY KEY,
+    secret_key TEXT NOT NULL UNIQUE,
     suffix TEXT NOT NULL,
     org_id TEXT NOT NULL,
     environment_id TEXT NOT NULL,

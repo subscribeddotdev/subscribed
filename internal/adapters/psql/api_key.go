@@ -25,6 +25,7 @@ func NewApiKeyRepository(db boil.ContextExecutor) *ApiKeyRepository {
 
 func (a ApiKeyRepository) Insert(ctx context.Context, apiKey *domain.ApiKey) error {
 	model := models.APIKey{
+		ID:            apiKey.Id().String(),
 		SecretKey:     apiKey.SecretKey().FullKey(),
 		Suffix:        apiKey.SecretKey().String(),
 		OrgID:         apiKey.OrgID(),
@@ -57,6 +58,7 @@ func (a ApiKeyRepository) FindBySecretKey(ctx context.Context, sk domain.SecretK
 	}
 
 	return domain.UnMarshallApiKey(
+		domain.ApiKeyID(model.ID),
 		domain.EnvironmentID(model.EnvironmentID),
 		model.OrgID,
 		model.Name,
@@ -86,7 +88,15 @@ func (a ApiKeyRepository) FindAll(
 			return nil, err
 		}
 
-		ak, err := domain.UnMarshallApiKey(envID, orgID, row.Name, sk, row.CreatedAt, row.ExpiresAt.Ptr())
+		ak, err := domain.UnMarshallApiKey(
+			domain.ApiKeyID(row.ID),
+			envID,
+			orgID,
+			row.Name,
+			sk,
+			row.CreatedAt,
+			row.ExpiresAt.Ptr(),
+		)
 		if err != nil {
 			return nil, err
 		}
@@ -95,4 +105,21 @@ func (a ApiKeyRepository) FindAll(
 	}
 
 	return apiKeys, nil
+}
+
+func (a ApiKeyRepository) Destroy(ctx context.Context, orgID string, id domain.ApiKeyID) error {
+	row, err := models.APIKeys(models.APIKeyWhere.OrgID.EQ(orgID), models.APIKeyWhere.ID.EQ(id.String())).One(ctx, a.db)
+	if errors.Is(err, sql.ErrNoRows) {
+		return domain.ErrApiKeyNotFound
+	}
+	if err != nil {
+		return fmt.Errorf("error querying api key via id '%s': %v", id, err)
+	}
+
+	_, err = row.Delete(ctx, a.db)
+	if err != nil {
+		return fmt.Errorf("error desotrying api key with id '%s': %v", id, err)
+	}
+
+	return nil
 }

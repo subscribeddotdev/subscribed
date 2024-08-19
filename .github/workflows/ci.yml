@@ -19,7 +19,7 @@ jobs:
         run: go mod download
 
       - name: Spin up Docker
-        run: task docker:up
+        run: task run
 
       - name: Test all
         run: task test:all

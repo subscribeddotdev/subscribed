@@ -6,6 +6,27 @@ dotenv:
   - ./.env
 
 tasks:
+  setup:
+    dir: ./misc/tools/cli
+    cmds:
+      - docker build -t subscribed-cli-tools:latest .
+
+  tools:
+    cmds:
+      - |
+        docker run \
+        --rm \
+        --env-file ./.env.local \
+        --network host \
+        -v $(pwd):/app \
+        -w /app \
+        subscribed-cli-tools:latest \
+        {{.CLI_ARGS}}
+
+  run:
+    cmds:
+      - docker compose up -d {{.CLI_ARGS}}
+
   run:backend:
     cmds:
       - task watch -- go run ./cmd/service
@@ -20,37 +41,37 @@ tasks:
 
   mig:up:
     cmds:
-      - goose -s -dir ./misc/sql/migrations up
+      - task tools -- goose -s -dir ./misc/sql/migrations up
 
   mig:down:
     cmds:
-      - goose -s -dir ./misc/sql/migrations down
+      - task tools -- goose -s -dir ./misc/sql/migrations down
 
   mig:reset:
     cmds:
-      - goose -s -dir ./misc/sql/migrations reset
+      - task tools -- goose -s -dir ./misc/sql/migrations reset
 
   mig:create:
     cmds:
-      - goose -s -dir ./misc/sql/migrations create {{.CLI_ARGS}} sql
+      - task tools -- goose -s -dir ./misc/sql/migrations create {{.CLI_ARGS}} sql
 
   seed:up:
     cmds:
-      - goose -no-versioning -dir ./misc/sql/seeds up
+      - task tools -- goose -no-versioning -dir ./misc/sql/seeds up
 
   seed:down:
     cmds:
-      - goose -no-versioning -dir ./misc/sql/seeds down
+      - task tools -- goose -no-versioning -dir ./misc/sql/seeds down
 
   seed:create:
     cmds:
-      - goose -no-versioning -dir ./misc/sql/seeds create {{.CLI_ARGS}} sql
+      - task tools -- goose -no-versioning -dir ./misc/sql/seeds create {{.CLI_ARGS}} sql
 
   orm:
     cmds:
       - task mig:down
       - task mig:up
-      - sqlboiler psql --wipe --no-tests -o ./internal/adapters/models
+      - task tools -- sqlboiler psql --wipe --no-tests -o ./internal/adapters/models
 
   test:all:
     cmds:
@@ -67,17 +88,13 @@ tasks:
       - go clean -testcache
       - go test -v -race ./tests/components/...
 
-  lint:docker:
-    cmds:
-      - docker run --rm -v $(pwd):/app -w /app golangci/golangci-lint:v1.59.1 golangci-lint run -v
-
   lint:
     cmds:
-      - golangci-lint run
+      - task tools -- golangci-lint run
 
   lint:fix:
     cmds:
-      - golangci-lint run --fix
+      - task tools -- golangci-lint run --fix
 
   fmt:
     cmds:
@@ -87,20 +104,16 @@ tasks:
     cmds:
       - docker compose logs -f --tail 10
 
-  docker:up:
-    cmds:
-      - docker compose up -d {{.CLI_ARGS}}
-
   openapi:
     cmds:
       - |
-        oapi-codegen \
+        task tools -- oapi-codegen \
           -package http \
           -generate server,types,spec \
           ./api/openapi.yml > ./internal/ports/http/server.gen.go
 
       - |
-        oapi-codegen \
+        task tools -- oapi-codegen \
           -package client \
           -generate client,types,spec \
           ./api/openapi.yml > ./tests/client/client.gen.go
@@ -108,13 +121,7 @@ tasks:
   events:
     cmds:
       - |
-        protoc ./events/events.proto \
+        task tools -- protoc ./events/events.proto \
         --go_out=./events/go --go_opt=paths=source_relative \
         --go-grpc_out=./events/go --go-grpc_opt=paths=source_relative \
         --proto_path=./events
-
-  # Proxies the app via NGROK to facilitate testing webhooks
-  # NGROK_URL must be set in your local .env.secrets
-  webhook:
-    cmds:
-      - ngrok http --domain=$NGROK_URL 8080

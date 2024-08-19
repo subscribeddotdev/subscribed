@@ -1,4 +1,4 @@
-# subscribed.dev
+# Subscribed
 
 [![main](https://github.com/subscribeddotdev/subscribed-backend/actions/workflows/main.yml/badge.svg?branch=main)](https://github.com/subscribeddotdev/subscribed-backend/actions/workflows/main.yml)
 
@@ -12,23 +12,34 @@ Subscribed is a webhook provider that allows software developers to quickly add 
 
 > In early-stage development of a Webhooks provider platform... things will change, a lot.
 
-## Local setup
+## Getting started
 
-### Pre-requisites (tools)
+### Requirements
 
-- Docker
+- [Docker](https://docker.com) and [Docker Compose](https://docs.docker.com/compose/)
 - [Taskfile](https://taskfile.dev): An alternative to Make used to run custom tasks defined in [./Taskfile.yml](./Taskfile.yml)
 
-### Running the project locally
+### Setup
 
-```
-docker-compose up -d
-```
+1. Clone the repository `git clone git@github.com:subscribeddotdev/subscribed-backend.git`
+2. Build the container with all the CLI tools that this repo depends on: `task setup`
+3. Run the project: `task run`
+4. View logs: `task logs`
 
-And then 
+## Running tests:
 
-```
-task logs
-```
+- Running unit and integration tests `task test`
+- Running component tests `task test:component`
+- Running all tests `task test:all`
 
-That alone should be enough to boot up the app in development inside a docker container with live-reloading enabled.
+### Other operations:
+
+- Running migrations upwards `task mig:up`
+- Running migrations downwards `task mig:down`
+- Generating handlers from the Open API spec `task openapi`
+- Generating ORM models `task orm`
+- Generating models from the event specification `task events`
+
+## License
+
+[GNU Affero General Public License v3.0](./LICENSE)

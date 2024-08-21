@@ -1,7 +1,6 @@
 version: 3
 
 dotenv:
-  - ./.env.secrets
   - ./.env.local
   - ./.env
 

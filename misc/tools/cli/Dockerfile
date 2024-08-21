@@ -11,7 +11,7 @@ RUN go install github.com/pressly/goose/v3/cmd/goose@latest
 RUN go install github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen@latest
 
 # Golang linter
-RUN curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s -- -b $(go env GOPATH)/bin v1.22.3
+RUN curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.60.1
 
 # Protocol Buffers Compiler & plugins
 RUN apt update

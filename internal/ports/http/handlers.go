@@ -161,7 +161,7 @@ func (h handlers) GetEnvironments(c echo.Context) error {
 		return err
 	}
 
-	envs, err := h.application.Query.Environments.Execute(c.Request().Context(), query.Environments{
+	envs, err := h.application.Query.AllEnvironments.Execute(c.Request().Context(), query.AllEnvironments{
 		OrgID: claims.OrganizationID,
 	})
 	if err != nil {

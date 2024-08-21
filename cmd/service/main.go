@@ -127,8 +127,8 @@ func run(logger *logs.Logger) error {
 			DestroyApiKey: observability.NewCommandDecorator[command.DestroyApiKey](command.NewDestroyApiKeyHandler(apiKeyRepo), logger),
 		},
 		Query: app.Query{
-			Environments: observability.NewQueryDecorator[query.Environments, []*domain.Environment](query.NewEnvironmentsHandler(envRepo), logger),
-			AllApiKeys:   observability.NewQueryDecorator[query.AllApiKeys, []*domain.ApiKey](query.NewAllApiKeysHandler(apiKeyRepo), logger),
+			AllEnvironments: observability.NewQueryDecorator[query.AllEnvironments, []*domain.Environment](query.NewEnvironmentsHandler(envRepo), logger),
+			AllApiKeys:      observability.NewQueryDecorator[query.AllApiKeys, []*domain.ApiKey](query.NewAllApiKeysHandler(apiKeyRepo), logger),
 		},
 	}
 

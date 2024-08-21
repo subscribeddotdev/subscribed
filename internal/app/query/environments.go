@@ -6,18 +6,20 @@ import (
 	"github.com/subscribeddotdev/subscribed-backend/internal/domain"
 )
 
-type Environments struct {
+type AllEnvironments struct {
 	OrgID string
 }
 
-type environmentsHandler struct {
+type allEnvironmentsHandler struct {
 	envRepo domain.EnvironmentRepository
 }
 
-func NewEnvironmentsHandler(envRepo domain.EnvironmentRepository) environmentsHandler {
-	return environmentsHandler{envRepo: envRepo}
+func NewEnvironmentsHandler(envRepo domain.EnvironmentRepository) allEnvironmentsHandler {
+	return allEnvironmentsHandler{
+		envRepo: envRepo,
+	}
 }
 
-func (h environmentsHandler) Execute(ctx context.Context, q Environments) ([]*domain.Environment, error) {
+func (h allEnvironmentsHandler) Execute(ctx context.Context, q AllEnvironments) ([]*domain.Environment, error) {
 	return h.envRepo.FindAll(ctx, q.OrgID)
 }

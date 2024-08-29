@@ -50,6 +50,14 @@ type ApiKey struct {
 	OrganizationId  string     `json:"organization_id"`
 }
 
+// Application defines model for Application.
+type Application struct {
+	CreatedAt     time.Time `json:"created_at"`
+	EnvironmentId string    `json:"environment_id"`
+	Id            string    `json:"id"`
+	Name          string    `json:"name"`
+}
+
 // CreateApiKeyPayload defines model for CreateApiKeyPayload.
 type CreateApiKeyPayload struct {
 	UnmaskedApiKey string `json:"unmasked_api_key"`
@@ -112,6 +120,15 @@ type GetAllEnvironmentsPayload struct {
 	Data []Environment `json:"data"`
 }
 
+// GetApplicationsPayload defines model for GetApplicationsPayload.
+type GetApplicationsPayload struct {
+	CurrentPage int64         `json:"current_page"`
+	Data        []Application `json:"data"`
+	PerPage     int64         `json:"per_page"`
+	Total       int64         `json:"total"`
+	TotalPages  int64         `json:"total_pages"`
+}
+
 // SendMessageRequest defines model for SendMessageRequest.
 type SendMessageRequest struct {
 	EventTypeId string `json:"event_type_id"`
@@ -147,6 +164,13 @@ type DefaultError = ErrorResponse
 // GetAllApiKeysParams defines parameters for GetAllApiKeys.
 type GetAllApiKeysParams struct {
 	EnvironmentId string `form:"environment_id" json:"environment_id"`
+}
+
+// GetApplicationsParams defines parameters for GetApplications.
+type GetApplicationsParams struct {
+	Page          *int   `form:"page,omitempty" json:"page,omitempty"`
+	Limit         *int   `form:"limit,omitempty" json:"limit,omitempty"`
+	EnvironmentId string `json:"environment_id"`
 }
 
 // CreateApiKeyJSONRequestBody defines body for CreateApiKey for application/json ContentType.
@@ -254,6 +278,9 @@ type ClientInterface interface {
 	// DestroyApiKey request
 	DestroyApiKey(ctx context.Context, apiKeyId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// GetApplications request
+	GetApplications(ctx context.Context, params *GetApplicationsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// CreateApplicationWithBody request with any body
 	CreateApplicationWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -329,6 +356,18 @@ func (c *Client) CreateApiKey(ctx context.Context, body CreateApiKeyJSONRequestB
 
 func (c *Client) DestroyApiKey(ctx context.Context, apiKeyId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewDestroyApiKeyRequest(c.Server, apiKeyId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetApplications(ctx context.Context, params *GetApplicationsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetApplicationsRequest(c.Server, params)
 	if err != nil {
 		return nil, err
 	}
@@ -621,6 +660,84 @@ func NewDestroyApiKeyRequest(server string, apiKeyId string) (*http.Request, err
 	req, err := http.NewRequest("DELETE", queryURL.String(), nil)
 	if err != nil {
 		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewGetApplicationsRequest generates requests for GetApplications
+func NewGetApplicationsRequest(server string, params *GetApplicationsParams) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/applications")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.Page != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "page", runtime.ParamLocationQuery, *params.Page); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.Limit != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "limit", runtime.ParamLocationQuery, *params.Limit); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+
+		var headerParam0 string
+
+		headerParam0, err = runtime.StyleParamWithLocation("simple", false, "environment_id", runtime.ParamLocationHeader, params.EnvironmentId)
+		if err != nil {
+			return nil, err
+		}
+
+		req.Header.Set("environment_id", headerParam0)
+
 	}
 
 	return req, nil
@@ -988,6 +1105,9 @@ type ClientWithResponsesInterface interface {
 	// DestroyApiKeyWithResponse request
 	DestroyApiKeyWithResponse(ctx context.Context, apiKeyId string, reqEditors ...RequestEditorFn) (*DestroyApiKeyResponse, error)
 
+	// GetApplicationsWithResponse request
+	GetApplicationsWithResponse(ctx context.Context, params *GetApplicationsParams, reqEditors ...RequestEditorFn) (*GetApplicationsResponse, error)
+
 	// CreateApplicationWithBodyWithResponse request with any body
 	CreateApplicationWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateApplicationResponse, error)
 
@@ -1087,6 +1207,29 @@ func (r DestroyApiKeyResponse) Status() string {
 
 // StatusCode returns HTTPResponse.StatusCode
 func (r DestroyApiKeyResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetApplicationsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *GetApplicationsPayload
+	JSONDefault  *DefaultError
+}
+
+// Status returns HTTPResponse.Status
+func (r GetApplicationsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetApplicationsResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -1307,6 +1450,15 @@ func (c *ClientWithResponses) DestroyApiKeyWithResponse(ctx context.Context, api
 	return ParseDestroyApiKeyResponse(rsp)
 }
 
+// GetApplicationsWithResponse request returning *GetApplicationsResponse
+func (c *ClientWithResponses) GetApplicationsWithResponse(ctx context.Context, params *GetApplicationsParams, reqEditors ...RequestEditorFn) (*GetApplicationsResponse, error) {
+	rsp, err := c.GetApplications(ctx, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetApplicationsResponse(rsp)
+}
+
 // CreateApplicationWithBodyWithResponse request with arbitrary body returning *CreateApplicationResponse
 func (c *ClientWithResponses) CreateApplicationWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateApplicationResponse, error) {
 	rsp, err := c.CreateApplicationWithBody(ctx, contentType, body, reqEditors...)
@@ -1507,6 +1659,39 @@ func ParseDestroyApiKeyResponse(rsp *http.Response) (*DestroyApiKeyResponse, err
 	}
 
 	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest DefaultError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetApplicationsResponse parses an HTTP response from a GetApplicationsWithResponse call
+func ParseGetApplicationsResponse(rsp *http.Response) (*GetApplicationsResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetApplicationsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest GetApplicationsPayload
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
 		var dest DefaultError
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
@@ -1751,31 +1936,34 @@ func ParseSignUpResponse(rsp *http.Response) (*SignUpResponse, error) {
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"H4sIAAAAAAAC/9RZTXPbNhP+Kxi874wvtKk0PWR0qmKprZq46dju9JDxaCBiLSImAQQAFase/vcOwG8R",
-	"lGVbysfNEIHF7vPsswvADzgSqRQcuNF4/IAVaCm4BjeYwi3JEjNTSig7jgQ3wI39k0iZsIgYJnj4SQtu",
-	"f9NRDCmxf/1fwS0e4/+FjfGw+KpDZ+2y3AbneR5gCjpSTFpjeIwnaAUcFIsQ2KlINXODcg/n3YTSGadS",
-	"MG4u4XMG2jkmlZCgDCsi6Fh+wGYjAY+xNorxFc4DDGvgZmF/XjDqVjADqfbOLX8gSpGNHWcq8czLA6zg",
-	"c8YUUDz+6Cbd5AGeSPYONn0HIwXEAF0Q5/ytUKn9C1Ni4NSwFHDgcZqvmRI8ta4z6o/rXjIF+klmB0yl",
-	"RN8BXWiIFJjFXRFEbxYnKXg/CLUinP3rMsXv7RZijOLSnG/vvsEeHkEbVIv9uRsWDPxFNokgtE9ExsvN",
-	"iGQDUW5Tu71ie6/BrDwMgTxLErJMAI+NyiDYm5OtMEqot3xqx1IrfRC8PXn1Gh1E6QnuN4ZnVtDXGwnP",
-	"LgmDmdyUt4FPC7gnqUye4vSsQb3vKVFRzNZPLA7PKSgDOfgCTVeb2FzPUhuyVIJmkUPdFvw1JEK6sG+C",
-	"JxSEvvjLD85ET/ndXtPXYdXYug3IrUJRpo1Iyx4UCQpIZ1GMiEYnkBKWLBhfZBpOfICmoDVZQd/0BLXG",
-	"iCxFZpCJodgFP4ZENasy30Anlp8gMnbr38BMkqQoQHpQsJQY0ul2uzp22bt6LXDLO2fzpnahldoH8qMt",
-	"lr2duQJOLwq8hutx+xTgzWbZBPAIRR1TzULnClvx+XARdVnl3f2WKW0Wg3Ic8DkhuxYZcQd8z27c2r9t",
-	"NihdroxVMbLhmj4coyRafxFqH4jLTesVPhlYPzL5DD8ewXo3qC8IYhDlfnS24UCUKWY2V1YaRUiFSieZ",
-	"iZ2gbLWJgVBQVZEc4/tTItlpcYyq1FNr+y0QBapav3SjX6v28cc/17hsc3ZV8bWxEhsji6M83BtQnCRT",
-	"EfW7rZunx2G4YibOlmeRSEOdLe2MJVAqDIV164fTJYnugNPwcjaZXszOUouSO3U/05ATC78V1V2GRKaV",
-	"DJaAlHFxFsWE2zbzy8p+sMZx75JyVRs/0agyH+CERVC2mhLzi/n1C70O38/PZ39eufitcEGl+sPtFag1",
-	"i+D5WATYMJO4FPV9XIPSRaijs9HZK9f2JXAiGR7j12ejs9cue03saA7LxHKDFThYrd5co55TPO72JbdU",
-	"kRQMKI3HH8t8/ZyB2jTp2jvXNwIqTryDJ7L8JujeZH8ajQ52gfV2WM899sO7Im3cHXrIaO1l2LlstzXu",
-	"8Gmr8+ONjU9naUrUpoAWkSRBRDJ0V6BryMriiiu8bWmWQnt4aV9YSohBm7eCbg4GmO9OlHcLouUz73H2",
-	"6igu7KDs/HI2uZ5NvxJvhVOIIA5fKvK83OVBI7DwoSjZc5oX9TUBA31ap6CNEpuaV5/crHobtVVmX6iz",
-	"n/tVfzp7P/t6qJaRd2FFK7YGjghHrpAMQVynlwtmt2DquUdWTe+i/I2k03sF8OmnuH4dkOn2qcavH10z",
-	"3WakYbjFaZ9mq6Z6NJ/mIZQvijsSoPXuuKewWjs8XV2HzyzPw+n+OfUtC+aEUivhiiNkhB36iZ/VRO7B",
-	"enmh3kF66xr5Y5LuuQd/P6TvUrl1HBFUUrST84uKxoLy1vlx57m0/VKBj35w9L2LfA+nR+ii0Oio9XOJ",
-	"6xq4ObV5+2ibrJ9jj9oke4++P0Y56/Yvhyoq3zFr9KvIKuxjIElxQ/dm8+/u83kM0d1AJh82yyo/i31L",
-	"H7V7A9pRS9072JEyovsAtVcijA66+ZwfU9VNL8xMDNxYP10KZbp4kKnOPVmHjkzupuNveUQ6mne4b6vL",
-	"AeG1/6eACKeImRON3GscSiFdenF1Olfr6gTQvO+MwzAREUlioc34zejNCOc3+X8BAAD//8Y5Z8NmHwAA",
+	"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",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

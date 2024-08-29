@@ -258,6 +258,44 @@ func (h handlers) DestroyApiKey(c echo.Context, apiKeyId string) error {
 	return c.NoContent(http.StatusNoContent)
 }
 
+func (h handlers) GetApplications(c echo.Context, params GetApplicationsParams) error {
+	claims, err := h.resolveJwtClaimsFromCtx(c)
+	if err != nil {
+		return err
+	}
+
+	result, err := h.application.Query.AllApplications.Execute(c.Request().Context(), query.AllApplications{
+		PaginationParams: query.PaginationParams{
+			Page:  params.Page,
+			Limit: params.Limit,
+		},
+		EnvironmentID: params.EnvironmentId,
+		OrgID:         claims.OrganizationID,
+	})
+	if err != nil {
+		return NewHandlerError(err, "error-retrieving-applications")
+	}
+
+	data := make([]Application, len(result.Data))
+
+	for i, app := range result.Data {
+		data[i] = Application{
+			Name:          app.Name(),
+			Id:            app.ID().String(),
+			EnvironmentId: app.EnvID().String(),
+			CreatedAt:     app.CreatedAt(),
+		}
+	}
+
+	return c.JSON(http.StatusOK, GetApplicationsPayload{
+		CurrentPage: result.CurrentPage,
+		Data:        data,
+		PerPage:     result.PerPage,
+		Total:       result.Total,
+		TotalPages:  result.TotalPages,
+	})
+}
+
 func (h handlers) resolveJwtClaimsFromCtx(c echo.Context) (*jwtCustomClaims, error) {
 	claims, ok := c.Get("user_claims").(*jwtCustomClaims)
 	if !ok {

@@ -48,6 +48,41 @@ paths:
                 $ref: '#/components/schemas/CreateApplicationPayload'
         default:
           $ref: '#/components/responses/DefaultError'
+    get:
+      tags:
+        - Applications
+      operationId: getApplications
+      summary: Returns a list of applications based on the org_id and environment_id
+      parameters:
+        - name: environment_id
+          in: header
+          required: true
+          schema:
+            type: string
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+      security:
+        - ApiKeyAuth: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetApplicationsPayload'
+        default:
+          $ref: '#/components/responses/DefaultError'
   /applications/{applicationID}/endpoints:
     post:
       tags:
@@ -286,6 +321,18 @@ components:
           items:
             type: string
     # Applications
+    Application:
+      required: [id, name, environment_id, created_at]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        environment_id:
+          type: string
+        created_at:
+          type: string
+          format: date-time
     CreateApplicationRequest:
       required: [ name ]
       properties:
@@ -297,6 +344,25 @@ components:
           id:
             type: string
 
+    GetApplicationsPayload:
+      required: [total, per_page, current_page, total_pages, data]
+      properties:
+        total:
+          type: integer
+          format: int64
+        per_page:
+          type: integer
+          format: int64
+        current_page:
+          type: integer
+          format: int64
+        total_pages:
+          type: integer
+          format: int64
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Application'
     # Messages
     SendMessageRequest:
       required: [ event_type_id, payload ]

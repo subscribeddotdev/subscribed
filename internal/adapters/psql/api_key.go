@@ -69,26 +69,6 @@ func (a ApiKeyRepository) FindBySecretKey(ctx context.Context, sk domain.SecretK
 	)
 }
 
-func (a ApiKeyRepository) FindByID(ctx context.Context, id domain.ApiKeyID) (*domain.ApiKey, error) {
-	model, err := models.APIKeys(models.APIKeyWhere.ID.EQ(id.String())).One(ctx, a.db)
-	if errors.Is(err, sql.ErrNoRows) {
-		return nil, domain.ErrApiKeyNotFound
-	}
-	if err != nil {
-		return nil, fmt.Errorf("error querying the api key: %v", err)
-	}
-
-	return domain.UnMarshallApiKey(
-		domain.ApiKeyID(model.ID),
-		domain.EnvironmentID(model.EnvironmentID),
-		model.OrgID,
-		model.Name,
-		domain.SecretKey{}, // TODO Do we need another constructor without the secret key?
-		model.CreatedAt,
-		model.ExpiresAt.Ptr(),
-	)
-}
-
 func (a ApiKeyRepository) FindAll(
 	ctx context.Context,
 	orgID string,

@@ -126,10 +126,10 @@ type GetApplicationsPayload struct {
 
 // Pagination defines model for Pagination.
 type Pagination struct {
-	CurrentPage int64 `json:"current_page"`
-	PerPage     int64 `json:"per_page"`
-	Total       int64 `json:"total"`
-	TotalPages  int64 `json:"total_pages"`
+	CurrentPage int `json:"current_page"`
+	PerPage     int `json:"per_page"`
+	Total       int `json:"total"`
+	TotalPages  int `json:"total_pages"`
 }
 
 // SendMessageRequest defines model for SendMessageRequest.
@@ -161,6 +161,12 @@ type SignupRequest struct {
 	Password  string `json:"password"`
 }
 
+// PaginationParamLimit defines model for paginationParamLimit.
+type PaginationParamLimit = int
+
+// PaginationParamPage defines model for paginationParamPage.
+type PaginationParamPage = int
+
 // DefaultError defines model for DefaultError.
 type DefaultError = ErrorResponse
 
@@ -172,8 +178,12 @@ type GetAllApiKeysParams struct {
 // GetApplicationsParams defines parameters for GetApplications.
 type GetApplicationsParams struct {
 	EnvironmentId string `form:"environment_id" json:"environment_id"`
-	Page          *int   `form:"page,omitempty" json:"page,omitempty"`
-	Limit         *int   `form:"limit,omitempty" json:"limit,omitempty"`
+
+	// Limit The number of items per page
+	Limit *PaginationParamLimit `form:"limit,omitempty" json:"limit,omitempty"`
+
+	// Page The page number
+	Page *PaginationParamPage `form:"page,omitempty" json:"page,omitempty"`
 }
 
 // CreateApiKeyJSONRequestBody defines body for CreateApiKey for application/json ContentType.
@@ -297,6 +307,8 @@ func (w *ServerInterfaceWrapper) GetApplications(ctx echo.Context) error {
 
 	ctx.Set(ApiKeyAuthScopes, []string{})
 
+	ctx.Set(BearerAuthScopes, []string{})
+
 	// Parameter object where we will unmarshal all parameters from the context
 	var params GetApplicationsParams
 	// ------------- Required query parameter "environment_id" -------------
@@ -306,18 +318,18 @@ func (w *ServerInterfaceWrapper) GetApplications(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter environment_id: %s", err))
 	}
 
-	// ------------- Optional query parameter "page" -------------
-
-	err = runtime.BindQueryParameter("form", true, false, "page", ctx.QueryParams(), &params.Page)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter page: %s", err))
-	}
-
 	// ------------- Optional query parameter "limit" -------------
 
 	err = runtime.BindQueryParameter("form", true, false, "limit", ctx.QueryParams(), &params.Limit)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter limit: %s", err))
+	}
+
+	// ------------- Optional query parameter "page" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "page", ctx.QueryParams(), &params.Page)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter page: %s", err))
 	}
 
 	// Invoke the callback with all the unmarshaled arguments
@@ -467,35 +479,36 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
-	"///awSY7miQAAA==",
+	"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",
+	"/6R6rqxgJQAA",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

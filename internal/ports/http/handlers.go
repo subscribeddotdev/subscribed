@@ -288,11 +288,8 @@ func (h handlers) GetApplications(c echo.Context, params GetApplicationsParams) 
 	}
 
 	return c.JSON(http.StatusOK, GetApplicationsPayload{
-		CurrentPage: result.CurrentPage,
-		Data:        data,
-		PerPage:     result.PerPage,
-		Total:       result.Total,
-		TotalPages:  result.TotalPages,
+		Data:       data,
+		Pagination: mapToPaginationResponse(result),
 	})
 }
 
@@ -317,4 +314,13 @@ func (h handlers) resolveApiKeyFromCtx(c echo.Context) (*domain.ApiKey, error) {
 	}
 
 	return apiKey, nil
+}
+
+func mapToPaginationResponse[D any](p query.Paginated[D]) Pagination {
+	return Pagination{
+		CurrentPage: p.CurrentPage,
+		PerPage:     p.PerPage,
+		Total:       p.Total,
+		TotalPages:  p.TotalPages,
+	}
 }

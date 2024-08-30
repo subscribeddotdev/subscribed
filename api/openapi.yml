@@ -344,20 +344,10 @@ components:
           id:
             type: string
     GetApplicationsPayload:
-      required: [total, per_page, current_page, total_pages, data]
+      required: [pagination, data]
       properties:
-        total:
-          type: integer
-          format: int64
-        per_page:
-          type: integer
-          format: int64
-        current_page:
-          type: integer
-          format: int64
-        total_pages:
-          type: integer
-          format: int64
+        pagination:
+          $ref: '#/components/schemas/Pagination'
         data:
           type: array
           items:
@@ -453,7 +443,22 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Environment'
-    # Generic responses and errors
+    # Generic models
+    Pagination:
+      required: [total, per_page, current_page, total_pages]
+      properties:
+        total:
+          type: integer
+          format: int64
+        per_page:
+          type: integer
+          format: int64
+        current_page:
+          type: integer
+          format: int64
+        total_pages:
+          type: integer
+          format: int64
     GenericResponse:
       type: object
       required:

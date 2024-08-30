@@ -55,7 +55,7 @@ paths:
       summary: Returns a list of applications based on the org_id and environment_id
       parameters:
         - name: environment_id
-          in: header
+          in: query
           required: true
           schema:
             type: string
@@ -343,7 +343,6 @@ components:
         properties:
           id:
             type: string
-
     GetApplicationsPayload:
       required: [total, per_page, current_page, total_pages, data]
       properties:

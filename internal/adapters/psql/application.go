@@ -4,7 +4,9 @@ import (
 	"context"
 
 	"github.com/subscribeddotdev/subscribed-backend/internal/adapters/models"
+	"github.com/subscribeddotdev/subscribed-backend/internal/app/query"
 	"github.com/subscribeddotdev/subscribed-backend/internal/domain"
+	"github.com/subscribeddotdev/subscribed-backend/internal/domain/iam"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 )
 
@@ -32,4 +34,13 @@ func (o ApplicationRepository) Insert(ctx context.Context, application *domain.A
 	}
 
 	return nil
+}
+
+func (o ApplicationRepository) FindAll(
+	ctx context.Context,
+	envID domain.EnvironmentID,
+	orgID iam.OrgID,
+	pagination query.PaginationParams,
+) (query.Paginated[[]domain.Application], error) {
+	return query.Paginated[[]domain.Application]{}, nil
 }

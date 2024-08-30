@@ -41,7 +41,11 @@ paths:
               $ref: '#/components/schemas/CreateApplicationRequest'
       responses:
         '201':
-          description: CREATED
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateApplicationPayload'
         default:
           $ref: '#/components/responses/DefaultError'
   /applications/{applicationID}/endpoints:
@@ -287,6 +291,12 @@ components:
       properties:
         name:
           type: string
+    CreateApplicationPayload:
+        required: [ id ]
+        properties:
+          id:
+            type: string
+
     # Messages
     SendMessageRequest:
       required: [ event_type_id, payload ]

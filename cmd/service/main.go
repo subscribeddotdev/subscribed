@@ -110,7 +110,7 @@ func run(logger *logs.Logger) error {
 			SignIn: observability.NewCommandWithResultDecorator[command.SignIn, *iam.Member](command.NewSignInHandler(memberRepo), logger),
 
 			// Applications
-			CreateApplication: observability.NewCommandWithResultDecorator[command.CreateApplication](command.NewCreateApplicationHandler(applicationRepo, apiKeyRepo), logger),
+			CreateApplication: observability.NewCommandWithResultDecorator[command.CreateApplication](command.NewCreateApplicationHandler(applicationRepo), logger),
 
 			// Endpoints
 			AddEndpoint:         observability.NewCommandDecorator[command.AddEndpoint](command.NewAddEndpointHandler(endpointRepo), logger),

@@ -67,14 +67,14 @@ func (h handlers) CreateApplication(c echo.Context) error {
 		return NewHandlerErrorWithStatus(err, "error-parsing-the-body", http.StatusBadRequest)
 	}
 
-	apiKeyID, err := h.resolveApiKeyFromCtx(c)
+	apiKey, err := h.resolveApiKeyFromCtx(c)
 	if err != nil {
-		return NewHandlerError(err, "error-retrieving-org-id")
+		return NewHandlerError(err, "error-retrieving-api-key")
 	}
 
 	id, err := h.application.Command.CreateApplication.Execute(c.Request().Context(), command.CreateApplication{
-		Name:     body.Name,
-		ApiKeyID: domain.ApiKeyID(apiKeyID),
+		Name:  body.Name,
+		EnvID: apiKey.EnvID(),
 	})
 	if err != nil {
 		return NewHandlerError(err, "unable-to-create-application")
@@ -88,7 +88,7 @@ func (h handlers) CreateApplication(c echo.Context) error {
 }
 
 func (h handlers) SendMessage(c echo.Context, applicationID string) error {
-	orgID, err := h.resolveOrgIdFromCtx(c)
+	apiKey, err := h.resolveApiKeyFromCtx(c)
 	if err != nil {
 		return NewHandlerError(err, "error-retrieving-org-id")
 	}
@@ -100,7 +100,7 @@ func (h handlers) SendMessage(c echo.Context, applicationID string) error {
 	}
 
 	err = h.application.Command.SendMessage.Execute(c.Request().Context(), command.SendMessage{
-		OrgID:         orgID,
+		OrgID:         apiKey.OrgID(),
 		ApplicationID: domain.ApplicationID(applicationID),
 		EventTypeID:   domain.EventTypeID(body.EventTypeId),
 		Payload:       body.Payload,
@@ -267,30 +267,16 @@ func (h handlers) resolveJwtClaimsFromCtx(c echo.Context) (*jwtCustomClaims, err
 	return claims, nil
 }
 
-func (h handlers) resolveOrgIdFromCtx(c echo.Context) (string, error) {
-	val := c.Get("org_id")
+func (h handlers) resolveApiKeyFromCtx(c echo.Context) (*domain.ApiKey, error) {
+	val := c.Get("api_key")
 	if val == nil {
-		return "", errors.New("orgID hasn't been set in the context")
+		return nil, errors.New("api_key hasn't been set in the context")
 	}
 
-	orgID, ok := val.(string)
+	apiKey, ok := val.(*domain.ApiKey)
 	if !ok {
-		return "", errors.New("invalid orgID type")
+		return nil, errors.New("invalid api_key type")
 	}
 
-	return orgID, nil
-}
-
-func (h handlers) resolveApiKeyFromCtx(c echo.Context) (string, error) {
-	val := c.Get("api_key_id")
-	if val == nil {
-		return "", errors.New("api_key_id hasn't been set in the context")
-	}
-
-	apiKeyID, ok := val.(string)
-	if !ok {
-		return "", errors.New("invalid api_key_id type")
-	}
-
-	return apiKeyID, nil
+	return apiKey, nil
 }

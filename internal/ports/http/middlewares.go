@@ -105,8 +105,7 @@ func (a *apiKeyMiddleware) Middleware(ctx context.Context, input *openapi3filter
 	}
 
 	eCtx := echomiddleware.GetEchoContext(ctx)
-	eCtx.Set("org_id", apiKey.OrgID())
-	eCtx.Set("api_key_id", apiKey.Id().String())
+	eCtx.Set("api_key", apiKey)
 
 	return nil
 }

@@ -19,7 +19,7 @@ func NewService(memberRepo iam.MemberRepository, apiKeyRepo domain.ApiKeyReposit
 	}
 }
 
-func (s *Service) resolveApiKeyFromSecretKey(ctx context.Context, secretKey string) (*domain.ApiKey, error) {
+func (s *Service) ResolveApiKeyFromSecretKey(ctx context.Context, secretKey string) (*domain.ApiKey, error) {
 	sk, err := domain.UnMarshallSecretKey(secretKey)
 	if err != nil {
 		return nil, err
@@ -31,17 +31,4 @@ func (s *Service) resolveApiKeyFromSecretKey(ctx context.Context, secretKey stri
 	}
 
 	return ak, nil
-}
-
-func (s *Service) ResolveOrgIdFromSecretKey(ctx context.Context, secretKey string) (iam.OrgID, error) {
-	ak, err := s.resolveApiKeyFromSecretKey(ctx, secretKey)
-	if err != nil {
-		return "", err
-	}
-
-	if ak.IsExpired() {
-		return "", domain.ErrApiKeyIsExpired
-	}
-
-	return iam.OrgID(ak.OrgID()), nil
 }

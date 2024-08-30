@@ -16,7 +16,7 @@ func TestEventTypes(t *testing.T) {
 	org := ff.NewOrganization().Save()
 	member, password := ff.NewMember().WithOrganizationID(org.ID).Save()
 	token := signIn(t, member.Email, password)
-	apiClient := getClient(t, token)
+	apiClient := getClientWithToken(t, token)
 
 	resp, err := apiClient.CreateEventType(ctx, client.CreateEventTypeRequest{
 		Name:        gofakeit.AppName(),

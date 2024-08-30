@@ -44,5 +44,6 @@ type ApiKeyRepository interface {
 	Insert(ctx context.Context, apiKey *ApiKey) error
 	Destroy(ctx context.Context, orgID string, id ApiKeyID) error
 	FindBySecretKey(ctx context.Context, sk SecretKey) (*ApiKey, error)
+	FindByID(ctx context.Context, id ApiKeyID) (*ApiKey, error)
 	FindAll(ctx context.Context, orgID string, envID EnvironmentID) ([]*ApiKey, error)
 }

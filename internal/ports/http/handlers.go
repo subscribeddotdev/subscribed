@@ -5,6 +5,7 @@ import (
 
 	"github.com/friendsofgo/errors"
 	"github.com/labstack/echo/v4"
+
 	"github.com/subscribeddotdev/subscribed-backend/internal/app"
 	"github.com/subscribeddotdev/subscribed-backend/internal/app/command"
 	"github.com/subscribeddotdev/subscribed-backend/internal/app/query"
@@ -60,7 +61,30 @@ func (h handlers) AddEndpoint(c echo.Context, applicationID string) error {
 }
 
 func (h handlers) CreateApplication(c echo.Context) error {
-	return c.NoContent(http.StatusCreated)
+	var body CreateApplicationJSONRequestBody
+	err := c.Bind(&body)
+	if err != nil {
+		return NewHandlerErrorWithStatus(err, "error-parsing-the-body", http.StatusBadRequest)
+	}
+
+	apiKeyID, err := h.resolveApiKeyFromCtx(c)
+	if err != nil {
+		return NewHandlerError(err, "error-retrieving-org-id")
+	}
+
+	id, err := h.application.Command.CreateApplication.Execute(c.Request().Context(), command.CreateApplication{
+		Name:     body.Name,
+		ApiKeyID: domain.ApiKeyID(apiKeyID),
+	})
+	if err != nil {
+		return NewHandlerError(err, "unable-to-create-application")
+	}
+
+	payload := CreateApplicationPayload{
+		Id: id.String(),
+	}
+
+	return c.JSON(http.StatusCreated, payload)
 }
 
 func (h handlers) SendMessage(c echo.Context, applicationID string) error {
@@ -255,4 +279,18 @@ func (h handlers) resolveOrgIdFromCtx(c echo.Context) (string, error) {
 	}
 
 	return orgID, nil
+}
+
+func (h handlers) resolveApiKeyFromCtx(c echo.Context) (string, error) {
+	val := c.Get("api_key_id")
+	if val == nil {
+		return "", errors.New("api_key_id hasn't been set in the context")
+	}
+
+	apiKeyID, ok := val.(string)
+	if !ok {
+		return "", errors.New("invalid api_key_id type")
+	}
+
+	return apiKeyID, nil
 }

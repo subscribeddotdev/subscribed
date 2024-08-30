@@ -19,7 +19,7 @@ func TestApiKeys_Lifecycle(t *testing.T) {
 	env := ff.NewEnvironment().WithOrganizationID(org.ID).Save()
 	member, password := ff.NewMember().WithOrganizationID(org.ID).Save()
 	token := signIn(t, member.Email, password)
-	apiClient := getClient(t, token)
+	apiClient := getClientWithToken(t, token)
 
 	t.Run("create_api_key", func(t *testing.T) {
 		reqBody := client.CreateApiKeyRequest{

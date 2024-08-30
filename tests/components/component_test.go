@@ -63,7 +63,16 @@ func TestMain(m *testing.M) {
 	os.Exit(m.Run())
 }
 
-func getClient(t *testing.T, token string) *client.ClientWithResponses {
+func getClient(t *testing.T) *client.ClientWithResponses {
+	cli, err := client.NewClientWithResponses(
+		fmt.Sprintf("http://localhost:%s", os.Getenv("HTTP_PORT")),
+	)
+	require.NoError(t, err)
+
+	return cli
+}
+
+func getClientWithToken(t *testing.T, token string) *client.ClientWithResponses {
 	cli, err := client.NewClientWithResponses(
 		fmt.Sprintf("http://localhost:%s", os.Getenv("HTTP_PORT")),
 		client.WithRequestEditorFn(func(ctx context.Context, req *http.Request) error {

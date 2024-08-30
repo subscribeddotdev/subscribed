@@ -10,7 +10,7 @@ import (
 )
 
 func TestSignup(t *testing.T) {
-	apiClient := getClient(t, noToken)
+	apiClient := getClientWithToken(t, noToken)
 
 	req := client.SignupRequest{
 		FirstName: gofakeit.FirstName(),
@@ -27,7 +27,7 @@ func TestSignup(t *testing.T) {
 }
 
 func signIn(t *testing.T, email, password string) string {
-	resp, err := getClient(t, noToken).SignInWithResponse(ctx, client.SigninRequest{
+	resp, err := getClientWithToken(t, noToken).SignInWithResponse(ctx, client.SigninRequest{
 		Email:    email,
 		Password: password,
 	})

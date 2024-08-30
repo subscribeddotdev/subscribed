@@ -29,7 +29,7 @@ type Command struct {
 	SendMessage         CommandHandler[command.SendMessage]
 
 	// Applications
-	CreateApplication CommandHandler[command.CreateApplication]
+	CreateApplication CommandHandlerWithResult[command.CreateApplication, domain.ApplicationID]
 
 	// IAM
 	SignUp CommandHandler[command.Signup]

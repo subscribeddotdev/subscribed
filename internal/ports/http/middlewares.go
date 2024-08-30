@@ -11,6 +11,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	echomiddleware "github.com/oapi-codegen/echo-middleware"
+
 	"github.com/subscribeddotdev/subscribed-backend/internal/app/auth"
 	"github.com/subscribeddotdev/subscribed-backend/internal/common/logs"
 )
@@ -98,13 +99,14 @@ func (a *apiKeyMiddleware) Middleware(ctx context.Context, input *openapi3filter
 		return errors.New("x-api-key header cannot be empty")
 	}
 
-	orgID, err := a.auth.ResolveOrgIdFromSecretKey(ctx, apiKeySecretKey)
+	apiKey, err := a.auth.ResolveApiKeyFromSecretKey(ctx, apiKeySecretKey)
 	if err != nil {
 		return err
 	}
 
 	eCtx := echomiddleware.GetEchoContext(ctx)
-	eCtx.Set("org_id", orgID.String())
+	eCtx.Set("org_id", apiKey.OrgID())
+	eCtx.Set("api_key_id", apiKey.Id().String())
 
 	return nil
 }

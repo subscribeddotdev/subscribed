@@ -2,37 +2,50 @@ package command
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/subscribeddotdev/subscribed-backend/internal/domain"
-	"github.com/subscribeddotdev/subscribed-backend/internal/domain/iam"
 )
 
 type CreateApplication struct {
-	Name  string
-	OrgID iam.OrgID
-	EnvID domain.EnvironmentID
+	Name     string
+	ApiKeyID domain.ApiKeyID
 }
 
 type CreateApplicationHandler struct {
-	repo domain.ApplicationRepository
+	repo         domain.ApplicationRepository
+	apiKeyFinder apiKeyFinder
 }
 
-func NewCreateApplicationHandler(repo domain.ApplicationRepository) CreateApplicationHandler {
+type apiKeyFinder interface {
+	FindByID(ctx context.Context, id domain.ApiKeyID) (*domain.ApiKey, error)
+}
+
+func NewCreateApplicationHandler(
+	repo domain.ApplicationRepository,
+	apiKeyFinder apiKeyFinder,
+) CreateApplicationHandler {
 	return CreateApplicationHandler{
-		repo: repo,
+		repo:         repo,
+		apiKeyFinder: apiKeyFinder,
 	}
 }
 
-func (c CreateApplicationHandler) Execute(ctx context.Context, cmd CreateApplication) error {
-	application, err := domain.NewApplication(cmd.Name, cmd.EnvID)
+func (c CreateApplicationHandler) Execute(ctx context.Context, cmd CreateApplication) (domain.ApplicationID, error) {
+	apiKey, err := c.apiKeyFinder.FindByID(ctx, cmd.ApiKeyID)
 	if err != nil {
-		return err
+		return "", fmt.Errorf("unable to find the api key: %v", err)
+	}
+
+	application, err := domain.NewApplication(cmd.Name, apiKey.EnvID())
+	if err != nil {
+		return "", err
 	}
 
 	err = c.repo.Insert(ctx, application)
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	return nil
+	return application.ID(), nil
 }

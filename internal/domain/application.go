@@ -56,3 +56,12 @@ func (a *Application) Name() string {
 func (a *Application) CreatedAt() time.Time {
 	return a.createdAt
 }
+
+func UnMarshallApplication(id ApplicationID, name string, envID EnvironmentID, createdAt time.Time) *Application {
+	return &Application{
+		id:        id,
+		name:      name,
+		envID:     envID,
+		createdAt: createdAt,
+	}
+}

@@ -129,6 +129,9 @@ func run(logger *logs.Logger) error {
 		Query: app.Query{
 			AllEnvironments: observability.NewQueryDecorator[query.AllEnvironments, []*domain.Environment](query.NewEnvironmentsHandler(envRepo), logger),
 			AllApiKeys:      observability.NewQueryDecorator[query.AllApiKeys, []*domain.ApiKey](query.NewAllApiKeysHandler(apiKeyRepo), logger),
+
+			// Applications
+			AllApplications: observability.NewQueryDecorator[query.AllApplications, query.Paginated[[]domain.Application]](query.NewAllApplicationsHandler(applicationRepo), logger),
 		},
 	}
 

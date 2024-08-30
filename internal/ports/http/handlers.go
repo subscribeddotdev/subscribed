@@ -265,12 +265,9 @@ func (h handlers) GetApplications(c echo.Context, params GetApplicationsParams) 
 	}
 
 	result, err := h.application.Query.AllApplications.Execute(c.Request().Context(), query.AllApplications{
-		PaginationParams: query.PaginationParams{
-			Page:  params.Page,
-			Limit: params.Limit,
-		},
-		EnvironmentID: params.EnvironmentId,
-		OrgID:         claims.OrganizationID,
+		PaginationParams: query.NewPaginationParams(params.Page, params.Limit),
+		EnvironmentID:    params.EnvironmentId,
+		OrgID:            claims.OrganizationID,
 	})
 	if err != nil {
 		return NewHandlerError(err, "error-retrieving-applications")

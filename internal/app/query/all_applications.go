@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/subscribeddotdev/subscribed-backend/internal/domain"
+	"github.com/subscribeddotdev/subscribed-backend/internal/domain/iam"
 )
 
 type AllApplications struct {
@@ -12,13 +13,30 @@ type AllApplications struct {
 	OrgID         string
 }
 
-type allApplicationsHandler struct {
+type applicationsFinder interface {
+	FindAll(
+		ctx context.Context,
+		envID domain.EnvironmentID,
+		orgID iam.OrgID,
+		pagination PaginationParams,
+	) (Paginated[[]domain.Application], error)
 }
 
-func NewAllApplicationsHandler() allApplicationsHandler {
-	return allApplicationsHandler{}
+type allApplicationsHandler struct {
+	applicationsFinder applicationsFinder
+}
+
+func NewAllApplicationsHandler(applicationsFinder applicationsFinder) allApplicationsHandler {
+	return allApplicationsHandler{
+		applicationsFinder: applicationsFinder,
+	}
 }
 
 func (h allApplicationsHandler) Execute(ctx context.Context, q AllApplications) (Paginated[[]domain.Application], error) {
-	return Paginated[[]domain.Application]{}, nil
+	return h.applicationsFinder.FindAll(
+		ctx,
+		domain.EnvironmentID(q.EnvironmentID),
+		iam.OrgID(q.OrgID),
+		q.PaginationParams,
+	)
 }

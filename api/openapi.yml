@@ -73,6 +73,28 @@ paths:
                 $ref: '#/components/schemas/GetApplicationsPayload'
         default:
           $ref: '#/components/responses/DefaultError'
+  /applications/{applicationID}:
+    get:
+      tags:
+        - Applications
+      operationId: getApplicationById
+      summary: Returns an application
+      security:
+        - ApiKeyAuth: [ ]
+        - BearerAuth: [ ]
+      parameters:
+        - $ref: '#/components/parameters/applicationId'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetApplicationByIdPayload'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        default:
+          $ref: '#/components/responses/DefaultError'
   /applications/{applicationID}/endpoints:
     post:
       tags:
@@ -107,11 +129,7 @@ paths:
       security:
         - ApiKeyAuth: []
       parameters:
-        - name: applicationID
-          in: path
-          required: true
-          schema:
-            type: string
+        - $ref: '#/components/parameters/applicationId'
       requestBody:
         required: true
         content:
@@ -264,6 +282,12 @@ paths:
 
 components:
   parameters:
+    applicationId:
+        name: applicationID
+        in: path
+        required: true
+        schema:
+          type: string
     paginationParamLimit:
       name: limit
       description: The number of items per page
@@ -359,6 +383,11 @@ components:
         data:
           type: array
           items:
+            $ref: '#/components/schemas/Application'
+    GetApplicationByIdPayload:
+      required: [ data ]
+      properties:
+        data:
             $ref: '#/components/schemas/Application'
     # Messages
     SendMessageRequest:
@@ -493,6 +522,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/GenericResponse'
+    NotFoundError:
+      description: 'Item not found'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
     DefaultError:
       description: 'A generic error response'
       content:

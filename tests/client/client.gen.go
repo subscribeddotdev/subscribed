@@ -120,6 +120,11 @@ type GetAllEnvironmentsPayload struct {
 	Data []Environment `json:"data"`
 }
 
+// GetApplicationByIdPayload defines model for GetApplicationByIdPayload.
+type GetApplicationByIdPayload struct {
+	Data Application `json:"data"`
+}
+
 // GetApplicationsPayload defines model for GetApplicationsPayload.
 type GetApplicationsPayload struct {
 	Data       []Application `json:"data"`
@@ -163,6 +168,9 @@ type SignupRequest struct {
 	Password  string `json:"password"`
 }
 
+// ApplicationId defines model for applicationId.
+type ApplicationId = string
+
 // PaginationParamLimit defines model for paginationParamLimit.
 type PaginationParamLimit = int
 
@@ -171,6 +179,9 @@ type PaginationParamPage = int
 
 // DefaultError defines model for DefaultError.
 type DefaultError = ErrorResponse
+
+// NotFoundError defines model for NotFoundError.
+type NotFoundError = ErrorResponse
 
 // GetAllApiKeysParams defines parameters for GetAllApiKeys.
 type GetAllApiKeysParams struct {
@@ -301,15 +312,18 @@ type ClientInterface interface {
 
 	CreateApplication(ctx context.Context, body CreateApplicationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// GetApplicationById request
+	GetApplicationById(ctx context.Context, applicationID ApplicationId, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// AddEndpointWithBody request with any body
 	AddEndpointWithBody(ctx context.Context, applicationID string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	AddEndpoint(ctx context.Context, applicationID string, body AddEndpointJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// SendMessageWithBody request with any body
-	SendMessageWithBody(ctx context.Context, applicationID string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+	SendMessageWithBody(ctx context.Context, applicationID ApplicationId, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	SendMessage(ctx context.Context, applicationID string, body SendMessageJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+	SendMessage(ctx context.Context, applicationID ApplicationId, body SendMessageJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// GetEnvironments request
 	GetEnvironments(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -417,6 +431,18 @@ func (c *Client) CreateApplication(ctx context.Context, body CreateApplicationJS
 	return c.Client.Do(req)
 }
 
+func (c *Client) GetApplicationById(ctx context.Context, applicationID ApplicationId, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetApplicationByIdRequest(c.Server, applicationID)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
 func (c *Client) AddEndpointWithBody(ctx context.Context, applicationID string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewAddEndpointRequestWithBody(c.Server, applicationID, contentType, body)
 	if err != nil {
@@ -441,7 +467,7 @@ func (c *Client) AddEndpoint(ctx context.Context, applicationID string, body Add
 	return c.Client.Do(req)
 }
 
-func (c *Client) SendMessageWithBody(ctx context.Context, applicationID string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *Client) SendMessageWithBody(ctx context.Context, applicationID ApplicationId, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewSendMessageRequestWithBody(c.Server, applicationID, contentType, body)
 	if err != nil {
 		return nil, err
@@ -453,7 +479,7 @@ func (c *Client) SendMessageWithBody(ctx context.Context, applicationID string, 
 	return c.Client.Do(req)
 }
 
-func (c *Client) SendMessage(ctx context.Context, applicationID string, body SendMessageJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *Client) SendMessage(ctx context.Context, applicationID ApplicationId, body SendMessageJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewSendMessageRequest(c.Server, applicationID, body)
 	if err != nil {
 		return nil, err
@@ -797,6 +823,40 @@ func NewCreateApplicationRequestWithBody(server string, contentType string, body
 	return req, nil
 }
 
+// NewGetApplicationByIdRequest generates requests for GetApplicationById
+func NewGetApplicationByIdRequest(server string, applicationID ApplicationId) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "applicationID", runtime.ParamLocationPath, applicationID)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/applications/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 // NewAddEndpointRequest calls the generic AddEndpoint builder with application/json body
 func NewAddEndpointRequest(server string, applicationID string, body AddEndpointJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
@@ -845,7 +905,7 @@ func NewAddEndpointRequestWithBody(server string, applicationID string, contentT
 }
 
 // NewSendMessageRequest calls the generic SendMessage builder with application/json body
-func NewSendMessageRequest(server string, applicationID string, body SendMessageJSONRequestBody) (*http.Request, error) {
+func NewSendMessageRequest(server string, applicationID ApplicationId, body SendMessageJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
 	buf, err := json.Marshal(body)
 	if err != nil {
@@ -856,7 +916,7 @@ func NewSendMessageRequest(server string, applicationID string, body SendMessage
 }
 
 // NewSendMessageRequestWithBody generates requests for SendMessage with any type of body
-func NewSendMessageRequestWithBody(server string, applicationID string, contentType string, body io.Reader) (*http.Request, error) {
+func NewSendMessageRequestWithBody(server string, applicationID ApplicationId, contentType string, body io.Reader) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -1127,15 +1187,18 @@ type ClientWithResponsesInterface interface {
 
 	CreateApplicationWithResponse(ctx context.Context, body CreateApplicationJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateApplicationResponse, error)
 
+	// GetApplicationByIdWithResponse request
+	GetApplicationByIdWithResponse(ctx context.Context, applicationID ApplicationId, reqEditors ...RequestEditorFn) (*GetApplicationByIdResponse, error)
+
 	// AddEndpointWithBodyWithResponse request with any body
 	AddEndpointWithBodyWithResponse(ctx context.Context, applicationID string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*AddEndpointResponse, error)
 
 	AddEndpointWithResponse(ctx context.Context, applicationID string, body AddEndpointJSONRequestBody, reqEditors ...RequestEditorFn) (*AddEndpointResponse, error)
 
 	// SendMessageWithBodyWithResponse request with any body
-	SendMessageWithBodyWithResponse(ctx context.Context, applicationID string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*SendMessageResponse, error)
+	SendMessageWithBodyWithResponse(ctx context.Context, applicationID ApplicationId, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*SendMessageResponse, error)
 
-	SendMessageWithResponse(ctx context.Context, applicationID string, body SendMessageJSONRequestBody, reqEditors ...RequestEditorFn) (*SendMessageResponse, error)
+	SendMessageWithResponse(ctx context.Context, applicationID ApplicationId, body SendMessageJSONRequestBody, reqEditors ...RequestEditorFn) (*SendMessageResponse, error)
 
 	// GetEnvironmentsWithResponse request
 	GetEnvironmentsWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetEnvironmentsResponse, error)
@@ -1267,6 +1330,30 @@ func (r CreateApplicationResponse) Status() string {
 
 // StatusCode returns HTTPResponse.StatusCode
 func (r CreateApplicationResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetApplicationByIdResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *GetApplicationByIdPayload
+	JSON404      *NotFoundError
+	JSONDefault  *DefaultError
+}
+
+// Status returns HTTPResponse.Status
+func (r GetApplicationByIdResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetApplicationByIdResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -1490,6 +1577,15 @@ func (c *ClientWithResponses) CreateApplicationWithResponse(ctx context.Context,
 	return ParseCreateApplicationResponse(rsp)
 }
 
+// GetApplicationByIdWithResponse request returning *GetApplicationByIdResponse
+func (c *ClientWithResponses) GetApplicationByIdWithResponse(ctx context.Context, applicationID ApplicationId, reqEditors ...RequestEditorFn) (*GetApplicationByIdResponse, error) {
+	rsp, err := c.GetApplicationById(ctx, applicationID, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetApplicationByIdResponse(rsp)
+}
+
 // AddEndpointWithBodyWithResponse request with arbitrary body returning *AddEndpointResponse
 func (c *ClientWithResponses) AddEndpointWithBodyWithResponse(ctx context.Context, applicationID string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*AddEndpointResponse, error) {
 	rsp, err := c.AddEndpointWithBody(ctx, applicationID, contentType, body, reqEditors...)
@@ -1508,7 +1604,7 @@ func (c *ClientWithResponses) AddEndpointWithResponse(ctx context.Context, appli
 }
 
 // SendMessageWithBodyWithResponse request with arbitrary body returning *SendMessageResponse
-func (c *ClientWithResponses) SendMessageWithBodyWithResponse(ctx context.Context, applicationID string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*SendMessageResponse, error) {
+func (c *ClientWithResponses) SendMessageWithBodyWithResponse(ctx context.Context, applicationID ApplicationId, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*SendMessageResponse, error) {
 	rsp, err := c.SendMessageWithBody(ctx, applicationID, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
@@ -1516,7 +1612,7 @@ func (c *ClientWithResponses) SendMessageWithBodyWithResponse(ctx context.Contex
 	return ParseSendMessageResponse(rsp)
 }
 
-func (c *ClientWithResponses) SendMessageWithResponse(ctx context.Context, applicationID string, body SendMessageJSONRequestBody, reqEditors ...RequestEditorFn) (*SendMessageResponse, error) {
+func (c *ClientWithResponses) SendMessageWithResponse(ctx context.Context, applicationID ApplicationId, body SendMessageJSONRequestBody, reqEditors ...RequestEditorFn) (*SendMessageResponse, error) {
 	rsp, err := c.SendMessage(ctx, applicationID, body, reqEditors...)
 	if err != nil {
 		return nil, err
@@ -1751,6 +1847,46 @@ func ParseCreateApplicationResponse(rsp *http.Response) (*CreateApplicationRespo
 	return response, nil
 }
 
+// ParseGetApplicationByIdResponse parses an HTTP response from a GetApplicationByIdWithResponse call
+func ParseGetApplicationByIdResponse(rsp *http.Response) (*GetApplicationByIdResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetApplicationByIdResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest GetApplicationByIdPayload
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest NotFoundError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest DefaultError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
+}
+
 // ParseAddEndpointResponse parses an HTTP response from a AddEndpointWithResponse call
 func ParseAddEndpointResponse(rsp *http.Response) (*AddEndpointResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
@@ -1950,36 +2086,37 @@ func ParseSignUpResponse(rsp *http.Response) (*SignUpResponse, error) {
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
-	"/6R6rqxgJQAA",
+	"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",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

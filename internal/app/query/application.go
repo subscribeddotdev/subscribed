@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/subscribeddotdev/subscribed-backend/internal/domain"
+	"github.com/subscribeddotdev/subscribed-backend/internal/domain/iam"
 )
 
 type Application struct {
@@ -20,5 +21,5 @@ func NewApplicationHandler(applicationsFinder applicationsFinder) applicationHan
 }
 
 func (h applicationHandler) Execute(ctx context.Context, q Application) (*domain.Application, error) {
-	return nil, nil
+	return h.applicationsFinder.FindByID(ctx, domain.ApplicationID(q.ApplicationID), iam.OrgID(q.OrgID))
 }

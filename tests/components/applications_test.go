@@ -5,6 +5,9 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/subscribeddotdev/subscribed-backend/internal/adapters/models"
+	"github.com/subscribeddotdev/subscribed-backend/internal/domain"
+	"github.com/subscribeddotdev/subscribed-backend/tests"
 	"github.com/subscribeddotdev/subscribed-backend/tests/client"
 	"github.com/subscribeddotdev/subscribed-backend/tests/fixture"
 )
@@ -17,8 +20,10 @@ func TestApplications(t *testing.T) {
 	token := signIn(t, member.Email, password)
 	apiClient := getClientWithToken(t, token)
 	applicationFixtureCount := 20
+	appsFixture := make([]models.Application, applicationFixtureCount)
+
 	for i := 0; i < applicationFixtureCount; i++ {
-		ff.NewApplication().WithEnvironmentID(env.ID).Save()
+		appsFixture[i] = ff.NewApplication().WithEnvironmentID(env.ID).Save()
 	}
 
 	t.Run("get_all_applications_by_env_id", func(t *testing.T) {
@@ -41,5 +46,22 @@ func TestApplications(t *testing.T) {
 			require.Equal(t, perPage, resp.JSON200.Pagination.PerPage)
 			require.Equal(t, totalPages, resp.JSON200.Pagination.TotalPages)
 		}
+	})
+
+	t.Run("get_application_by_id", func(t *testing.T) {
+		appFixture := appsFixture[0]
+		resp, err := apiClient.GetApplicationByIdWithResponse(ctx, appFixture.ID)
+
+		require.NoError(t, err)
+		require.Equal(t, http.StatusOK, resp.StatusCode())
+		require.Equal(t, appFixture.ID, resp.JSON200.Data.Id)
+		require.Equal(t, appFixture.Name, resp.JSON200.Data.Name)
+		require.Equal(t, appFixture.EnvironmentID, resp.JSON200.Data.EnvironmentId)
+		tests.RequireEqualTime(t, appFixture.CreatedAt, resp.JSON200.Data.CreatedAt)
+
+		// Not found
+		resp, err = apiClient.GetApplicationByIdWithResponse(ctx, domain.NewApplicationID().String())
+		require.NoError(t, err)
+		require.Equal(t, http.StatusNotFound, resp.StatusCode())
 	})
 }

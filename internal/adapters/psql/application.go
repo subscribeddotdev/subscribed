@@ -72,6 +72,14 @@ func (o ApplicationRepository) FindAll(
 	}, nil
 }
 
+func (o ApplicationRepository) FindByID(
+	ctx context.Context,
+	id domain.ApplicationID,
+	orgID iam.OrgID,
+) (*domain.Application, error) {
+	return nil, nil
+}
+
 func mapPaginationParamsToSqlOffset(pagination query.PaginationParams) int {
 	if pagination.Page() == 1 {
 		return 0

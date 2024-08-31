@@ -5,7 +5,6 @@ import (
 
 	"github.com/friendsofgo/errors"
 	"github.com/labstack/echo/v4"
-
 	"github.com/subscribeddotdev/subscribed-backend/internal/app"
 	"github.com/subscribeddotdev/subscribed-backend/internal/app/command"
 	"github.com/subscribeddotdev/subscribed-backend/internal/app/query"
@@ -259,6 +258,7 @@ func (h handlers) DestroyApiKey(c echo.Context, apiKeyId string) error {
 }
 
 func (h handlers) GetApplications(c echo.Context, params GetApplicationsParams) error {
+	// TODO: Add support for resolving important details from when the request is made with an api key instead
 	claims, err := h.resolveJwtClaimsFromCtx(c)
 	if err != nil {
 		return err
@@ -288,6 +288,32 @@ func (h handlers) GetApplications(c echo.Context, params GetApplicationsParams) 
 		Data:       data,
 		Pagination: mapToPaginationResponse(result),
 	})
+}
+
+func (h handlers) GetApplicationById(c echo.Context, applicationID ApplicationId) error {
+	claims, err := h.resolveJwtClaimsFromCtx(c)
+	if err != nil {
+		return err
+	}
+
+	app, err := h.application.Query.Application.Execute(c.Request().Context(), query.Application{
+		ApplicationID: applicationID,
+		OrgID:         claims.OrganizationID,
+	})
+	if errors.Is(err, domain.ErrAppNotFound) {
+		return NewHandlerErrorWithStatus(err, "error-retrieving-application", http.StatusNotFound)
+	}
+
+	if err != nil {
+		return NewHandlerError(err, "error-retrieving-application")
+	}
+
+	return c.JSON(http.StatusOK, GetApplicationByIdPayload{Data: Application{
+		Id:            app.ID().String(),
+		Name:          app.Name(),
+		EnvironmentId: app.EnvID().String(),
+		CreatedAt:     app.CreatedAt(),
+	}})
 }
 
 func (h handlers) resolveJwtClaimsFromCtx(c echo.Context) (*jwtCustomClaims, error) {

@@ -8,6 +8,7 @@ import (
 var (
 	ErrApiKeyExists        = errors.New("the api key already exists")
 	ErrApiKeyNotFound      = errors.New("api key not found")
+	ErrAppNotFound         = errors.New("application not found")
 	ErrEndpointNotFound    = errors.New("endpoint not found")
 	ErrEventTypeNotFound   = errors.New("event type not found")
 	ErrMessageNotFound     = errors.New("message not found")

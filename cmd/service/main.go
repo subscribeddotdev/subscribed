@@ -132,6 +132,7 @@ func run(logger *logs.Logger) error {
 
 			// Applications
 			AllApplications: observability.NewQueryDecorator[query.AllApplications, query.Paginated[[]domain.Application]](query.NewAllApplicationsHandler(applicationRepo), logger),
+			Application:     observability.NewQueryDecorator[query.Application, *domain.Application](query.NewApplicationHandler(applicationRepo), logger),
 		},
 	}
 

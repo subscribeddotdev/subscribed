@@ -20,6 +20,7 @@ type applicationsFinder interface {
 		orgID iam.OrgID,
 		pagination PaginationParams,
 	) (Paginated[[]domain.Application], error)
+	FindByID(ctx context.Context, id domain.ApplicationID, orgID iam.OrgID) (*domain.Application, error)
 }
 
 type allApplicationsHandler struct {

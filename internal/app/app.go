@@ -48,6 +48,7 @@ type Query struct {
 	AllEnvironments QueryHandler[query.AllEnvironments, []*domain.Environment]
 
 	// Applications
+	Application     QueryHandler[query.Application, *domain.Application]
 	AllApplications QueryHandler[query.AllApplications, query.Paginated[[]domain.Application]]
 }
 

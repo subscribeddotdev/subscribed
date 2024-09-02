@@ -51,3 +51,4 @@ jobs:
         with:
           version: v1.60.1
           args: --timeout 3m --verbose
+          working-directory: ./server

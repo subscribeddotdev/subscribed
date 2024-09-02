@@ -36,6 +36,11 @@ jobs:
   golangci:
     name: lint
     runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ./server
+
     steps:
       - uses: actions/setup-go@v5
         with:

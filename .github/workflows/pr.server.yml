@@ -2,10 +2,10 @@ name: pr
 on:
   push:
     paths:
-      - './server/**'
+      - 'server/**'
     branches-ignore:
       - main
 
 jobs:
   ci:
-    uses: ./.github/workflows/ci.backend.yml
+    uses: ./.github/workflows/ci.server.yml

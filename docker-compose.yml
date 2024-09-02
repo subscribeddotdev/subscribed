@@ -13,7 +13,7 @@ services:
       - "5432:5432"
 
   app:
-    build: ./misc/tools/reflex
+    build: ./server/misc/tools/reflex
     stop_grace_period: 1s
     environment:
       APP_NAME: backend

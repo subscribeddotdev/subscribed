@@ -1,0 +1,11 @@
+name: pr
+on:
+  push:
+    paths:
+      - 'backend/**'
+    branches-ignore:
+      - main
+
+jobs:
+  ci:
+    uses: ./.github/workflows/ci.backend.yml

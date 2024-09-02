@@ -65,3 +65,32 @@ func TestApplicationRepository_FindAll(t *testing.T) {
 		}
 	})
 }
+
+func TestApplicationRepository_FindById(t *testing.T) {
+	ff := fixture.NewFactory(t, ctx, db)
+	org := ff.NewOrganization().Save()
+	env := ff.NewEnvironment().WithOrganizationID(org.ID).Save()
+
+	t.Run("find_app_by_id_and_org_id", func(t *testing.T) {
+		appFixture := ff.NewApplication().WithEnvironmentID(env.ID).Save()
+		app, err := applicationRepo.FindByID(ctx, domain.ApplicationID(appFixture.ID), iam.OrgID(org.ID))
+
+		require.NoError(t, err)
+		require.NotNil(t, app)
+		require.Equal(t, appFixture.ID, app.ID().String())
+	})
+
+	t.Run("error_app_not_found_wrong_id", func(t *testing.T) {
+		app, err := applicationRepo.FindByID(ctx, domain.NewApplicationID(), iam.OrgID(org.ID))
+		require.ErrorIs(t, err, domain.ErrAppNotFound)
+		require.Nil(t, app)
+	})
+
+	//TODO: enable once the attribute orgID gets added to the application model
+	// t.Run("error_app_not_found_wrong_org_id", func(t *testing.T) {
+	// 	appFixture := ff.NewApplication().WithEnvironmentID(env.ID).Save()
+	// 	app, err := applicationRepo.FindByID(ctx, domain.ApplicationID(appFixture.ID), iam.NewOrgID())
+	// 	require.ErrorIs(t, err, domain.ErrAppNotFound)
+	// 	require.Nil(t, app)
+	// })
+}

@@ -2,8 +2,10 @@ package psql
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 
+	"github.com/friendsofgo/errors"
 	"github.com/subscribeddotdev/subscribed-backend/internal/adapters/models"
 	"github.com/subscribeddotdev/subscribed-backend/internal/app/query"
 	"github.com/subscribeddotdev/subscribed-backend/internal/domain"
@@ -41,7 +43,7 @@ func (o ApplicationRepository) Insert(ctx context.Context, application *domain.A
 func (o ApplicationRepository) FindAll(
 	ctx context.Context,
 	envID domain.EnvironmentID,
-	orgID iam.OrgID,
+	orgID iam.OrgID, // TODO: to be used later
 	pagination query.PaginationParams,
 ) (query.Paginated[[]domain.Application], error) {
 	total, err := models.Applications(
@@ -77,7 +79,24 @@ func (o ApplicationRepository) FindByID(
 	id domain.ApplicationID,
 	orgID iam.OrgID,
 ) (*domain.Application, error) {
-	return nil, nil
+	row, err := models.Applications(
+		models.ApplicationWhere.ID.EQ(id.String()),
+		// TODO: models.ApplicationWhere.OrgID.EQ(orgID.String())
+	).One(ctx, o.db)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, domain.ErrAppNotFound
+	}
+	if err != nil {
+		return nil, fmt.Errorf("error querying application via id: %v", err)
+	}
+
+	return domain.UnMarshallApplication(
+		domain.ApplicationID(row.ID),
+		row.Name,
+		domain.EnvironmentID(row.EnvironmentID),
+		// TODO: iam.OrgID(row.OrgID),
+		row.CreatedAt,
+	), nil
 }
 
 func mapPaginationParamsToSqlOffset(pagination query.PaginationParams) int {

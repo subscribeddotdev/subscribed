@@ -3,6 +3,7 @@ on:
   push:
     paths:
       - 'server/**'
+      - '.github/workflows/*.server.yml'
     branches:
       - main
 

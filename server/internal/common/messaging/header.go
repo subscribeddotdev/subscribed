@@ -6,7 +6,7 @@ import (
 	"github.com/oklog/ulid/v2"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
-	events "github.com/subscribeddotdev/subscribed-backend/events/go"
+	events "github.com/subscribeddotdev/subscribed/server/events/go"
 )
 
 func NewHeader(eventName, serviceName string) *events.Header {

@@ -2,7 +2,7 @@ package messaging
 
 import (
 	"github.com/ThreeDotsLabs/watermill/message"
-	"github.com/subscribeddotdev/subscribed-backend/internal/common/observability"
+	"github.com/subscribeddotdev/subscribed/server/internal/common/observability"
 )
 
 const correlationIdContextKey = "correlation_id"

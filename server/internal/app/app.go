@@ -3,11 +3,11 @@ package app
 import (
 	"context"
 
-	"github.com/subscribeddotdev/subscribed-backend/internal/app/auth"
-	"github.com/subscribeddotdev/subscribed-backend/internal/app/command"
-	"github.com/subscribeddotdev/subscribed-backend/internal/app/query"
-	"github.com/subscribeddotdev/subscribed-backend/internal/domain"
-	"github.com/subscribeddotdev/subscribed-backend/internal/domain/iam"
+	"github.com/subscribeddotdev/subscribed/server/internal/app/auth"
+	"github.com/subscribeddotdev/subscribed/server/internal/app/command"
+	"github.com/subscribeddotdev/subscribed/server/internal/app/query"
+	"github.com/subscribeddotdev/subscribed/server/internal/domain"
+	"github.com/subscribeddotdev/subscribed/server/internal/domain/iam"
 )
 
 type CommandHandler[C any] interface {

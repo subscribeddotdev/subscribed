@@ -8,9 +8,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/subscribeddotdev/subscribed-backend/internal/adapters/psql"
-	"github.com/subscribeddotdev/subscribed-backend/internal/common/postgres"
-	"github.com/subscribeddotdev/subscribed-backend/misc/tools/wait/wait_for"
+	"github.com/subscribeddotdev/subscribed/server/internal/adapters/psql"
+	"github.com/subscribeddotdev/subscribed/server/internal/common/postgres"
+	"github.com/subscribeddotdev/subscribed/server/misc/tools/wait/wait_for"
 )
 
 var (

@@ -2,7 +2,7 @@ package amqp
 
 import (
 	"github.com/ThreeDotsLabs/watermill/message"
-	"github.com/subscribeddotdev/subscribed-backend/internal/app"
+	"github.com/subscribeddotdev/subscribed/server/internal/app"
 )
 
 type Handler interface {

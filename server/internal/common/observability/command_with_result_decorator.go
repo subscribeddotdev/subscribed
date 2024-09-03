@@ -3,7 +3,7 @@ package observability
 import (
 	"context"
 
-	"github.com/subscribeddotdev/subscribed-backend/internal/common/logs"
+	"github.com/subscribeddotdev/subscribed/server/internal/common/logs"
 )
 
 type commandWithResultDecorator[C, R any] struct {

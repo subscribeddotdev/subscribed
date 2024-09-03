@@ -13,10 +13,10 @@ import (
 	"github.com/labstack/echo/v4"
 	_ "github.com/lib/pq"
 	"github.com/stretchr/testify/require"
-	"github.com/subscribeddotdev/subscribed-backend/internal/common/logs"
-	"github.com/subscribeddotdev/subscribed-backend/internal/common/postgres"
-	"github.com/subscribeddotdev/subscribed-backend/misc/tools/wait/wait_for"
-	"github.com/subscribeddotdev/subscribed-backend/tests/client"
+	"github.com/subscribeddotdev/subscribed/server/internal/common/logs"
+	"github.com/subscribeddotdev/subscribed/server/internal/common/postgres"
+	"github.com/subscribeddotdev/subscribed/server/misc/tools/wait/wait_for"
+	"github.com/subscribeddotdev/subscribed/server/tests/client"
 )
 
 var (

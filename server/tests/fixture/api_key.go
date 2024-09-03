@@ -2,7 +2,7 @@ package fixture
 
 import (
 	"github.com/stretchr/testify/require"
-	"github.com/subscribeddotdev/subscribed-backend/internal/adapters/models"
+	"github.com/subscribeddotdev/subscribed/server/internal/adapters/models"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 )
 

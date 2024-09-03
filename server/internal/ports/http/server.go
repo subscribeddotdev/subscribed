@@ -13,8 +13,8 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	oapimiddleware "github.com/oapi-codegen/echo-middleware"
-	"github.com/subscribeddotdev/subscribed-backend/internal/app"
-	"github.com/subscribeddotdev/subscribed-backend/internal/common/logs"
+	"github.com/subscribeddotdev/subscribed/server/internal/app"
+	"github.com/subscribeddotdev/subscribed/server/internal/common/logs"
 )
 
 const (

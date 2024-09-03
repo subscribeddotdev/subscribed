@@ -12,7 +12,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4"
 	echomiddleware "github.com/oapi-codegen/echo-middleware"
-	"github.com/subscribeddotdev/subscribed-backend/internal/domain/iam"
+	"github.com/subscribeddotdev/subscribed/server/internal/domain/iam"
 )
 
 type jwtCustomClaims struct {

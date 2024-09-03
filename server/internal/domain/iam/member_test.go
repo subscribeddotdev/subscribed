@@ -6,8 +6,8 @@ import (
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/subscribeddotdev/subscribed-backend/internal/domain/iam"
-	"github.com/subscribeddotdev/subscribed-backend/tests"
+	"github.com/subscribeddotdev/subscribed/server/internal/domain/iam"
+	"github.com/subscribeddotdev/subscribed/server/tests"
 )
 
 func TestNewMember(t *testing.T) {

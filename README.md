@@ -1,6 +1,7 @@
 # Subscribed
 
-[![main](https://github.com/subscribeddotdev/subscribed-backend/actions/workflows/main.yml/badge.svg?branch=main)](https://github.com/subscribeddotdev/subscribed-backend/actions/workflows/main.yml)
+[![main.server](https://github.com/subscribeddotdev/subscribed/actions/workflows/main.server.yml/badge.svg?branch=main)](https://github.com/subscribeddotdev/subscribed-backend/actions/workflows/main.yml)
+[![ci.web](https://github.com/subscribeddotdev/subscribed/actions/workflows/ci.web.yml/badge.svg?branch=main)](https://github.com/subscribeddotdev/subscribed-backend/actions/workflows/main.yml)
 
 Subscribed is a webhook provider that allows software developers to quickly add webhook capabilities into their applications, without having to deal with common webhook-related challenges such as:
 

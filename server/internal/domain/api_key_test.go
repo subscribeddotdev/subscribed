@@ -7,9 +7,9 @@ import (
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/subscribeddotdev/subscribed-backend/internal/domain"
-	"github.com/subscribeddotdev/subscribed-backend/internal/domain/iam"
-	"github.com/subscribeddotdev/subscribed-backend/tests"
+	"github.com/subscribeddotdev/subscribed/server/internal/domain"
+	"github.com/subscribeddotdev/subscribed/server/internal/domain/iam"
+	"github.com/subscribeddotdev/subscribed/server/tests"
 )
 
 func TestNewApiKey(t *testing.T) {

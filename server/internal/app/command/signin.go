@@ -3,7 +3,7 @@ package command
 import (
 	"context"
 
-	"github.com/subscribeddotdev/subscribed-backend/internal/domain/iam"
+	"github.com/subscribeddotdev/subscribed/server/internal/domain/iam"
 )
 
 type SignIn struct {

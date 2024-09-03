@@ -8,7 +8,7 @@ import (
 	"github.com/ThreeDotsLabs/watermill-amqp/v2/pkg/amqp"
 	"github.com/ThreeDotsLabs/watermill/message"
 	"github.com/oklog/ulid/v2"
-	"github.com/subscribeddotdev/subscribed-backend/internal/common/logs"
+	"github.com/subscribeddotdev/subscribed/server/internal/common/logs"
 )
 
 type Publisher struct {

@@ -4,11 +4,11 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/subscribeddotdev/subscribed-backend/internal/app/query"
-	"github.com/subscribeddotdev/subscribed-backend/internal/domain"
-	"github.com/subscribeddotdev/subscribed-backend/internal/domain/iam"
-	"github.com/subscribeddotdev/subscribed-backend/tests"
-	"github.com/subscribeddotdev/subscribed-backend/tests/fixture"
+	"github.com/subscribeddotdev/subscribed/server/internal/app/query"
+	"github.com/subscribeddotdev/subscribed/server/internal/domain"
+	"github.com/subscribeddotdev/subscribed/server/internal/domain/iam"
+	"github.com/subscribeddotdev/subscribed/server/tests"
+	"github.com/subscribeddotdev/subscribed/server/tests/fixture"
 )
 
 func TestApplicationRepository_Insert(t *testing.T) {

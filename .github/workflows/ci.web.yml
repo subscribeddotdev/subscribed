@@ -114,10 +114,10 @@ jobs:
         run: npm run build
 
       # Cache Playwright browsers
-      # https://dev.to/ayomiku222/how-to-cache-playwright-browser-on-github-actions-51o6
+      # https://github.com/microsoft/playwright/issues/7249#issuecomment-1154603556
       - name: Get Playwright version
         id: playwright-version
-        run: echo "PLAYWRIGHT_VERSION=$(node -e "console.log(require('./package-lock.json').devDependencies['@playwright/test'].version)")" >> $GITHUB_ENV
+        run: echo "PLAYWRIGHT_VERSION=$(node -e "console.log(require('./package.json').devDependencies['@playwright/test'])")" >> $GITHUB_ENV
 
       - uses: actions/cache@v4
         id: playwright-cache

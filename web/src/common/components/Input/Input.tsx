@@ -6,7 +6,7 @@ import styles from "./Input.module.css";
 interface Props extends ComponentPropsWithoutRef<"input"> {
   label?: string;
   error?: string;
-  "data-testid"?: string
+  "data-testid"?: string;
 }
 
 export const Input = forwardRef<HTMLInputElement, Props>(function Input(props, ref) {
@@ -34,7 +34,7 @@ export const Input = forwardRef<HTMLInputElement, Props>(function Input(props, r
         onChange={onChange}
         className={styles.input}
         placeholder={placeholder}
-        data-testid={props['data-testid']}
+        data-testid={props["data-testid"]}
       >
         <TextField.Slot></TextField.Slot>
       </TextField.Root>

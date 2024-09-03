@@ -105,14 +105,16 @@ jobs:
       - name: Generate API Client from OpenAPI
         run: npm run openapi
 
+      - name: Docker
+        run: |
+          cd ../server
+          docker compose up -d
+
       - name: Install dependencies
         run: npm ci
 
       - name: Build
         run: npm run build
-
-      - name: Docker
-        run: cd ../server; docker compose up -d
 
       - name: Run tests
         run: npm run e2e

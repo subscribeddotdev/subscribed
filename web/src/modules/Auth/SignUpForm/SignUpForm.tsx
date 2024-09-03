@@ -37,14 +37,14 @@ export function SignUpForm({}: Props) {
 
       <Flex direction="column" gap="2" mb="4">
         <Grid gap="2" columns="2">
-          <Input name="first_name" required onChange={f.handleChange} label="First name" error={f.errors.first_name} />
-          <Input name="last_name" required onChange={f.handleChange} label="Last name" error={f.errors.last_name} />
+          <Input data-testid="SignUpForm_Inp_FirstName" name="first_name" required onChange={f.handleChange} label="First name" error={f.errors.first_name} />
+          <Input data-testid="SignUpForm_Inp_LastName" name="last_name" required onChange={f.handleChange} label="Last name" error={f.errors.last_name} />
         </Grid>
-        <Input name="email" required type="email" onChange={f.handleChange} label="E-mail" error={f.errors.email} />
-        <Input name="password" label="Password" type="password" onChange={f.handleChange} error={f.errors.password} />
+        <Input data-testid="SignUpForm_Inp_Email" name="email" required type="email" onChange={f.handleChange} label="E-mail" error={f.errors.email} />
+        <Input data-testid="SignUpForm_Inp_Password" name="password" label="Password" type="password" onChange={f.handleChange} error={f.errors.password} />
       </Flex>
 
-      <Button mb="4" type="submit" disabled={f.isSubmitting} loading={f.isSubmitting}>
+      <Button data-testid="SignUpForm_Btn_CreateAccount" mb="4" type="submit" disabled={f.isSubmitting} loading={f.isSubmitting}>
         Create account
       </Button>
 
@@ -54,7 +54,7 @@ export function SignUpForm({}: Props) {
         </Text>
       </Box>
 
-      {error && <Alert color="red">{error}</Alert>}
+      {error && <Alert data-testid="SignUpForm_Alert_Error" color="red">{error}</Alert>}
     </form>
   );
 }

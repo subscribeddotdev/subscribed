@@ -11,11 +11,20 @@ interface Props extends PropsWithChildren {
   mt?: "1" | "2" | "3" | "4" | "5";
   variant?: "soft" | "surface" | "outline";
   color?: "red" | "amber" | "gray" | "green";
+  "data-testid"?: string;
 }
 
-export function Alert({ mb, mt, children, Icon, size, variant = "soft", color = "gray", onClose }: Props) {
+export function Alert({ mb, mt, children, Icon, size, variant = "soft", color = "gray", onClose, ...props }: Props) {
   return (
-    <Callout.Root className={styles.root} mb={mb} size={size} variant={variant} color={color} mt={mt}>
+    <Callout.Root
+      mt={mt}
+      mb={mb}
+      size={size}
+      color={color}
+      variant={variant}
+      className={styles.root}
+      data-testid={props["data-testid"]}
+    >
       {Icon && <Callout.Icon>{Icon}</Callout.Icon>}
       <Callout.Text className={styles.text}>
         {children}

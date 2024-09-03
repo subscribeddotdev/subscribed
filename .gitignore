@@ -5,3 +5,4 @@ bin
 .env.secrets
 terraform/*.tfstate
 terraform/*.tfstate.backup
+.vscode

@@ -6,6 +6,11 @@ jobs:
   tests:
     name: tests
     runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ./server
+
     steps:
       - uses: actions/checkout@v4
       - uses: arduino/setup-task@v2
@@ -31,6 +36,11 @@ jobs:
   golangci:
     name: lint
     runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ./server
+
     steps:
       - uses: actions/setup-go@v5
         with:
@@ -41,3 +51,4 @@ jobs:
         with:
           version: v1.60.1
           args: --timeout 3m --verbose
+          working-directory: ./server

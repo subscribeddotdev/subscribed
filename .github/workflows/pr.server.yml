@@ -1,0 +1,12 @@
+name: pr
+on:
+  push:
+    paths:
+      - 'server/**'
+      - '.github/workflows/*.server.yml'
+    branches-ignore:
+      - main
+
+jobs:
+  ci:
+    uses: ./.github/workflows/ci.server.yml

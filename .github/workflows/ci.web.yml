@@ -113,21 +113,31 @@ jobs:
 
       # Cache Playwright browsers
       # https://dev.to/ayomiku222/how-to-cache-playwright-browser-on-github-actions-51o6
-      - name: Get installed Playwright version
+      - name: Get Playwright version
         id: playwright-version
-        run: echo "PLAYWRIGHT_VERSION=$(node -e "console.log(require('./package-lock.json').dependencies['@playwright/test'].version)")" >> $GITHUB_ENV
-      - name: Cache playwright binaries
-        uses: actions/cache@v3
+        run: echo "PLAYWRIGHT_VERSION=$(node -e "console.log(require('./package-lock.json').devDependencies['@playwright/test'].version)")" >> $GITHUB_ENV
+
+      - uses: actions/cache@v4
         id: playwright-cache
         with:
-          path: |
-            ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-${{ env.PLAYWRIGHT_VERSION }}
-      - run: npm ci
-      - run: npx playwright install --with-deps
+          path: "~/.cache/ms-playwright"
+          key: "${{ runner.os }}-playwright-${{ steps.playwright-version.outputs.version }}"
+          # As a fallback, if the Playwright version has changed, try use the
+          # most recently cached version. There's a good chance that at least one
+          # of the browser binary versions haven't been updated, so Playwright can
+          # skip installing that in the next step.
+          # Note: When falling back to an old cache, `cache-hit` (used below)
+          # will be `false`. This allows us to restore the potentially out of
+          # date cache, but still let Playwright decide if it needs to download
+          # new binaries or not.
+          restore-keys: |
+            ${{ runner.os }}-playwright-
+
+      # If the Playwright browser binaries weren't able to be restored, we tell
+      # paywright to install everything for us.
+      - name: Install Playwright's dependencies
         if: steps.playwright-cache.outputs.cache-hit != 'true'
-      - run: npx playwright install-deps
-        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: npx playwright install --with-deps
 
       - name: Run tests
         run: npm run e2e

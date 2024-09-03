@@ -1,0 +1,4 @@
+@custom-media --tablet-and-up (min-width: 768px);
+@custom-media --laptop-and-up (min-width: 992px);
+@custom-media --x-large-and-up (min-width: 1200px);
+@custom-media --xx-large-and-up (min-width: 1400px);

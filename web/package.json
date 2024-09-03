@@ -16,9 +16,7 @@
     "e2e": "playwright test",
     "e2e:codegen": "npx playwright codegen",
     "type-check": "tsc --noEmit",
-    "openapi": "npx @openapitools/openapi-generator-cli generate -i ./.openapi/openapi.yml -g typescript-axios -o ./src/common/libs/backendapi/client",
-    "openapi:dev": "npx @openapitools/openapi-generator-cli generate -i ./.openapi/openapi.yml -g typescript-axios -o ./src/common/libs/backendapi/client",
-    "preopenapi": "rm -rf .openapi; wget -P ./.openapi/ https://raw.githubusercontent.com/subscribeddotdev/subscribed-backend/main/api/openapi.yml"
+    "openapi": "npx @openapitools/openapi-generator-cli generate -i ../server/api//openapi.yml -g typescript-axios -o ./src/common/libs/backendapi/client"
   },
   "dependencies": {
     "@radix-ui/react-avatar": "^1.1.0",

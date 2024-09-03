@@ -2,8 +2,8 @@ package messaging
 
 import (
 	"github.com/ThreeDotsLabs/watermill/message"
-	"github.com/subscribeddotdev/subscribed-backend/internal/common/logs"
-	"github.com/subscribeddotdev/subscribed-backend/internal/common/observability"
+	"github.com/subscribeddotdev/subscribed/server/internal/common/logs"
+	"github.com/subscribeddotdev/subscribed/server/internal/common/observability"
 )
 
 func CorrelationIdMiddleware(h message.HandlerFunc) message.HandlerFunc {

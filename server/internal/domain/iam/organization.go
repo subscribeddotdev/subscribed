@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"github.com/friendsofgo/errors"
-	"github.com/subscribeddotdev/subscribed-backend/internal/domain"
+	"github.com/subscribeddotdev/subscribed/server/internal/domain"
 )
 
 type OrgID string

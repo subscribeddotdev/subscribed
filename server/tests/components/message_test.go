@@ -8,9 +8,9 @@ import (
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/subscribeddotdev/subscribed-backend/internal/adapters/models"
-	"github.com/subscribeddotdev/subscribed-backend/tests/client"
-	"github.com/subscribeddotdev/subscribed-backend/tests/fixture"
+	"github.com/subscribeddotdev/subscribed/server/internal/adapters/models"
+	"github.com/subscribeddotdev/subscribed/server/tests/client"
+	"github.com/subscribeddotdev/subscribed/server/tests/fixture"
 )
 
 type JSON map[string]interface{}

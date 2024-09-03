@@ -7,10 +7,10 @@ import (
 
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/stretchr/testify/require"
-	"github.com/subscribeddotdev/subscribed-backend/internal/adapters/models"
-	"github.com/subscribeddotdev/subscribed-backend/tests"
-	"github.com/subscribeddotdev/subscribed-backend/tests/client"
-	"github.com/subscribeddotdev/subscribed-backend/tests/fixture"
+	"github.com/subscribeddotdev/subscribed/server/internal/adapters/models"
+	"github.com/subscribeddotdev/subscribed/server/tests"
+	"github.com/subscribeddotdev/subscribed/server/tests/client"
+	"github.com/subscribeddotdev/subscribed/server/tests/fixture"
 )
 
 func TestApiKeys_Lifecycle(t *testing.T) {

@@ -13,7 +13,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/subscribeddotdev/subscribed-backend/internal/domain"
+	"github.com/subscribeddotdev/subscribed/server/internal/domain"
 )
 
 const (

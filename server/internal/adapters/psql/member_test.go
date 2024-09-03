@@ -7,10 +7,10 @@ import (
 	_ "github.com/lib/pq"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/subscribeddotdev/subscribed-backend/internal/adapters/psql"
-	"github.com/subscribeddotdev/subscribed-backend/internal/domain/iam"
-	"github.com/subscribeddotdev/subscribed-backend/tests"
-	"github.com/subscribeddotdev/subscribed-backend/tests/fixture"
+	"github.com/subscribeddotdev/subscribed/server/internal/adapters/psql"
+	"github.com/subscribeddotdev/subscribed/server/internal/domain/iam"
+	"github.com/subscribeddotdev/subscribed/server/tests"
+	"github.com/subscribeddotdev/subscribed/server/tests/fixture"
 )
 
 func TestMemberRepository_Lifecycle(t *testing.T) {

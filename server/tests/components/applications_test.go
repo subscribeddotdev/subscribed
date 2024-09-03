@@ -5,11 +5,11 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/subscribeddotdev/subscribed-backend/internal/adapters/models"
-	"github.com/subscribeddotdev/subscribed-backend/internal/domain"
-	"github.com/subscribeddotdev/subscribed-backend/tests"
-	"github.com/subscribeddotdev/subscribed-backend/tests/client"
-	"github.com/subscribeddotdev/subscribed-backend/tests/fixture"
+	"github.com/subscribeddotdev/subscribed/server/internal/adapters/models"
+	"github.com/subscribeddotdev/subscribed/server/internal/domain"
+	"github.com/subscribeddotdev/subscribed/server/tests"
+	"github.com/subscribeddotdev/subscribed/server/tests/client"
+	"github.com/subscribeddotdev/subscribed/server/tests/fixture"
 )
 
 func TestApplications(t *testing.T) {

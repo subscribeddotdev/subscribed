@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/subscribeddotdev/subscribed-backend/internal/domain"
-	"github.com/subscribeddotdev/subscribed-backend/internal/domain/iam"
+	"github.com/subscribeddotdev/subscribed/server/internal/domain"
+	"github.com/subscribeddotdev/subscribed/server/internal/domain/iam"
 )
 
 type Signup struct {

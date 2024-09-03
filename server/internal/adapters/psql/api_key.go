@@ -10,8 +10,8 @@ import (
 	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 
-	"github.com/subscribeddotdev/subscribed-backend/internal/adapters/models"
-	"github.com/subscribeddotdev/subscribed-backend/internal/domain"
+	"github.com/subscribeddotdev/subscribed/server/internal/adapters/models"
+	"github.com/subscribeddotdev/subscribed/server/internal/domain"
 )
 
 type ApiKeyRepository struct {

@@ -7,9 +7,9 @@ import (
 	"time"
 
 	"github.com/ThreeDotsLabs/watermill/message"
-	events "github.com/subscribeddotdev/subscribed-backend/events/go"
-	"github.com/subscribeddotdev/subscribed-backend/internal/app/command"
-	"github.com/subscribeddotdev/subscribed-backend/internal/domain"
+	events "github.com/subscribeddotdev/subscribed/server/events/go"
+	"github.com/subscribeddotdev/subscribed/server/internal/app/command"
+	"github.com/subscribeddotdev/subscribed/server/internal/domain"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 

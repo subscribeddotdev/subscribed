@@ -6,7 +6,7 @@ import (
 
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/stretchr/testify/require"
-	"github.com/subscribeddotdev/subscribed-backend/tests/client"
+	"github.com/subscribeddotdev/subscribed/server/tests/client"
 )
 
 func TestSignup(t *testing.T) {

@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/subscribeddotdev/subscribed-backend/internal/domain"
+	"github.com/subscribeddotdev/subscribed/server/internal/domain"
 )
 
 type SendMessage struct {

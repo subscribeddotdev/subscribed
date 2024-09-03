@@ -6,8 +6,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/subscribeddotdev/subscribed-backend/internal/domain"
-	"github.com/subscribeddotdev/subscribed-backend/internal/domain/iam"
+	"github.com/subscribeddotdev/subscribed/server/internal/domain"
+	"github.com/subscribeddotdev/subscribed/server/internal/domain/iam"
 )
 
 func TestNewEnvironment(t *testing.T) {

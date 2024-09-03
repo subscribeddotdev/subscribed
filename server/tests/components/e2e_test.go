@@ -9,7 +9,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 
-	"github.com/subscribeddotdev/subscribed-backend/tests/client"
+	"github.com/subscribeddotdev/subscribed/server/tests/client"
 )
 
 func TestE2E(t *testing.T) {

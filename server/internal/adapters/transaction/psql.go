@@ -4,12 +4,12 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/subscribeddotdev/subscribed-backend/internal/adapters/psql"
+	"github.com/subscribeddotdev/subscribed/server/internal/adapters/psql"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 
-	"github.com/subscribeddotdev/subscribed-backend/internal/adapters/events"
-	"github.com/subscribeddotdev/subscribed-backend/internal/app/command"
-	"github.com/subscribeddotdev/subscribed-backend/internal/common/logs"
+	"github.com/subscribeddotdev/subscribed/server/internal/adapters/events"
+	"github.com/subscribeddotdev/subscribed/server/internal/app/command"
+	"github.com/subscribeddotdev/subscribed/server/internal/common/logs"
 )
 
 type PsqlProvider struct {

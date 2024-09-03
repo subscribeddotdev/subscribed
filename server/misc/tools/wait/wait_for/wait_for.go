@@ -7,8 +7,8 @@ import (
 
 	_ "github.com/lib/pq"
 	"github.com/rabbitmq/amqp091-go"
-	"github.com/subscribeddotdev/subscribed-backend/internal/common/logs"
-	"github.com/subscribeddotdev/subscribed-backend/internal/common/postgres"
+	"github.com/subscribeddotdev/subscribed/server/internal/common/logs"
+	"github.com/subscribeddotdev/subscribed/server/internal/common/postgres"
 )
 
 type WaitFor struct {

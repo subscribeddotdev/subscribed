@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/subscribeddotdev/subscribed-backend/internal/domain"
+	"github.com/subscribeddotdev/subscribed/server/internal/domain"
 	"golang.org/x/crypto/bcrypt"
 )
 

@@ -13,6 +13,7 @@
     "init": "mkdir .openapi",
     "test:unit": "jest",
     "test:unit:ci": "jest --ci",
+    "pree2e": "cd ../server; docker compose up -d",
     "e2e": "playwright test",
     "e2e:codegen": "npx playwright codegen",
     "type-check": "tsc --noEmit",

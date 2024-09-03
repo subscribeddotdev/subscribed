@@ -1,4 +1,4 @@
-name: ci
+name: ci.web
 on:
   push:
     paths:

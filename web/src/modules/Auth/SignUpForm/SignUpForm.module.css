@@ -1,0 +1,7 @@
+.root {
+  width: 100%;
+
+  @media (--tablet-and-up) {
+    width: 400px;
+  }
+}

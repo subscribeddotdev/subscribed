@@ -1,6 +1,9 @@
 name: ci
 on:
   push:
+    paths:
+      - 'web/**'
+      - '.github/workflows/*.web.yml'
 
 # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#concurrency
 concurrency:
@@ -11,6 +14,11 @@ jobs:
   tests:
     name: tests
     runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: web
+
     env:
       NEXT_TELEMETRY_DISABLED: 1
     steps:
@@ -22,6 +30,8 @@ jobs:
         with:
           node-version: 20
           cache: "npm"
+          # https://github.com/actions/setup-node#caching-global-packages-data
+          cache-dependency-path: "web/package-lock.json"
 
       - name: Install dependencies
         run: npm ci
@@ -56,9 +66,13 @@ jobs:
 
       - name: Test
         run: npm run test:unit
+
   e2e_tests:
     timeout-minutes: 10
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
     container:
       image: mcr.microsoft.com/playwright:v1.46.1-jammy
     steps:
@@ -70,6 +84,8 @@ jobs:
         with:
           node-version: 20
           cache: "npm"
+
+          cache-dependency-path: "web/package-lock.json"
 
       - name: Setup Java
         uses: actions/setup-java@v4

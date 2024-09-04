@@ -148,7 +148,7 @@ jobs:
         with:
           url: "http://localhost:8080/health"
           responseCode: "200,500"
-          timeout: 5000
+          timeout: 15000
           interval: 250
 
       - name: Run tests

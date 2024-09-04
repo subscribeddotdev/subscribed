@@ -149,7 +149,7 @@ jobs:
           url: http://localhost:8080/health
           method: GET
           expected-status: 200
-          timeout: 15000
+          timeout: 30000
           interval: 250
 
       - name: Run tests

@@ -1,12 +1,12 @@
 name: pr.web
+
 on:
   push:
     branches-ignore:
       - main
-    paths-ignore:
-      - "*.md"
     paths:
       - "web/**"
+      - "!web/*.md"
       - ".github/workflows/*.web.yml"
 
 jobs:

@@ -11,59 +11,59 @@ concurrency:
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
-  # tests:
-  #   name: tests
-  #   runs-on: ubuntu-latest
+  tests:
+    name: tests
+    runs-on: ubuntu-latest
 
-  #   defaults:
-  #     run:
-  #       working-directory: web
+    defaults:
+      run:
+        working-directory: web
 
-  #   env:
-  #     NEXT_TELEMETRY_DISABLED: 1
-  #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@v4
+    env:
+      NEXT_TELEMETRY_DISABLED: 1
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-  #     - name: Setup Node
-  #       uses: actions/setup-node@v4
-  #       with:
-  #         node-version: 20
-  #         cache: "npm"
-  #         # https://github.com/actions/setup-node#caching-global-packages-data
-  #         cache-dependency-path: "web/package-lock.json"
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+          # https://github.com/actions/setup-node#caching-global-packages-data
+          cache-dependency-path: "web/package-lock.json"
 
-  #     - name: Install dependencies
-  #       run: npm ci
+      - name: Install dependencies
+        run: npm ci
 
-  #       # As described on https://nextjs.org/docs/pages/building-your-application/deploying/ci-build-caching#github-actions
-  #     - name: Cache
-  #       uses: actions/cache@v4
-  #       with:
-  #         path: |
-  #           ~/.npm
-  #           ${{ github.workspace }}/.next/cache
-  #         key: ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-${{ hashFiles('**/*.js', '**/*.jsx', '**/*.ts', '**/*.tsx') }}
-  #         restore-keys: |
-  #           ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-
+        # As described on https://nextjs.org/docs/pages/building-your-application/deploying/ci-build-caching#github-actions
+      - name: Cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.npm
+            ${{ github.workspace }}/.next/cache
+          key: ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-${{ hashFiles('**/*.js', '**/*.jsx', '**/*.ts', '**/*.tsx') }}
+          restore-keys: |
+            ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-
 
-  #     - name: Generate API Client from OpenAPI
-  #       run: npm run openapi
+      - name: Generate API Client from OpenAPI
+        run: npm run openapi
 
-  #     - name: Type check
-  #       run: npm run type-check
+      - name: Type check
+        run: npm run type-check
 
-  #     - name: Lint
-  #       run: npm run lint
+      - name: Lint
+        run: npm run lint
 
-  #     - name: Lint (css)
-  #       run: npm run lint:css
+      - name: Lint (css)
+        run: npm run lint:css
 
-  #     - name: Check code formatting
-  #       run: npm run fmt
+      - name: Check code formatting
+        run: npm run fmt
 
-  #     - name: Test
-  #       run: npm run test:unit
+      - name: Test
+        run: npm run test:unit
 
   e2e_tests:
     timeout-minutes: 10
@@ -71,8 +71,6 @@ jobs:
     defaults:
       run:
         working-directory: web
-    # container:
-    #   image: mcr.microsoft.com/playwright:v1.46.1-jammy
     env:
       CI: true
     steps:
@@ -124,14 +122,6 @@ jobs:
         with:
           path: "~/.cache/ms-playwright"
           key: "${{ runner.os }}-playwright-${{ steps.playwright-version.outputs.version }}"
-          # As a fallback, if the Playwright version has changed, try use the
-          # most recently cached version. There's a good chance that at least one
-          # of the browser binary versions haven't been updated, so Playwright can
-          # skip installing that in the next step.
-          # Note: When falling back to an old cache, `cache-hit` (used below)
-          # will be `false`. This allows us to restore the potentially out of
-          # date cache, but still let Playwright decide if it needs to download
-          # new binaries or not.
           restore-keys: |
             ${{ runner.os }}-playwright-
 

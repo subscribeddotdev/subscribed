@@ -144,11 +144,12 @@ jobs:
       - name: Run server
         run: npm run e2e:server
 
-      - uses: cygnetdigital/wait_for_response@v2.0.0
+      - uses: emilioschepis/wait-for-endpoint@v1.0.3
         with:
-          url: "http://localhost:8080/health"
-          responseCode: "200,500"
-          timeout: 30000
+          url: http://localhost:8080/health
+          method: GET
+          expected-status: 200
+          timeout: 15000
           interval: 250
 
       - name: Run tests

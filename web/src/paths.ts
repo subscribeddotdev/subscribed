@@ -10,6 +10,7 @@ export function usePaths() {
   const router = useRouter();
   const env = router.query.environment as string;
   const paths = getPaths(env);
+
   return {
     urls: paths,
     helpers: {

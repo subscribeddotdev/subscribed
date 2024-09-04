@@ -162,5 +162,5 @@ jobs:
           path: web/playwright-report/
           retention-days: 15
 
-      - run: docker-compose logs || true
+      - run: docker compose logs || true
         if: always()

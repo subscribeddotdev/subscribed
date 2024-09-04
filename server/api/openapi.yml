@@ -221,7 +221,11 @@ paths:
               $ref: '#/components/schemas/CreateEventTypeRequest'
       responses:
         '201':
-          description: CREATED
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateEventTypePayload'
         default:
           $ref: '#/components/responses/DefaultError'
   /signup:
@@ -408,6 +412,11 @@ components:
         schema:
           type: string
         schema_example:
+          type: string
+    CreateEventTypePayload:
+      required: [ id ]
+      properties:
+        id:
           type: string
     # API Keys
     CreateApiKeyRequest:

@@ -25,11 +25,11 @@ func NewCreateEventTypeHandler(repo domain.EventTypeRepository) CreateEventTypeH
 	}
 }
 
-func (c CreateEventTypeHandler) Execute(ctx context.Context, cmd CreateEventType) error {
+func (c CreateEventTypeHandler) Execute(ctx context.Context, cmd CreateEventType) (domain.EventTypeID, error) {
 	eventType, err := domain.NewEventType(cmd.OrgID.String(), cmd.Name, cmd.Description, cmd.Schema, cmd.SchemaExample)
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	return c.repo.Insert(ctx, eventType)
+	return eventType.ID(), c.repo.Insert(ctx, eventType)
 }

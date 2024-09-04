@@ -36,7 +36,7 @@ type Command struct {
 	SignIn CommandHandlerWithResult[command.SignIn, *iam.Member]
 
 	// Event types
-	CreateEventType CommandHandler[command.CreateEventType]
+	CreateEventType CommandHandlerWithResult[command.CreateEventType, domain.EventTypeID]
 
 	// Api keys
 	CreateApiKey  CommandHandlerWithResult[command.CreateApiKey, *domain.ApiKey]

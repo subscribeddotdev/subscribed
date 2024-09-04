@@ -144,9 +144,12 @@ jobs:
       - name: Run server
         run: npm run e2e:server
 
-      - name: Wait for server
-        run: npm run e2e:wait-server
-        timeout-minutes: 1
+      - uses: cygnetdigital/wait_for_response@v2.0.0
+        with:
+          url: "http://localhost:8080/health"
+          responseCode: "200,500"
+          timeout: 5000
+          interval: 250
 
       - name: Run tests
         run: npm run e2e

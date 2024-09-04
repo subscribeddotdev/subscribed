@@ -2,8 +2,8 @@ name: pr.server
 on:
   push:
     paths:
-      - 'server/**'
-      - '.github/workflows/*.server.yml'
+      - "server/**"
+      - ".github/workflows/*.server.yml"
     branches-ignore:
       - main
 

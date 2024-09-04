@@ -1,0 +1,15 @@
+name: main.web
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "web/**"
+      - ".github/workflows/*.web.yml"
+
+jobs:
+  ci:
+    uses: ./.github/workflows/ci.web.yml
+
+  e2e:
+    uses: ./.github/workflows/e2e.web.yml

@@ -1,0 +1,12 @@
+name: pr.web
+on:
+  push:
+    branches-ignore:
+      - main
+    paths:
+      - "web/**"
+      - ".github/workflows/*.web.yml"
+
+jobs:
+  ci:
+    uses: ./.github/workflows/ci.web.yml

@@ -1,7 +1,9 @@
-# `subscribed (webapp)`
+# Getting started
 
-The frontend of [subscribed.dev](https://subscribed.dev)
+## Running e2e tests locally
 
-[![ci](https://github.com/subscribeddotdev/subscribed-webapp/actions/workflows/ci.yml/badge.svg)](https://github.com/subscribeddotdev/subscribed-webapp/actions/workflows/ci.yml)
+The E2E tests on the web project rely on the actual Subscribed server and its dependency to be up and running - the less the mocking the better - and to achieve that, we leverage the npm script `npm run e2e:server` defined in `package.json` that boots up server.
 
-![sbs](./sbs.gif)
+- Running E2E tests in Headless mode: `npm run e2e`
+- Running E2E tests in Headed mode: `npm run e2e -- --headed`
+- Running a specific E2E test: `npm run e2e -- ./path/to/test/testFile.spec.ts`

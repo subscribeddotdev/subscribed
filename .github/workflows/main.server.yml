@@ -1,25 +1,14 @@
 name: main.server
+
 on:
   push:
     paths:
-      - 'server/**'
-      - '.github/workflows/*.server.yml'
+      - "server/**"
+      - "!server/*.md"
+      - ".github/workflows/*.server.yml"
     branches:
       - main
 
 jobs:
   ci:
     uses: ./.github/workflows/ci.server.yml
-
-#   tag:
-#     uses: ./.github/workflows/tag.yml
-#     needs: ci
-#     permissions:
-#       id-token: write
-#       contents: read
-#     secrets:
-#       PAT: ${{ secrets.PAT }}
-#       AWS_ECR_ROLE: ${{ secrets.AWS_ECR_ROLE }}
-#       AWS_REGION: ${{ secrets.AWS_REGION }}
-#       AWS_ECR_REGISTRY: ${{ secrets.AWS_ECR_REGISTRY }}
-#       AWS_ECR_REPOSITORY: ${{ secrets.AWS_ECR_REPOSITORY }}

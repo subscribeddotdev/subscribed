@@ -1,0 +1,14 @@
+# Ran only when a pull request against main is opened
+name: pr.e2e.web
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "web/**"
+      - "!web/*.md"
+      - ".github/workflows/*.web.yml"
+
+jobs:
+  ci:
+    uses: ./.github/workflows/e2e.web.yml

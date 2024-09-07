@@ -54,11 +54,7 @@ paths:
       operationId: getApplications
       summary: Returns a list of applications based on the org_id and environment_id
       parameters:
-        - name: environment_id
-          in: query
-          required: true
-          schema:
-            type: string
+        - $ref: '#/components/parameters/environmentId'
         - $ref: '#/components/parameters/paginationParamLimit'
         - $ref: '#/components/parameters/paginationParamPage'
       security:
@@ -224,6 +220,27 @@ paths:
           description: CREATED
         default:
           $ref: '#/components/responses/DefaultError'
+    get:
+      tags:
+        - EventTypes
+      operationId: getEventTypes
+      summary: Get event types by org_id and environment_id
+      security:
+        - BearerAuth: [ ]
+        - ApiKeyAuth: [ ]
+      parameters:
+        - $ref: '#/components/parameters/environmentId'
+        - $ref: '#/components/parameters/paginationParamLimit'
+        - $ref: '#/components/parameters/paginationParamPage'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetEventTypesPayload'
+        default:
+          $ref: '#/components/responses/DefaultError'
   /signup:
     post:
       tags:
@@ -288,6 +305,12 @@ components:
         required: true
         schema:
           type: string
+    environmentId:
+      name: environmentID
+      in: query
+      required: true
+      schema:
+        type: string
     paginationParamLimit:
       name: limit
       description: The number of items per page
@@ -409,6 +432,34 @@ components:
           type: string
         schema_example:
           type: string
+    EventType:
+      required: [id, name, description, schema, schema_example, created_at]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        schema:
+          type: string
+        schema_example:
+          type: string
+        archived_at:
+          type: string
+          format: date-time
+    GetEventTypesPayload:
+      required: [ pagination, data ]
+      properties:
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/EventType'
     # API Keys
     CreateApiKeyRequest:
       required: [name, environment_id]

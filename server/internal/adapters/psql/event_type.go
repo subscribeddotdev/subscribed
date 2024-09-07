@@ -5,7 +5,9 @@ import (
 	"fmt"
 
 	"github.com/subscribeddotdev/subscribed/server/internal/adapters/models"
+	"github.com/subscribeddotdev/subscribed/server/internal/app/query"
 	"github.com/subscribeddotdev/subscribed/server/internal/domain"
+	"github.com/subscribeddotdev/subscribed/server/internal/domain/iam"
 	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 )
@@ -38,4 +40,13 @@ func (e EventTypeRepository) Insert(ctx context.Context, eventType *domain.Event
 	}
 
 	return nil
+}
+
+func (e EventTypeRepository) FindAll(
+	ctx context.Context,
+	envID domain.EnvironmentID,
+	orgID iam.OrgID,
+	pagination query.PaginationParams,
+) (query.Paginated[[]domain.EventType], error) {
+	return query.Paginated[[]domain.EventType]{}, nil
 }

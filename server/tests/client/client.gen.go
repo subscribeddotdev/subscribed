@@ -110,6 +110,17 @@ type ErrorResponse struct {
 	Message string `json:"message"`
 }
 
+// EventType defines model for EventType.
+type EventType struct {
+	ArchivedAt    *time.Time `json:"archived_at,omitempty"`
+	CreatedAt     time.Time  `json:"created_at"`
+	Description   string     `json:"description"`
+	Id            string     `json:"id"`
+	Name          string     `json:"name"`
+	Schema        string     `json:"schema"`
+	SchemaExample string     `json:"schema_example"`
+}
+
 // GetAllApiKeysPayload defines model for GetAllApiKeysPayload.
 type GetAllApiKeysPayload struct {
 	Data []ApiKey `json:"data"`
@@ -129,6 +140,12 @@ type GetApplicationByIdPayload struct {
 type GetApplicationsPayload struct {
 	Data       []Application `json:"data"`
 	Pagination Pagination    `json:"pagination"`
+}
+
+// GetEventTypesPayload defines model for GetEventTypesPayload.
+type GetEventTypesPayload struct {
+	Data       []EventType `json:"data"`
+	Pagination Pagination  `json:"pagination"`
 }
 
 // Pagination defines model for Pagination.
@@ -171,6 +188,9 @@ type SignupRequest struct {
 // ApplicationId defines model for applicationId.
 type ApplicationId = string
 
+// EnvironmentId defines model for environmentId.
+type EnvironmentId = string
+
 // PaginationParamLimit defines model for paginationParamLimit.
 type PaginationParamLimit = int
 
@@ -190,7 +210,18 @@ type GetAllApiKeysParams struct {
 
 // GetApplicationsParams defines parameters for GetApplications.
 type GetApplicationsParams struct {
-	EnvironmentId string `form:"environment_id" json:"environment_id"`
+	EnvironmentID EnvironmentId `form:"environmentID" json:"environmentID"`
+
+	// Limit The number of items per page
+	Limit *PaginationParamLimit `form:"limit,omitempty" json:"limit,omitempty"`
+
+	// Page The page number
+	Page *PaginationParamPage `form:"page,omitempty" json:"page,omitempty"`
+}
+
+// GetEventTypesParams defines parameters for GetEventTypes.
+type GetEventTypesParams struct {
+	EnvironmentID EnvironmentId `form:"environmentID" json:"environmentID"`
 
 	// Limit The number of items per page
 	Limit *PaginationParamLimit `form:"limit,omitempty" json:"limit,omitempty"`
@@ -327,6 +358,9 @@ type ClientInterface interface {
 
 	// GetEnvironments request
 	GetEnvironments(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetEventTypes request
+	GetEventTypes(ctx context.Context, params *GetEventTypesParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// CreateEventTypeWithBody request with any body
 	CreateEventTypeWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -493,6 +527,18 @@ func (c *Client) SendMessage(ctx context.Context, applicationID ApplicationId, b
 
 func (c *Client) GetEnvironments(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetEnvironmentsRequest(c.Server)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetEventTypes(ctx context.Context, params *GetEventTypesParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetEventTypesRequest(c.Server, params)
 	if err != nil {
 		return nil, err
 	}
@@ -728,7 +774,7 @@ func NewGetApplicationsRequest(server string, params *GetApplicationsParams) (*h
 	if params != nil {
 		queryValues := queryURL.Query()
 
-		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "environment_id", runtime.ParamLocationQuery, params.EnvironmentId); err != nil {
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "environmentID", runtime.ParamLocationQuery, params.EnvironmentID); err != nil {
 			return nil, err
 		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
 			return nil, err
@@ -978,6 +1024,83 @@ func NewGetEnvironmentsRequest(server string) (*http.Request, error) {
 	return req, nil
 }
 
+// NewGetEventTypesRequest generates requests for GetEventTypes
+func NewGetEventTypesRequest(server string, params *GetEventTypesParams) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/event-types")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "environmentID", runtime.ParamLocationQuery, params.EnvironmentID); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+		if params.Limit != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "limit", runtime.ParamLocationQuery, *params.Limit); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.Page != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "page", runtime.ParamLocationQuery, *params.Page); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 // NewCreateEventTypeRequest calls the generic CreateEventType builder with application/json body
 func NewCreateEventTypeRequest(server string, body CreateEventTypeJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
@@ -1203,6 +1326,9 @@ type ClientWithResponsesInterface interface {
 	// GetEnvironmentsWithResponse request
 	GetEnvironmentsWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetEnvironmentsResponse, error)
 
+	// GetEventTypesWithResponse request
+	GetEventTypesWithResponse(ctx context.Context, params *GetEventTypesParams, reqEditors ...RequestEditorFn) (*GetEventTypesResponse, error)
+
 	// CreateEventTypeWithBodyWithResponse request with any body
 	CreateEventTypeWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateEventTypeResponse, error)
 
@@ -1427,6 +1553,29 @@ func (r GetEnvironmentsResponse) StatusCode() int {
 	return 0
 }
 
+type GetEventTypesResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *GetEventTypesPayload
+	JSONDefault  *DefaultError
+}
+
+// Status returns HTTPResponse.Status
+func (r GetEventTypesResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetEventTypesResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
 type CreateEventTypeResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -1627,6 +1776,15 @@ func (c *ClientWithResponses) GetEnvironmentsWithResponse(ctx context.Context, r
 		return nil, err
 	}
 	return ParseGetEnvironmentsResponse(rsp)
+}
+
+// GetEventTypesWithResponse request returning *GetEventTypesResponse
+func (c *ClientWithResponses) GetEventTypesWithResponse(ctx context.Context, params *GetEventTypesParams, reqEditors ...RequestEditorFn) (*GetEventTypesResponse, error) {
+	rsp, err := c.GetEventTypes(ctx, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetEventTypesResponse(rsp)
 }
 
 // CreateEventTypeWithBodyWithResponse request with arbitrary body returning *CreateEventTypeResponse
@@ -1972,6 +2130,39 @@ func ParseGetEnvironmentsResponse(rsp *http.Response) (*GetEnvironmentsResponse,
 	return response, nil
 }
 
+// ParseGetEventTypesResponse parses an HTTP response from a GetEventTypesWithResponse call
+func ParseGetEventTypesResponse(rsp *http.Response) (*GetEventTypesResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetEventTypesResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest GetEventTypesPayload
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest DefaultError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
+}
+
 // ParseCreateEventTypeResponse parses an HTTP response from a CreateEventTypeWithResponse call
 func ParseCreateEventTypeResponse(rsp *http.Response) (*CreateEventTypeResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
@@ -2086,37 +2277,38 @@ func ParseSignUpResponse(rsp *http.Response) (*SignUpResponse, error) {
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
+	"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",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

@@ -18,6 +18,7 @@ var (
 	ctx              context.Context
 	environmentRepo  *psql.EnvironmentRepository
 	applicationRepo  *psql.ApplicationRepository
+	eventTypeRepo    *psql.EventTypeRepository
 	endpointRepo     *psql.EndpointRepository
 	organizationRepo *psql.OrganizationRepository
 	apiKeyRepo       *psql.ApiKeyRepository
@@ -51,6 +52,7 @@ func TestMain(m *testing.M) {
 	organizationRepo = psql.NewOrganizationRepository(db)
 	apiKeyRepo = psql.NewApiKeyRepository(db)
 	msgRepo = psql.NewMessageRepository(db)
+	eventTypeRepo = psql.NewEventTypeRepository(db)
 
 	os.Exit(m.Run())
 }

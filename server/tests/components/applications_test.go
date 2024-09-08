@@ -33,7 +33,7 @@ func TestApplications(t *testing.T) {
 		for i := 0; i < totalPages; i++ {
 			currentPage := i + 1
 			resp, err := apiClient.GetApplicationsWithResponse(ctx, &client.GetApplicationsParams{
-				EnvironmentId: env.ID,
+				EnvironmentID: env.ID,
 				Limit:         &perPage,
 				Page:          &currentPage,
 			})

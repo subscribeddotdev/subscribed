@@ -9,17 +9,11 @@ import (
 
 type AllEventTypes struct {
 	PaginationParams
-	EnvironmentID string
-	OrgID         string
+	OrgID string
 }
 
 type eventTypesFinder interface {
-	FindAll(
-		ctx context.Context,
-		envID domain.EnvironmentID,
-		orgID iam.OrgID,
-		pagination PaginationParams,
-	) (Paginated[[]domain.EventType], error)
+	FindAll(ctx context.Context, orgID iam.OrgID, pagination PaginationParams) (Paginated[[]domain.EventType], error)
 }
 
 type allEventTypesHandler struct {
@@ -33,10 +27,5 @@ func NewAllEventTypesHandler(eventTypesFinder eventTypesFinder) allEventTypesHan
 }
 
 func (h allEventTypesHandler) Execute(ctx context.Context, q AllEventTypes) (Paginated[[]domain.EventType], error) {
-	return h.eventTypesFinder.FindAll(
-		ctx,
-		domain.EnvironmentID(q.EnvironmentID),
-		iam.OrgID(q.OrgID),
-		q.PaginationParams,
-	)
+	return h.eventTypesFinder.FindAll(ctx, iam.OrgID(q.OrgID), q.PaginationParams)
 }

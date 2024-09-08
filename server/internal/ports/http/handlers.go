@@ -324,7 +324,6 @@ func (h handlers) GetEventTypes(c echo.Context, params GetEventTypesParams) erro
 
 	result, err := h.application.Query.AllEventTypes.Execute(c.Request().Context(), query.AllEventTypes{
 		PaginationParams: query.NewPaginationParams(params.Page, params.Limit),
-		EnvironmentID:    params.EnvironmentID,
 		OrgID:            claims.OrganizationID,
 	})
 	if err != nil {

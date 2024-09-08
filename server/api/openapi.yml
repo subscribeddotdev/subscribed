@@ -224,12 +224,11 @@ paths:
       tags:
         - EventTypes
       operationId: getEventTypes
-      summary: Get event types by org_id and environment_id
+      summary: Get event types by org_id
       security:
         - BearerAuth: [ ]
         - ApiKeyAuth: [ ]
       parameters:
-        - $ref: '#/components/parameters/environmentId'
         - $ref: '#/components/parameters/paginationParamLimit'
         - $ref: '#/components/parameters/paginationParamPage'
       responses:

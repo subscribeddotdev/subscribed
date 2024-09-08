@@ -44,7 +44,6 @@ func (e EventTypeRepository) Insert(ctx context.Context, eventType *domain.Event
 
 func (e EventTypeRepository) FindAll(
 	ctx context.Context,
-	envID domain.EnvironmentID,
 	orgID iam.OrgID,
 	pagination query.PaginationParams,
 ) (query.Paginated[[]domain.EventType], error) {

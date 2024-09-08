@@ -34,7 +34,7 @@ func TestApplicationRepository_FindAll(t *testing.T) {
 		result, err := applicationRepo.FindAll(
 			ctx,
 			domain.EnvironmentID(env.ID),
-			iam.OrgID(env.ID),
+			"", //TODO: add me
 			query.NewPaginationParams(tests.ToPtr(30), tests.ToPtr(5)),
 		)
 		require.NoError(t, err)
@@ -49,7 +49,12 @@ func TestApplicationRepository_FindAll(t *testing.T) {
 
 		for i := 0; i < totalPages; i++ {
 			currentPage := i + 1
-			result, err := applicationRepo.FindAll(ctx, domain.EnvironmentID(env.ID), iam.OrgID(env.ID), query.NewPaginationParams(&currentPage, &perPage))
+			result, err := applicationRepo.FindAll(
+				ctx,
+				domain.EnvironmentID(env.ID),
+				"", //TODO: add me
+				query.NewPaginationParams(&currentPage, &perPage),
+			)
 			require.NoError(t, err)
 			require.NotEmpty(t, result.Data)
 			require.Equal(t, perPage, result.PerPage)

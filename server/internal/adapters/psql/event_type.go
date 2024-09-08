@@ -48,24 +48,19 @@ func (e EventTypeRepository) FindAll(
 	orgID iam.OrgID,
 	pagination query.PaginationParams,
 ) (query.Paginated[[]domain.EventType], error) {
-	total, err := models.Applications(
-		//TODO: include orgID in the query
-		models.ApplicationWhere.EnvironmentID.EQ(envID.String()),
-	).Count(ctx, e.db)
+	total, err := models.EventTypes(models.EventTypeWhere.OrgID.EQ(orgID.String())).Count(ctx, e.db)
 	if err != nil {
-		return query.Paginated[[]domain.EventType]{}, fmt.Errorf("error counting applications: %v", err)
+		return query.Paginated[[]domain.EventType]{}, fmt.Errorf("error counting event types: %v", err)
 	}
 
 	rows, err := models.EventTypes(
-		//TODO: include orgID in the query
-		// models.EventTypeWhere.OrgID.EQ(orgID),
-		models.ApplicationWhere.EnvironmentID.EQ(envID.String()),
+		models.EventTypeWhere.OrgID.EQ(orgID.String()),
 		qm.Offset(mapPaginationParamsToSqlOffset(pagination)),
 		qm.Limit(pagination.Limit()),
 		qm.OrderBy("created_at DESC"),
 	).All(ctx, e.db)
 	if err != nil {
-		return query.Paginated[[]domain.EventType]{}, fmt.Errorf("error querying applications: %v", err)
+		return query.Paginated[[]domain.EventType]{}, fmt.Errorf("error querying event types: %v", err)
 	}
 
 	return query.Paginated[[]domain.EventType]{
@@ -75,10 +70,24 @@ func (e EventTypeRepository) FindAll(
 		TotalPages:  getPaginationTotalPages(total, pagination.Limit()),
 		Data:        mapRowsToEventTypes(rows),
 	}, nil
-
-	return query.Paginated[[]domain.EventType]{}, nil
 }
 
 func mapRowsToEventTypes(rows []*models.EventType) []domain.EventType {
-	return nil
+	eventTypes := make([]domain.EventType, len(rows))
+	for i, row := range rows {
+		eventType := domain.UnMarshallEventType(
+			domain.EventTypeID(row.ID),
+			row.OrgID,
+			row.Name,
+			row.Description.String,
+			row.Schema.String,
+			row.SchemaExample.String,
+			row.CreatedAt,
+			row.ArchivedAt.Ptr(),
+		)
+
+		eventTypes[i] = *eventType
+	}
+
+	return eventTypes
 }

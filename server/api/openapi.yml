@@ -318,6 +318,7 @@ components:
       schema:
         type: integer
         minimum: 1
+        maximum: 15
     paginationParamPage:
       name: page
       description: The page number
@@ -326,7 +327,6 @@ components:
       schema:
         type: integer
         minimum: 1
-        maximum: 15
   schemas:
     # Auth
     SignupRequest:

@@ -29,7 +29,7 @@ export function ListApplications({ data: initialData, pagination: initialPaginat
         const resp = await apiClients().Applications.getApplications(
           router.query.environment as string,
           undefined,
-          page
+          page,
         );
         setData(resp.data.data);
         setPagination(resp.data.pagination);
@@ -39,7 +39,7 @@ export function ListApplications({ data: initialData, pagination: initialPaginat
         setLoading(false);
       }
     },
-    [router]
+    [router],
   );
 
   const paths = usePaths();

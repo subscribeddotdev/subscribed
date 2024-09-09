@@ -1,9 +1,8 @@
 import { Alert } from "@@/common/components/Alert/Alert";
 import { TablePaginationControl } from "@@/common/components/TablePaginationControl/TablePaginationControl";
-import { apiClients } from "@@/common/libs/backendapi/browser";
+import { apiClients, getApiError } from "@@/common/libs/backendapi/browser";
 import { Application, Pagination } from "@@/common/libs/backendapi/client";
 import { dates } from "@@/common/libs/dates";
-import { logger } from "@@/common/libs/logger";
 import { usePaths } from "@@/paths";
 import { Badge, Box, Table } from "@radix-ui/themes";
 import Link from "next/link";
@@ -21,25 +20,27 @@ export function ListApplications({ data: initialData, pagination: initialPaginat
   const [data, setData] = useState(initialData);
   const [pagination, setPagination] = useState(initialPagination);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const paginationHandler = useCallback(
     async (page: number) => {
       setLoading(true);
+      setError("");
       try {
         const resp = await apiClients().Applications.getApplications(
           router.query.environment as string,
           undefined,
-          page,
+          page
         );
         setData(resp.data.data);
         setPagination(resp.data.pagination);
-      } catch (error) {
-        logger.error(error);
+      } catch (err) {
+        setError(getApiError(err));
       } finally {
         setLoading(false);
       }
     },
-    [router],
+    [router]
   );
 
   const paths = usePaths();
@@ -49,6 +50,12 @@ export function ListApplications({ data: initialData, pagination: initialPaginat
 
   return (
     <Box>
+      {error && (
+        <Alert mb="4" color="red">
+          {error}
+        </Alert>
+      )}
+
       <Table.Root>
         <Table.Header>
           <Table.Row>

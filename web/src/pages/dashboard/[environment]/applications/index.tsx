@@ -13,7 +13,7 @@ interface Props {
   applications: Application[];
 }
 
-export default function ApplicationsPage({ applications }: Props) {
+export default function ApplicationsPage({ applications, pagination }: Props) {
   return (
     <LayoutDashboard>
       <PageMeta title="Applications" />
@@ -23,7 +23,7 @@ export default function ApplicationsPage({ applications }: Props) {
         <CreateApplication />
       </Flex>
 
-      <ListApplications data={applications} />
+      <ListApplications data={applications} pagination={pagination} />
     </LayoutDashboard>
   );
 }

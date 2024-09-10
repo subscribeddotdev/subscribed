@@ -1,7 +1,7 @@
 import { config } from "@@/config";
 import { retrieveTokenFromTheClient } from "@@/modules/Auth/token";
 import { AxiosError } from "axios";
-import { ApiKeysApi, ApplicationsApi, AuthApi, EnvironmentsApi, ErrorResponse } from "./client/api";
+import { ApiKeysApi, ApplicationsApi, AuthApi, EnvironmentsApi, ErrorResponse, EventTypesApi } from "./client/api";
 import { Configuration } from "./client/configuration";
 
 export type ApiErrorResponse = AxiosError<ErrorResponse>;
@@ -12,6 +12,7 @@ export function createApiClients(token: string | null) {
   return {
     Applications: new ApplicationsApi(baseConfig),
     Environments: new EnvironmentsApi(baseConfig),
+    EventTypes: new EventTypesApi(baseConfig),
     ApiKeys: new ApiKeysApi(baseConfig),
     Auth: new AuthApi(baseConfig),
   };

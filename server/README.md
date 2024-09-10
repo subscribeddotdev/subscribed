@@ -7,10 +7,11 @@
 
 ## Setup
 
-1. Clone the repository `git clone git@github.com:subscribeddotdev/subscribed-backend.git`
-2. Build the container with all the CLI tools that this repo depends on: `task setup`
-3. Run the project: `task run`
-4. View logs: `task logs`
+1. Clone the repository `git clone git@github.com:subscribeddotdev/subscribed.git`
+2. Navigate to the server folder: `cd subscribed/server`
+3. Build the container with all the CLI tools that this repo depends on: `task setup`
+4. Run the project: `task run`
+5. View logs: `task logs`
 
 ## Running tests:
 

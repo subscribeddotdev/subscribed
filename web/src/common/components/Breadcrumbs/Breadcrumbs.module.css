@@ -1,0 +1,16 @@
+.breadcrumb {
+  display: flex;
+  gap: var(--space-1);
+  margin-bottom: var(--space-4);
+}
+
+.breadcrumbItem {
+  display: flex;
+  align-items: center;
+  list-style: none;
+  text-transform: capitalize;
+}
+
+.breadcrumbIcon {
+  margin-left: var(--space-1);
+}

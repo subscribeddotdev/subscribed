@@ -44,7 +44,7 @@ export function SignInForm({}: Props) {
       <Heading mb="4">Sign in</Heading>
 
       {showAccountCreatedSuccessMsg && (
-        <Alert mb="4" color="green">
+        <Alert data-testid="SignInForm_Alert_AccountCreated" mb="4" color="green">
           You account has been created successfully.
         </Alert>
       )}

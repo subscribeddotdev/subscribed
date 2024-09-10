@@ -269,7 +269,7 @@ func (h handlers) GetApplications(c echo.Context, params GetApplicationsParams) 
 
 	result, err := h.application.Query.AllApplications.Execute(c.Request().Context(), query.AllApplications{
 		PaginationParams: query.NewPaginationParams(params.Page, params.Limit),
-		EnvironmentID:    params.EnvironmentId,
+		EnvironmentID:    params.EnvironmentID,
 		OrgID:            claims.OrganizationID,
 	})
 	if err != nil {
@@ -304,7 +304,7 @@ func (h handlers) GetApplicationById(c echo.Context, applicationID ApplicationId
 		OrgID:         claims.OrganizationID,
 	})
 	if errors.Is(err, domain.ErrAppNotFound) {
-		return NewHandlerErrorWithStatus(err, "error-retrieving-application", http.StatusNotFound)
+		return NewHandlerErrorWithStatus(err, "error-application-not-found", http.StatusNotFound)
 	}
 
 	if err != nil {
@@ -317,6 +317,40 @@ func (h handlers) GetApplicationById(c echo.Context, applicationID ApplicationId
 		EnvironmentId: app.EnvID().String(),
 		CreatedAt:     app.CreatedAt(),
 	}})
+}
+
+func (h handlers) GetEventTypes(c echo.Context, params GetEventTypesParams) error {
+	claims, err := h.resolveJwtClaimsFromCtx(c)
+	if err != nil {
+		return err
+	}
+
+	result, err := h.application.Query.AllEventTypes.Execute(c.Request().Context(), query.AllEventTypes{
+		PaginationParams: query.NewPaginationParams(params.Page, params.Limit),
+		OrgID:            claims.OrganizationID,
+	})
+	if err != nil {
+		return NewHandlerError(err, "error-retrieving-event-types")
+	}
+
+	data := make([]EventType, len(result.Data))
+
+	for i, et := range result.Data {
+		data[i] = EventType{
+			Id:            et.ID().String(),
+			Name:          et.Name(),
+			Description:   et.Description(),
+			Schema:        et.Schema(),
+			SchemaExample: et.SchemaExample(),
+			CreatedAt:     et.CreatedAt(),
+			ArchivedAt:    et.ArchivedAt(),
+		}
+	}
+
+	return c.JSON(http.StatusOK, GetEventTypesPayload{
+		Data:       data,
+		Pagination: mapToPaginationResponse(result),
+	})
 }
 
 func (h handlers) resolveJwtClaimsFromCtx(c echo.Context) (*jwtCustomClaims, error) {

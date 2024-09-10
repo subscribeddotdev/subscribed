@@ -1,51 +1,42 @@
 import { Alert } from "@@/common/components/Alert/Alert";
 import { TablePaginationControl } from "@@/common/components/TablePaginationControl/TablePaginationControl";
 import { apiClients, getApiError } from "@@/common/libs/backendapi/browser";
-import { Application, Pagination } from "@@/common/libs/backendapi/client";
+import { EventType, Pagination } from "@@/common/libs/backendapi/client";
 import { dates } from "@@/common/libs/dates";
 import { usePaths } from "@@/paths";
-import { Badge, Box, Table } from "@radix-ui/themes";
+import { Box, Table } from "@radix-ui/themes";
 import Link from "next/link";
-import { useRouter } from "next/router";
 import { useCallback, useState } from "react";
-import styles from "./ListApplications.module.css";
+import styles from "./ListEventTypes.module.css";
 
 interface Props {
-  data: Application[];
+  data: EventType[];
   pagination: Pagination;
 }
 
-export function ListApplications({ data: initialData, pagination: initialPagination }: Props) {
-  const router = useRouter();
+export function ListEventTypes({ data: initialData, pagination: initialPagination }: Props) {
   const [data, setData] = useState(initialData);
   const [pagination, setPagination] = useState(initialPagination);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const paginationHandler = useCallback(
-    async (page: number) => {
-      setLoading(true);
-      setError("");
-      try {
-        const resp = await apiClients().Applications.getApplications(
-          router.query.environment as string,
-          undefined,
-          page,
-        );
-        setData(resp.data.data);
-        setPagination(resp.data.pagination);
-      } catch (err) {
-        setError(getApiError(err));
-      } finally {
-        setLoading(false);
-      }
-    },
-    [router],
-  );
+  const paginationHandler = useCallback(async (page: number) => {
+    setLoading(true);
+    setError("");
+    try {
+      const resp = await apiClients().EventTypes.getEventTypes(undefined, page);
+      setData(resp.data.data);
+      setPagination(resp.data.pagination);
+    } catch (err) {
+      setError(getApiError(err));
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   const paths = usePaths();
   if (data.length === 0) {
-    return <Alert>No applications have been created for this environment.</Alert>;
+    return <Alert>No event types have been created yet.</Alert>;
   }
 
   return (
@@ -60,23 +51,26 @@ export function ListApplications({ data: initialData, pagination: initialPaginat
         <Table.Header>
           <Table.Row>
             <Table.ColumnHeaderCell>Name</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>ID</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell>Description</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>Created at</Table.ColumnHeaderCell>
           </Table.Row>
         </Table.Header>
 
         <Table.Body>
-          {data.map((app) => (
-            <Table.Row key={app.id}>
+          {data.map((eventType) => (
+            <Table.Row key={eventType.id}>
               <Table.RowHeaderCell>
-                <Link className={styles.link} href={paths.helpers.toApplication(app.id)}>
-                  {app.name}
+                <Link className={styles.link} href={paths.helpers.toEventType(eventType.id)}>
+                  {eventType.name}
                 </Link>
               </Table.RowHeaderCell>
               <Table.RowHeaderCell>
-                <Badge color="gray">{app.id}</Badge>
+                {eventType.description.length}
+                {eventType.description.length > 70
+                  ? `${eventType.description.substring(0, 67).trimEnd()}...`
+                  : eventType.description}
               </Table.RowHeaderCell>
-              <Table.Cell>{dates(app.created_at).format("LL")}</Table.Cell>
+              <Table.Cell>{dates(eventType.created_at).format("LL")}</Table.Cell>
             </Table.Row>
           ))}
         </Table.Body>

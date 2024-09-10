@@ -3,7 +3,9 @@ package fixture
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"os"
+	"strings"
 	"testing"
 	"time"
 
@@ -92,8 +94,9 @@ func (f *Factory) NewEventType() *EventType {
 	return &EventType{
 		factory: f,
 		model: models.EventType{
-			ID:   domain.NewEventTypeID().String(),
-			Name: gofakeit.Verb(),
+			ID:          domain.NewEventTypeID().String(),
+			Name:        strings.ToLower(fmt.Sprintf("%s.%s.%s", gofakeit.Verb(), gofakeit.Verb(), gofakeit.Verb())),
+			Description: null.StringFrom(gofakeit.SentenceSimple()),
 		},
 	}
 }

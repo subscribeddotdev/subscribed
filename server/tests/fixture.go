@@ -23,7 +23,7 @@ func FixturePassword(t *testing.T) iam.Password {
 }
 
 func MustID(t *testing.T, id string) domain.ID {
-	ID, err := domain.NewIdFromString(id)
+	ID, err := domain.NewIDFromString(id)
 	require.NoError(t, err)
 	return ID
 }

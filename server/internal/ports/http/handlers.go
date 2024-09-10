@@ -37,7 +37,7 @@ func (h handlers) AddEndpoint(c echo.Context, applicationID string) error {
 
 	if body.EventTypeIds != nil {
 		for _, eventTypeID := range *body.EventTypeIds {
-			eID, err := domain.NewIdFromString(eventTypeID)
+			eID, err := domain.NewIDFromString(eventTypeID)
 			if err != nil {
 				return NewHandlerErrorWithStatus(err, "error-mapping-event-type-id", http.StatusBadRequest)
 			}

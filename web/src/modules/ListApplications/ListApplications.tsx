@@ -30,7 +30,7 @@ export function ListApplications({ data: initialData, pagination: initialPaginat
         const resp = await apiClients().Applications.getApplications(
           router.query.environment as string,
           undefined,
-          page,
+          page
         );
         setData(resp.data.data);
         setPagination(resp.data.pagination);
@@ -40,7 +40,7 @@ export function ListApplications({ data: initialData, pagination: initialPaginat
         setLoading(false);
       }
     },
-    [router],
+    [router]
   );
 
   const paths = usePaths();
@@ -61,7 +61,7 @@ export function ListApplications({ data: initialData, pagination: initialPaginat
           <Table.Row>
             <Table.ColumnHeaderCell>Name</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>ID</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>Created at</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell>Created on</Table.ColumnHeaderCell>
           </Table.Row>
         </Table.Header>
 

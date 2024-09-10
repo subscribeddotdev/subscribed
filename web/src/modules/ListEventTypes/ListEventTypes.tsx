@@ -52,7 +52,7 @@ export function ListEventTypes({ data: initialData, pagination: initialPaginatio
           <Table.Row>
             <Table.ColumnHeaderCell>Name</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>Description</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>Created at</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell>Created on</Table.ColumnHeaderCell>
           </Table.Row>
         </Table.Header>
 

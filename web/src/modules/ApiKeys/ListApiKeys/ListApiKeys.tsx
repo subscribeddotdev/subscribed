@@ -27,7 +27,7 @@ export function ListApiKeys({ apiKeys }: Props) {
         setError(getApiError(err));
       }
     },
-    [dispatch],
+    [dispatch]
   );
 
   if (apiKeys.length === 0) {
@@ -46,8 +46,8 @@ export function ListApiKeys({ apiKeys }: Props) {
           <Table.Row>
             <Table.ColumnHeaderCell>Name</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>Key</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>Created</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>Expires</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell>Created on</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell>Expires on</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell></Table.ColumnHeaderCell>
           </Table.Row>
         </Table.Header>

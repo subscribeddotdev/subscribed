@@ -240,6 +240,30 @@ paths:
                 $ref: '#/components/schemas/GetEventTypesPayload'
         default:
           $ref: '#/components/responses/DefaultError'
+  /event-types/{eventTypeID}:
+    get:
+      tags:
+        - EventTypes
+      operationId: getEventTypeById
+      summary: Get event type by id and org_id
+      parameters:
+        - name: eventTypeID
+          in: path
+          required: true
+          schema:
+            type: string
+      security:
+        - BearerAuth: [ ]
+        - ApiKeyAuth: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetEventTypeByIdPayload'
+        default:
+          $ref: '#/components/responses/DefaultError'
   /signup:
     post:
       tags:
@@ -459,6 +483,11 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/EventType'
+    GetEventTypeByIdPayload:
+      required: [ data ]
+      properties:
+        data:
+          $ref: '#/components/schemas/EventType'
     # API Keys
     CreateApiKeyRequest:
       required: [name, environment_id]

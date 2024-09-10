@@ -142,6 +142,11 @@ type GetApplicationsPayload struct {
 	Pagination Pagination    `json:"pagination"`
 }
 
+// GetEventTypeByIdPayload defines model for GetEventTypeByIdPayload.
+type GetEventTypeByIdPayload struct {
+	Data EventType `json:"data"`
+}
+
 // GetEventTypesPayload defines model for GetEventTypesPayload.
 type GetEventTypesPayload struct {
 	Data       []EventType `json:"data"`
@@ -365,6 +370,9 @@ type ClientInterface interface {
 
 	CreateEventType(ctx context.Context, body CreateEventTypeJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// GetEventTypeById request
+	GetEventTypeById(ctx context.Context, eventTypeID string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// HealthCheck request
 	HealthCheck(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -561,6 +569,18 @@ func (c *Client) CreateEventTypeWithBody(ctx context.Context, contentType string
 
 func (c *Client) CreateEventType(ctx context.Context, body CreateEventTypeJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewCreateEventTypeRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetEventTypeById(ctx context.Context, eventTypeID string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetEventTypeByIdRequest(c.Server, eventTypeID)
 	if err != nil {
 		return nil, err
 	}
@@ -1127,6 +1147,40 @@ func NewCreateEventTypeRequestWithBody(server string, contentType string, body i
 	return req, nil
 }
 
+// NewGetEventTypeByIdRequest generates requests for GetEventTypeById
+func NewGetEventTypeByIdRequest(server string, eventTypeID string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "eventTypeID", runtime.ParamLocationPath, eventTypeID)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/event-types/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 // NewHealthCheckRequest generates requests for HealthCheck
 func NewHealthCheckRequest(server string) (*http.Request, error) {
 	var err error
@@ -1319,6 +1373,9 @@ type ClientWithResponsesInterface interface {
 	CreateEventTypeWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateEventTypeResponse, error)
 
 	CreateEventTypeWithResponse(ctx context.Context, body CreateEventTypeJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateEventTypeResponse, error)
+
+	// GetEventTypeByIdWithResponse request
+	GetEventTypeByIdWithResponse(ctx context.Context, eventTypeID string, reqEditors ...RequestEditorFn) (*GetEventTypeByIdResponse, error)
 
 	// HealthCheckWithResponse request
 	HealthCheckWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*HealthCheckResponse, error)
@@ -1584,6 +1641,29 @@ func (r CreateEventTypeResponse) StatusCode() int {
 	return 0
 }
 
+type GetEventTypeByIdResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *GetEventTypeByIdPayload
+	JSONDefault  *DefaultError
+}
+
+// Status returns HTTPResponse.Status
+func (r GetEventTypeByIdResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetEventTypeByIdResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
 type HealthCheckResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -1788,6 +1868,15 @@ func (c *ClientWithResponses) CreateEventTypeWithResponse(ctx context.Context, b
 		return nil, err
 	}
 	return ParseCreateEventTypeResponse(rsp)
+}
+
+// GetEventTypeByIdWithResponse request returning *GetEventTypeByIdResponse
+func (c *ClientWithResponses) GetEventTypeByIdWithResponse(ctx context.Context, eventTypeID string, reqEditors ...RequestEditorFn) (*GetEventTypeByIdResponse, error) {
+	rsp, err := c.GetEventTypeById(ctx, eventTypeID, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetEventTypeByIdResponse(rsp)
 }
 
 // HealthCheckWithResponse request returning *HealthCheckResponse
@@ -2175,6 +2264,39 @@ func ParseCreateEventTypeResponse(rsp *http.Response) (*CreateEventTypeResponse,
 	return response, nil
 }
 
+// ParseGetEventTypeByIdResponse parses an HTTP response from a GetEventTypeByIdWithResponse call
+func ParseGetEventTypeByIdResponse(rsp *http.Response) (*GetEventTypeByIdResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetEventTypeByIdResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest GetEventTypeByIdPayload
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest DefaultError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
+}
+
 // ParseHealthCheckResponse parses an HTTP response from a HealthCheckWithResponse call
 func ParseHealthCheckResponse(rsp *http.Response) (*HealthCheckResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
@@ -2263,38 +2385,39 @@ func ParseSignUpResponse(rsp *http.Response) (*SignUpResponse, error) {
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
+	"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",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

@@ -136,6 +136,7 @@ func run(logger *logs.Logger) error {
 
 			// Event types
 			AllEventTypes: observability.NewQueryDecorator[query.AllEventTypes, query.Paginated[[]domain.EventType]](query.NewAllEventTypesHandler(eventTypeRepo), logger),
+			EventType:     observability.NewQueryDecorator[query.EventType, *domain.EventType](query.NewEventTypeHandler(eventTypeRepo), logger),
 		},
 	}
 

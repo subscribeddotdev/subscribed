@@ -14,7 +14,7 @@ interface Props {
 
 export default function ApplicationPage({ application }: Props) {
   return (
-    <LayoutDashboard>
+    <LayoutDashboard breadcrumbs={{ variables: { [application.id]: application.name } }}>
       <PageMeta title={application.name} />
 
       <Flex justify="between" mb="4">

@@ -350,6 +350,34 @@ func (h handlers) GetEventTypes(c echo.Context, params GetEventTypesParams) erro
 	})
 }
 
+func (h handlers) GetEventTypeById(c echo.Context, eventTypeID string) error {
+	claims, err := h.resolveJwtClaimsFromCtx(c)
+	if err != nil {
+		return err
+	}
+
+	et, err := h.application.Query.EventType.Execute(c.Request().Context(), query.EventType{
+		EventTypeID: eventTypeID,
+		OrgID:       claims.OrganizationID,
+	})
+	if errors.Is(err, domain.ErrEventTypeNotFound) {
+		return NewHandlerErrorWithStatus(err, "error-retrieving-event-type", http.StatusNotFound)
+	}
+	if err != nil {
+		return NewHandlerError(err, "error-retrieving-event-type")
+	}
+
+	return c.JSON(http.StatusOK, GetEventTypeByIdPayload{Data: EventType{
+		Id:            et.ID().String(),
+		Name:          et.Name(),
+		Description:   et.Description(),
+		Schema:        et.Schema(),
+		SchemaExample: et.SchemaExample(),
+		ArchivedAt:    et.ArchivedAt(),
+		CreatedAt:     et.CreatedAt(),
+	}})
+}
+
 func (h handlers) resolveJwtClaimsFromCtx(c echo.Context) (*jwtCustomClaims, error) {
 	claims, ok := c.Get("user_claims").(*jwtCustomClaims)
 	if !ok {

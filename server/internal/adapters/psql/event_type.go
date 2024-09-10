@@ -72,6 +72,10 @@ func (e EventTypeRepository) FindAll(
 	}, nil
 }
 
+func (e EventTypeRepository) ByID(ctx context.Context, orgID string, id domain.EventTypeID) (*domain.EventType, error) {
+	return nil, nil
+}
+
 func mapRowsToEventTypes(rows []*models.EventType) []domain.EventType {
 	eventTypes := make([]domain.EventType, len(rows))
 	for i, row := range rows {

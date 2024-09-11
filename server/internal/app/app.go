@@ -53,6 +53,7 @@ type Query struct {
 
 	// Event types
 	AllEventTypes QueryHandler[query.AllEventTypes, query.Paginated[[]domain.EventType]]
+	EventType     QueryHandler[query.EventType, *domain.EventType]
 }
 
 type App struct {

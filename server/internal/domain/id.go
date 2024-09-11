@@ -2,7 +2,6 @@ package domain
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/oklog/ulid/v2"
 )
@@ -13,23 +12,12 @@ func NewID() ID {
 	return ID(ulid.Make().String())
 }
 
-func NewIdFromString(value string) (ID, error) {
-	parsedID, err := ulid.Parse(value)
-	if err != nil {
-		return "", err
+func NewIDFromString(value string) (ID, error) {
+	if value == "" {
+		return "", fmt.Errorf("id cannot be empty")
 	}
 
-	return ID(parsedID.String()), nil
-}
-
-func NewIdFromStringWithPrefix(value string) (ID, error) {
-	parts := strings.Split(value, "_")
-	parsedID, err := ulid.Parse(parts[1])
-	if err != nil {
-		return "", err
-	}
-
-	return ID(fmt.Sprintf("%s_%s", parts[0], parsedID.String())), nil
+	return ID(value), nil
 }
 
 func (i ID) String() string {

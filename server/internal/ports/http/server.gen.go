@@ -78,6 +78,11 @@ type CreateApplicationRequest struct {
 	Name string `json:"name"`
 }
 
+// CreateEventTypePayload defines model for CreateEventTypePayload.
+type CreateEventTypePayload struct {
+	Id string `json:"id"`
+}
+
 // CreateEventTypeRequest defines model for CreateEventTypeRequest.
 type CreateEventTypeRequest struct {
 	Description   *string `json:"description,omitempty"`
@@ -606,38 +611,38 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 var swaggerSpec = []string{
 
 	"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",
-	"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",
+	"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",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

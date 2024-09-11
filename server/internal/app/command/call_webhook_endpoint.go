@@ -74,6 +74,7 @@ func (c CallWebhookEndpointHandler) Execute(ctx context.Context, cmd CallWebhook
 		req.Header.Set("x-sbs-id", cmd.MessageID.String())
 		req.Header.Set("x-sbs-timestamp", fmt.Sprintf("%d", timestamp.Unix()))
 		req.Header.Set("x-sbs-signature", signature)
+		req.Header.Set("x-sbs-event-type-id", message.EventTypeID().String())
 		for name, value := range endpoint.Headers() {
 			req.Header.Set(name, value)
 		}

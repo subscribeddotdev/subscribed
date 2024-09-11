@@ -217,7 +217,11 @@ paths:
               $ref: '#/components/schemas/CreateEventTypeRequest'
       responses:
         '201':
-          description: CREATED
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateEventTypePayload'
         default:
           $ref: '#/components/responses/DefaultError'
     get:
@@ -474,6 +478,11 @@ components:
         archived_at:
           type: string
           format: date-time
+    CreateEventTypePayload:
+      required: [ id ]
+      properties:
+        id:
+          type: string
     GetEventTypesPayload:
       required: [ pagination, data ]
       properties:

@@ -120,7 +120,7 @@ func run(logger *logs.Logger) error {
 			SendMessage: observability.NewCommandDecorator[command.SendMessage](command.NewSendMessageHandler(txProvider, endpointRepo), logger),
 
 			// Event types
-			CreateEventType: observability.NewCommandDecorator[command.CreateEventType](command.NewCreateEventTypeHandler(eventTypeRepo), logger),
+			CreateEventType: observability.NewCommandWithResultDecorator[command.CreateEventType, domain.EventTypeID](command.NewCreateEventTypeHandler(eventTypeRepo), logger),
 
 			// API Keys
 			CreateApiKey:  observability.NewCommandWithResultDecorator[command.CreateApiKey, *domain.ApiKey](command.NewCreateApiKeyHandler(apiKeyRepo, envRepo), logger),

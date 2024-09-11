@@ -25,3 +25,16 @@ services:
       - .:/usr/app
       - ${GOCACHE:-/tmp/go-cache}:/root/.cache/go-build
       - ${GOMODCACHE:-/tmp/go-mod-cache}:/go/pkg/mod
+
+  emulators:
+    build: ./misc/tools/reflex
+    environment:
+      APP_NAME: emulators
+    env_file:
+      - ./.env
+    ports:
+      - "8081:8080"
+    volumes:
+      - .:/usr/app
+      - ${GOCACHE:-/tmp/go-cache}:/root/.cache/go-build
+      - ${GOMODCACHE:-/tmp/go-mod-cache}:/go/pkg/mod

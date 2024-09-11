@@ -37,7 +37,7 @@ func (h handlers) AddEndpoint(c echo.Context, applicationID string) error {
 
 	if body.EventTypeIds != nil {
 		for _, eventTypeID := range *body.EventTypeIds {
-			eID, err := domain.NewIdFromString(eventTypeID)
+			eID, err := domain.NewIDFromString(eventTypeID)
 			if err != nil {
 				return NewHandlerErrorWithStatus(err, "error-mapping-event-type-id", http.StatusBadRequest)
 			}
@@ -139,7 +139,7 @@ func (h handlers) CreateEventType(c echo.Context) error {
 		schemaExample = *body.SchemaExample
 	}
 
-	err = h.application.Command.CreateEventType.Execute(c.Request().Context(), command.CreateEventType{
+	id, err := h.application.Command.CreateEventType.Execute(c.Request().Context(), command.CreateEventType{
 		OrgID:         iam.OrgID(claims.OrganizationID),
 		Name:          body.Name,
 		Description:   description,
@@ -147,10 +147,13 @@ func (h handlers) CreateEventType(c echo.Context) error {
 		SchemaExample: schemaExample,
 	})
 	if err != nil {
-		return NewHandlerError(err, "unable-to-send-message")
+		return NewHandlerError(err, "unable-to-create-event-type")
 	}
 
-	return c.NoContent(http.StatusCreated)
+	payload := CreateEventTypePayload{
+		Id: id.String(),
+	}
+	return c.JSON(http.StatusCreated, payload)
 }
 
 func (h handlers) CreateApiKey(c echo.Context) error {

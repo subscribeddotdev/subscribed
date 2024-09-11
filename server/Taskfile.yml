@@ -30,9 +30,9 @@ tasks:
     cmds:
       - task watch -- go run ./cmd/service
 
-  run:webhook-target-emulator:
+  run:emulators:
     cmds:
-      - task watch -- go run ./cmd/webhook-target-emulator
+      - task watch -- go run ./cmd/emulators
 
   watch:
     cmds:

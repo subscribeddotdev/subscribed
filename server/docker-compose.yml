@@ -26,10 +26,10 @@ services:
       - ${GOCACHE:-/tmp/go-cache}:/root/.cache/go-build
       - ${GOMODCACHE:-/tmp/go-mod-cache}:/go/pkg/mod
 
-  webhook-target:
+  emulators:
     build: ./misc/tools/reflex
     environment:
-      APP_NAME: webhook-target-emulator
+      APP_NAME: emulators
     env_file:
       - ./.env
     ports:

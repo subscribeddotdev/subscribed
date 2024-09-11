@@ -99,9 +99,9 @@ func TestE2E(t *testing.T) {
 	appID := createAppResp.JSON201.Id
 
 	addEndpointResp, err := authClient.AddEndpoint(ctx, appID, client.AddEndpointJSONRequestBody{
-		Description:  strPtr("All event types"),
+		Description:  strPtr("No event types"),
 		EventTypeIds: nil,
-		Url:          webhookTargetURL(appID, "/all-event-types"),
+		Url:          webhookTargetURL(appID, "/no-event-types"),
 	})
 	require.NoError(t, err)
 	require.Equal(t, http.StatusNoContent, addEndpointResp.StatusCode)
@@ -165,10 +165,22 @@ func TestE2E(t *testing.T) {
 	require.Equal(t, http.StatusCreated, resp.StatusCode)
 
 	require.EventuallyWithT(t, func(t *assert.CollectT) {
-		ids := getOrderIDFromWebhooks(t, appID, "/all-event-types")
-		assert.Equal(t, []string{orderPlaced.OrderID, orderRefunded.OrderID}, ids)
+		ids := getOrderIDFromWebhooks(t, appID, "/order-placed-only")
+		assert.ElementsMatch(t, []string{orderPlaced.OrderID}, ids)
 	}, 2*time.Second, 200*time.Millisecond)
 
+	require.EventuallyWithT(t, func(t *assert.CollectT) {
+		ids := getOrderIDFromWebhooks(t, appID, "/order-refunded-only")
+		assert.ElementsMatch(t, []string{orderRefunded.OrderID}, ids)
+	}, 2*time.Second, 200*time.Millisecond)
+
+	require.EventuallyWithT(t, func(t *assert.CollectT) {
+		ids := getOrderIDFromWebhooks(t, appID, "/both-order-placed-and-refunded")
+		assert.ElementsMatch(t, []string{orderPlaced.OrderID, orderRefunded.OrderID}, ids)
+	}, 2*time.Second, 200*time.Millisecond)
+
+	ids := getOrderIDFromWebhooks(t, appID, "/no-event-types")
+	assert.Empty(t, ids)
 }
 
 type Event struct {
@@ -194,11 +206,11 @@ func strPtr(s string) *string {
 }
 
 func webhookTargetURL(id string, path string) string {
-	return fmt.Sprintf("http://webhook-target:8080/webhooks/%s%s", id, path)
+	return fmt.Sprintf("http://emulators:8080/webhook-target/webhooks/%s%s", id, path)
 }
 
 func localWebhookTargetURL(id string, path string) string {
-	return fmt.Sprintf("http://localhost:8081/webhooks/%s%s", id, path)
+	return fmt.Sprintf("http://localhost:8081/webhook-target/webhooks/%s%s", id, path)
 }
 
 // Note: Don't use require here because it's being used in EventuallyWithT

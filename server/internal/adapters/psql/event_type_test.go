@@ -64,6 +64,16 @@ func TestEventTypesRepository_ByID(t *testing.T) {
 		foundEt, err := eventTypeRepo.ByID(ctx, org.ID, domain.EventTypeID(et.ID))
 		require.NoError(t, err)
 		require.Equal(t, et.ID, foundEt.ID().String())
+		require.Equal(t, et.Name, foundEt.Name())
+		require.Equal(t, et.Description.String, foundEt.Description())
+		require.Equal(t, et.Schema.String, foundEt.Schema())
+		require.Equal(t, et.SchemaExample.String, foundEt.SchemaExample())
+		tests.RequireEqualTime(t, et.CreatedAt, foundEt.CreatedAt())
+
+		if foundEt.ArchivedAt() != nil {
+			archivedAt := foundEt.ArchivedAt()
+			tests.RequireEqualTime(t, et.ArchivedAt.Time, *archivedAt)
+		}
 	})
 
 	t.Run("error_event_type_not_found", func(t *testing.T) {

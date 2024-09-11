@@ -20,5 +20,5 @@ func NewEventTypeHandler(repo domain.EventTypeRepository) eventTypeHandler {
 }
 
 func (h eventTypeHandler) Execute(ctx context.Context, q EventType) (*domain.EventType, error) {
-	return nil, nil
+	return h.repo.ByID(ctx, q.OrgID, domain.EventTypeID(q.EventTypeID))
 }

@@ -9,6 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/subscribeddotdev/subscribed/server/internal/adapters/models"
+	"github.com/subscribeddotdev/subscribed/server/tests"
 	"github.com/subscribeddotdev/subscribed/server/tests/client"
 	"github.com/subscribeddotdev/subscribed/server/tests/fixture"
 )
@@ -55,5 +56,24 @@ func TestEventTypes(t *testing.T) {
 			require.Equal(t, perPage, resp.JSON200.Pagination.PerPage)
 			require.Equal(t, totalPages, resp.JSON200.Pagination.TotalPages)
 		}
+	})
+
+	t.Run("get_event_type_by_id", func(t *testing.T) {
+		et := ff.NewEventType().WithArchivedAt(gofakeit.PastDate()).WithOrgID(org.ID).Save()
+
+		resp, err := apiClient.GetEventTypeByIdWithResponse(ctx, et.ID)
+		require.NoError(t, err)
+		require.Equal(t, http.StatusOK, resp.StatusCode())
+		require.Equal(t, et.ID, resp.JSON200.Data.Id)
+		require.Equal(t, et.Name, resp.JSON200.Data.Name)
+		require.Equal(t, et.Description.String, resp.JSON200.Data.Description)
+		require.Equal(t, et.Schema.String, resp.JSON200.Data.Schema)
+		require.Equal(t, et.SchemaExample.String, resp.JSON200.Data.SchemaExample)
+		tests.RequireEqualTime(t, et.CreatedAt, resp.JSON200.Data.CreatedAt)
+		tests.RequireEqualTime(t, et.ArchivedAt.Time, *resp.JSON200.Data.ArchivedAt)
+
+		resp, err = apiClient.GetEventTypeByIdWithResponse(ctx, "non-existent-id")
+		require.NoError(t, err)
+		require.Equal(t, http.StatusNotFound, resp.StatusCode())
 	})
 }

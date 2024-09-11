@@ -370,15 +370,17 @@ func (h handlers) GetEventTypeById(c echo.Context, eventTypeID string) error {
 		return NewHandlerError(err, "error-retrieving-event-type")
 	}
 
-	return c.JSON(http.StatusOK, GetEventTypeByIdPayload{Data: EventType{
-		Id:            et.ID().String(),
-		Name:          et.Name(),
-		Description:   et.Description(),
-		Schema:        et.Schema(),
-		SchemaExample: et.SchemaExample(),
-		ArchivedAt:    et.ArchivedAt(),
-		CreatedAt:     et.CreatedAt(),
-	}})
+	return c.JSON(http.StatusOK, GetEventTypeByIdPayload{
+		Data: EventType{
+			Id:            et.ID().String(),
+			Name:          et.Name(),
+			Description:   et.Description(),
+			Schema:        et.Schema(),
+			SchemaExample: et.SchemaExample(),
+			ArchivedAt:    et.ArchivedAt(),
+			CreatedAt:     et.CreatedAt(),
+		},
+	})
 }
 
 func (h handlers) resolveJwtClaimsFromCtx(c echo.Context) (*jwtCustomClaims, error) {

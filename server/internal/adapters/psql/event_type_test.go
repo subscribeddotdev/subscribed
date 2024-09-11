@@ -54,3 +54,26 @@ func TestEventTypesRepository_FindAll(t *testing.T) {
 		}
 	})
 }
+
+func TestEventTypesRepository_ByID(t *testing.T) {
+	ff := fixture.NewFactory(t, ctx, db)
+	org := ff.NewOrganization().Save()
+
+	t.Run("find_by_id", func(t *testing.T) {
+		et := ff.NewEventType().WithOrgID(org.ID).Save()
+		foundEt, err := eventTypeRepo.ByID(ctx, org.ID, domain.EventTypeID(et.ID))
+		require.NoError(t, err)
+		require.Equal(t, et.ID, foundEt.ID().String())
+	})
+
+	t.Run("error_event_type_not_found", func(t *testing.T) {
+		foundEt, err := eventTypeRepo.ByID(ctx, org.ID, "")
+		require.ErrorIs(t, err, domain.ErrEventTypeNotFound)
+		require.Nil(t, foundEt)
+
+		et := ff.NewEventType().WithOrgID(org.ID).Save()
+		foundEt, err = eventTypeRepo.ByID(ctx, "", domain.EventTypeID(et.ID))
+		require.ErrorIs(t, err, domain.ErrEventTypeNotFound)
+		require.Nil(t, foundEt)
+	})
+}

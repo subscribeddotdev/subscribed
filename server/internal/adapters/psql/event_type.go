@@ -2,8 +2,10 @@ package psql
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 
+	"github.com/friendsofgo/errors"
 	"github.com/subscribeddotdev/subscribed/server/internal/adapters/models"
 	"github.com/subscribeddotdev/subscribed/server/internal/app/query"
 	"github.com/subscribeddotdev/subscribed/server/internal/domain"
@@ -73,25 +75,40 @@ func (e EventTypeRepository) FindAll(
 }
 
 func (e EventTypeRepository) ByID(ctx context.Context, orgID string, id domain.EventTypeID) (*domain.EventType, error) {
-	return nil, nil
+	row, err := models.EventTypes(
+		models.EventTypeWhere.OrgID.EQ(orgID),
+		models.EventTypeWhere.ID.EQ(id.String()),
+	).One(ctx, e.db)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, domain.ErrEventTypeNotFound
+	}
+
+	if err != nil {
+		return nil, fmt.Errorf("error querying event type with id '%s': %v", id, err)
+	}
+
+	return mapRowToEventType(row), nil
 }
 
 func mapRowsToEventTypes(rows []*models.EventType) []domain.EventType {
 	eventTypes := make([]domain.EventType, len(rows))
 	for i, row := range rows {
-		eventType := domain.UnMarshallEventType(
-			domain.EventTypeID(row.ID),
-			row.OrgID,
-			row.Name,
-			row.Description.String,
-			row.Schema.String,
-			row.SchemaExample.String,
-			row.CreatedAt,
-			row.ArchivedAt.Ptr(),
-		)
-
+		eventType := mapRowToEventType(row)
 		eventTypes[i] = *eventType
 	}
 
 	return eventTypes
+}
+
+func mapRowToEventType(row *models.EventType) *domain.EventType {
+	return domain.UnMarshallEventType(
+		domain.EventTypeID(row.ID),
+		row.OrgID,
+		row.Name,
+		row.Description.String,
+		row.Schema.String,
+		row.SchemaExample.String,
+		row.CreatedAt,
+		row.ArchivedAt.Ptr(),
+	)
 }

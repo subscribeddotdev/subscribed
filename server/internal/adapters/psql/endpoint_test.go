@@ -35,23 +35,35 @@ func TestEndpointRepository_ByEventTypeIdAndAppID(t *testing.T) {
 		require.NoError(t, err)
 	}
 
-	endpoints, err := endpointRepo.ByEventTypeIdAndAppID(ctx, eventTypeID, domain.ApplicationID(app.ID))
-	require.NoError(t, err)
-	assert.NotEmpty(t, endpoints)
+	t.Run("find_endpoints_by_event_type_id", func(t *testing.T) {
+		endpoints, err := endpointRepo.ByEventTypeIdOrAppID(ctx, &eventTypeID, domain.ApplicationID(app.ID))
+		require.NoError(t, err)
+		require.NotEmpty(t, endpoints)
 
-	for _, endpoint := range endpoints {
-		require.Equal(t, app.ID, endpoint.ApplicationID().String())
-		containsEventTypeID := false
+		for _, endpoint := range endpoints {
+			require.Equal(t, app.ID, endpoint.ApplicationID().String())
+			containsEventTypeID := false
 
-		for _, endpointEventTypeID := range endpoint.EventTypeIDs() {
-			if endpointEventTypeID.String() == eventTypeID.String() {
-				containsEventTypeID = true
-				break
+			for _, endpointEventTypeID := range endpoint.EventTypeIDs() {
+				if endpointEventTypeID.String() == eventTypeID.String() {
+					containsEventTypeID = true
+					break
+				}
 			}
-		}
 
-		assert.True(t, containsEventTypeID)
-	}
+			assert.True(t, containsEventTypeID)
+		}
+	})
+
+	t.Run("find_endpoints_by_app_id", func(t *testing.T) {
+		endpoints, err := endpointRepo.ByEventTypeIdOrAppID(ctx, nil, domain.ApplicationID(app.ID))
+		require.NoError(t, err)
+		require.NotEmpty(t, endpoints)
+
+		for _, endpoint := range endpoints {
+			require.Equal(t, app.ID, endpoint.ApplicationID().String())
+		}
+	})
 }
 
 func fixtureEndpoint(t *testing.T, appID domain.ApplicationID, eventTypeIDs []domain.EventTypeID) *domain.Endpoint {

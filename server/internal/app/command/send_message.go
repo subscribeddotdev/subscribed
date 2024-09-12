@@ -8,7 +8,7 @@ import (
 )
 
 type SendMessage struct {
-	EventTypeID   domain.EventTypeID
+	EventTypeID   *domain.EventTypeID
 	Payload       string
 	ApplicationID domain.ApplicationID
 	OrgID         string
@@ -38,7 +38,7 @@ func (c SendMessageHandler) Execute(ctx context.Context, cmd SendMessage) error 
 	}
 
 	// TODO: consider moving this inside the transaction???
-	endpoints, err := c.endpointRepo.ByEventTypeIdAndAppID(ctx, message.EventTypeID(), message.ApplicationID())
+	endpoints, err := c.endpointRepo.ByEventTypeIdOrAppID(ctx, message.EventTypeID(), message.ApplicationID())
 	if err != nil {
 		return fmt.Errorf("error retrieving endpoints: %v", err)
 	}

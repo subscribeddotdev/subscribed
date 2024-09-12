@@ -98,10 +98,16 @@ func (h handlers) SendMessage(c echo.Context, applicationID string) error {
 		return NewHandlerErrorWithStatus(err, "error-parsing-the-body", http.StatusBadRequest)
 	}
 
+	var eventTypeID *domain.EventTypeID
+	if body.EventTypeId != nil {
+		val := domain.EventTypeID(*body.EventTypeId)
+		eventTypeID = &val
+	}
+
 	err = h.application.Command.SendMessage.Execute(c.Request().Context(), command.SendMessage{
 		OrgID:         apiKey.OrgID(),
 		ApplicationID: domain.ApplicationID(applicationID),
-		EventTypeID:   domain.EventTypeID(body.EventTypeId),
+		EventTypeID:   eventTypeID,
 		Payload:       body.Payload,
 	})
 	if err != nil {

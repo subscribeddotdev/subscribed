@@ -9,6 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/subscribeddotdev/subscribed/server/internal/adapters/models"
+	"github.com/subscribeddotdev/subscribed/server/tests"
 	"github.com/subscribeddotdev/subscribed/server/tests/client"
 	"github.com/subscribeddotdev/subscribed/server/tests/fixture"
 )
@@ -40,7 +41,7 @@ func TestMessages_SendMessage(t *testing.T) {
 		}.Marshall(t)
 
 		resp, err := apiClient.SendMessage(ctx, app.ID, client.SendMessageRequest{
-			EventTypeId: eventType.ID,
+			EventTypeId: tests.ToPtr(eventType.ID),
 			Payload:     string(payload),
 		})
 		require.NoError(t, err)

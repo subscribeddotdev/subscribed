@@ -18,7 +18,7 @@ func (i MessageID) String() string {
 
 type Message struct {
 	id            MessageID
-	eventTypeID   EventTypeID
+	eventTypeID   *EventTypeID
 	applicationID ApplicationID
 	orgID         string
 	sentAt        time.Time
@@ -26,7 +26,7 @@ type Message struct {
 	sendAttempts  []MessageSendAttempt
 }
 
-func NewMessage(eventTypeID EventTypeID, orgID string, applicationID ApplicationID, payload string) (*Message, error) {
+func NewMessage(eventTypeID *EventTypeID, orgID string, applicationID ApplicationID, payload string) (*Message, error) {
 	if eventTypeID.String() == "" {
 		return nil, errors.New("eventTypeID cannot be empty")
 	}
@@ -58,7 +58,7 @@ func (m *Message) Id() MessageID {
 	return m.id
 }
 
-func (m *Message) EventTypeID() EventTypeID {
+func (m *Message) EventTypeID() *EventTypeID {
 	return m.eventTypeID
 }
 
@@ -84,7 +84,7 @@ func (m *Message) SendAttempts() []MessageSendAttempt {
 
 func UnMarshallMessage(
 	id MessageID,
-	eventTypeID EventTypeID,
+	eventTypeID *EventTypeID,
 	applicationID ApplicationID,
 	orgID string,
 	sentAt time.Time,

@@ -441,7 +441,7 @@ components:
             $ref: '#/components/schemas/Application'
     # Messages
     SendMessageRequest:
-      required: [ event_type_id, payload ]
+      required: [ payload ]
       properties:
         event_type_id:
           type: string

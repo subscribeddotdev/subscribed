@@ -58,7 +58,7 @@ func TestNewMessage(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 
-			msg, err := domain.NewMessage(tc.eventTypeID, tc.orgID, tc.applicationID, tc.payload)
+			msg, err := domain.NewMessage(&tc.eventTypeID, tc.orgID, tc.applicationID, tc.payload)
 			if tc.expectedErr != "" {
 				assert.EqualError(t, err, tc.expectedErr)
 				return

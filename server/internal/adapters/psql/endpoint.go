@@ -51,23 +51,33 @@ func (o EndpointRepository) Insert(ctx context.Context, endpoint *domain.Endpoin
 	return nil
 }
 
-func (o EndpointRepository) ByEventTypeIdAndAppID(
+func (o EndpointRepository) ByEventTypeIdOrAppID(
 	ctx context.Context,
-	eventTypeID domain.EventTypeID,
+	eventTypeID *domain.EventTypeID,
 	appID domain.ApplicationID,
 ) ([]*domain.Endpoint, error) {
-	model, err := models.EventTypes(
-		models.EventTypeWhere.ID.EQ(eventTypeID.String()),
-		qm.Load(models.EventTypeRels.Endpoints),
-	).One(ctx, o.db)
-	if errors.Is(err, sql.ErrNoRows) {
-		return nil, domain.ErrEventTypeNotFound
-	}
-	if err != nil {
-		return nil, fmt.Errorf("error querying event_types by id '%s': %v", eventTypeID, err)
+	if eventTypeID != nil {
+		// TODO: reimplement this
+		model, err := models.EventTypes(
+			models.EventTypeWhere.ID.EQ(eventTypeID.String()),
+			qm.Load(models.EventTypeRels.Endpoints),
+		).One(ctx, o.db)
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, domain.ErrEventTypeNotFound
+		}
+		if err != nil {
+			return nil, fmt.Errorf("error querying event_types by id '%s': %v", eventTypeID, err)
+		}
+
+		return mapRowsToDomainEndpoints(model.R.Endpoints, appID)
 	}
 
-	return mapRowsToDomainEndpoints(model.R.Endpoints, appID)
+	rows, err := models.Endpoints(models.EndpointWhere.ApplicationID.EQ(appID.String())).All(ctx, o.db)
+	if err != nil {
+		return nil, fmt.Errorf("error querying endppoints: %v", err)
+	}
+
+	return mapRowsToDomainEndpoints(rows, appID)
 }
 
 func (o EndpointRepository) ByID(ctx context.Context, id domain.EndpointID) (*domain.Endpoint, error) {

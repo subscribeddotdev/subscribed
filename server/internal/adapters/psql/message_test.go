@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/subscribeddotdev/subscribed/server/internal/domain"
+	"github.com/subscribeddotdev/subscribed/server/tests"
 	"github.com/subscribeddotdev/subscribed/server/tests/fixture"
 )
 
@@ -19,7 +20,7 @@ func TestMessageRepository_Lifecycle(t *testing.T) {
 	app := ff.NewApplication().WithEnvironmentID(env.ID).Save()
 
 	msg, err := domain.NewMessage(
-		domain.EventTypeID(eventType.ID),
+		tests.ToPtr(domain.EventTypeID(eventType.ID)),
 		org.ID,
 		domain.ApplicationID(app.ID),
 		gofakeit.Sentence(10),

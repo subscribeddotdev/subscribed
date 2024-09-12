@@ -33,7 +33,7 @@ type EventTypeRepository interface {
 type EndpointRepository interface {
 	Insert(ctx context.Context, endpoint *Endpoint) error
 	ByID(ctx context.Context, id EndpointID) (*Endpoint, error)
-	ByEventTypeIdAndAppID(ctx context.Context, eventTypeID EventTypeID, appID ApplicationID) ([]*Endpoint, error)
+	ByEventTypeIdOrAppID(ctx context.Context, eventTypeID *EventTypeID, appID ApplicationID) ([]*Endpoint, error)
 }
 
 type MessageRepository interface {

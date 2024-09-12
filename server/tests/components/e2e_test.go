@@ -12,9 +12,12 @@ import (
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/subscribeddotdev/subscribed/server/tests"
 
 	"github.com/subscribeddotdev/subscribed/server/tests/client"
 )
+
+//TODO: Add a test case in which and endpoint is created without an event type id
 
 func TestE2E(t *testing.T) {
 	ctx := context.Background()
@@ -151,14 +154,14 @@ func TestE2E(t *testing.T) {
 	require.NoError(t, err)
 
 	resp, err := apiKeyClient.SendMessage(ctx, appID, client.SendMessageJSONRequestBody{
-		EventTypeId: orderPlacedEventTypeID,
+		EventTypeId: tests.ToPtr(orderPlacedEventTypeID),
 		Payload:     string(orderPlacedJSON),
 	})
 	require.NoError(t, err)
 	require.Equal(t, http.StatusCreated, resp.StatusCode)
 
 	resp, err = apiKeyClient.SendMessage(ctx, appID, client.SendMessageJSONRequestBody{
-		EventTypeId: orderRefundedEventTypeID,
+		EventTypeId: tests.ToPtr(orderRefundedEventTypeID),
 		Payload:     string(orderRefundedJSON),
 	})
 	require.NoError(t, err)

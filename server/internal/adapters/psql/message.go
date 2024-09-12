@@ -9,6 +9,7 @@ import (
 	"github.com/friendsofgo/errors"
 	"github.com/subscribeddotdev/subscribed/server/internal/adapters/models"
 	"github.com/subscribeddotdev/subscribed/server/internal/domain"
+	"github.com/subscribeddotdev/subscribed/server/tests"
 	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 )
@@ -47,7 +48,7 @@ func (o MessageRepository) ByID(ctx context.Context, id domain.MessageID) (*doma
 
 	return domain.UnMarshallMessage(
 		domain.MessageID(model.ID),
-		domain.EventTypeID(model.EventTypeID),
+		tests.ToPtr(domain.EventTypeID(model.EventTypeID)),
 		domain.ApplicationID(model.ApplicationID),
 		model.OrgID,
 		model.SentAt,

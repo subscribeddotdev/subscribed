@@ -36,12 +36,13 @@ import (
 )
 
 type Config struct {
-	DatabaseUrl       string `envconfig:"DATABASE_URL" required:"true"`
-	Port              int    `envconfig:"HTTP_PORT" required:"true"`
-	ProductionMode    bool   `envconfig:"PRODUCTION_MODE" required:"true"`
-	AllowedCorsOrigin string `envconfig:"HTTP_ALLOWED_CORS" required:"true"`
-	AmqpURL           string `envconfig:"AMQP_URL" required:"true"`
-	HttpJwtSecret     string `envconfig:"HTTP_JWT_SECRET" required:"true"`
+	DatabaseUrl        string `envconfig:"DATABASE_URL" required:"true"`
+	Port               int    `envconfig:"HTTP_PORT" required:"true"`
+	ProductionMode     bool   `envconfig:"PRODUCTION_MODE" required:"true"`
+	AllowedCorsOrigin  string `envconfig:"HTTP_ALLOWED_CORS" required:"true"`
+	AmqpURL            string `envconfig:"AMQP_URL" required:"true"`
+	HttpJwtSecret      string `envconfig:"HTTP_JWT_SECRET" required:"true"`
+	WebFrontendEnabled bool   `envconfig:"WEB_FRONTEND_ENABLED" required:"true"`
 }
 
 func main() {
@@ -181,13 +182,14 @@ func run(logger *logs.Logger) error {
 	}
 
 	httpserver, err := http.NewServer(http.Config{
-		Ctx:               ctx,
-		Logger:            logger,
-		Application:       application,
-		Port:              config.Port,
-		IsDebug:           !config.ProductionMode,
-		JwtSecret:         config.HttpJwtSecret,
-		AllowedCorsOrigin: strings.Split(config.AllowedCorsOrigin, ","),
+		Ctx:                ctx,
+		Logger:             logger,
+		Application:        application,
+		Port:               config.Port,
+		JwtSecret:          config.HttpJwtSecret,
+		IsDebug:            !config.ProductionMode,
+		WebFrontendEnabled: config.WebFrontendEnabled,
+		AllowedCorsOrigin:  strings.Split(config.AllowedCorsOrigin, ","),
 	})
 	if err != nil {
 		return err

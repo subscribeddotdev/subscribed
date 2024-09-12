@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"net"
 	libhttp "net/http"
+	"os"
+	"strings"
 	"time"
 
 	"github.com/getkin/kin-openapi/openapi3"
@@ -28,13 +30,14 @@ type Server struct {
 }
 
 type Config struct {
-	Application       *app.App
-	Port              int
-	AllowedCorsOrigin []string
-	Logger            *logs.Logger
-	IsDebug           bool
-	Ctx               context.Context
-	JwtSecret         string
+	Application        *app.App
+	Port               int
+	AllowedCorsOrigin  []string
+	Logger             *logs.Logger
+	IsDebug            bool
+	Ctx                context.Context
+	JwtSecret          string
+	WebFrontendEnabled bool
 }
 
 func NewServer(config Config) (*Server, error) {
@@ -52,6 +55,10 @@ func NewServer(config Config) (*Server, error) {
 
 	registerMiddlewares(router, spec, config)
 	RegisterHandlers(router, routerHandlers)
+
+	if config.WebFrontendEnabled {
+		registerWebFrontend(router)
+	}
 
 	return &Server{
 		logger: config.Logger,
@@ -104,6 +111,7 @@ func registerMiddlewares(router *echo.Echo, spec *openapi3.T, config Config) {
 
 	spec.Servers = nil
 	router.Use(oapimiddleware.OapiRequestValidatorWithOptions(spec, &oapimiddleware.Options{
+		ErrorHandler: nil,
 		Options: openapi3filter.Options{
 			AuthenticationFunc: func(ctx context.Context, input *openapi3filter.AuthenticationInput) error {
 				if input.SecuritySchemeName == akSecurityScheme {
@@ -117,5 +125,22 @@ func registerMiddlewares(router *echo.Echo, spec *openapi3.T, config Config) {
 				return fmt.Errorf("unable to recognise '%s' as the security scheme", input.SecuritySchemeName)
 			},
 		},
+		ParamDecoder: nil,
+		UserData:     nil,
+		Skipper: func(c echo.Context) bool {
+			return strings.HasPrefix(c.Request().URL.Path, "/web")
+		},
+		MultiErrorHandler:     nil,
+		SilenceServersWarning: false,
+	}))
+}
+func registerWebFrontend(router *echo.Echo) {
+	wd, _ := os.Getwd()
+
+	web := router.Group("/web")
+	web.Use(middleware.StaticWithConfig(middleware.StaticConfig{
+		Root:  fmt.Sprintf("%s/web", wd),
+		Index: "index.html",
+		HTML5: true,
 	}))
 }

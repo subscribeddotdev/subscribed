@@ -14,7 +14,17 @@ interface Props extends PropsWithChildren {
   "data-testid"?: string;
 }
 
-export function Alert({ mb, mt, children, Icon, size, variant = "soft", color = "gray", onClose, ...props }: Props) {
+export function Alert({
+  mb,
+  mt,
+  children,
+  Icon,
+  size,
+  variant = "soft",
+  color = "gray",
+  onClose,
+  ...props
+}: Props) {
   return (
     <Callout.Root
       mt={mt}
@@ -29,7 +39,11 @@ export function Alert({ mb, mt, children, Icon, size, variant = "soft", color = 
       <Callout.Text className={styles.text}>
         {children}
         {onClose && (
-          <Button variant="soft" onClick={onClose} className={styles.closeButton}>
+          <Button
+            variant="soft"
+            onClick={onClose}
+            className={styles.closeButton}
+          >
             <RiCloseLine />
           </Button>
         )}

@@ -2,9 +2,7 @@ import { config } from "@@/config";
 import { Button, Code, Dialog, Flex, Text, TextField } from "@radix-ui/themes";
 import { useState } from "react";
 
-interface Props {}
-
-export function CreateApplication({}: Props) {
+export function CreateApplication() {
   const [name, setName] = useState("");
 
   return (
@@ -16,8 +14,9 @@ export function CreateApplication({}: Props) {
       <Dialog.Content maxWidth="450px">
         <Dialog.Title>New application</Dialog.Title>
         <Dialog.Description size="2" mb="4">
-          Applications can only be created via our API, please copy the code snippet below to your terminal and specify
-          your a valid API key in the header <Code>x-api-key</Code>.
+          Applications can only be created via our API, please copy the code
+          snippet below to your terminal and specify your a valid API key in the
+          header <Code>x-api-key</Code>.
         </Dialog.Description>
 
         <Flex direction="column" gap="3" mb="4">
@@ -25,7 +24,10 @@ export function CreateApplication({}: Props) {
             <Text as="div" size="2" mb="1" weight="bold">
               Name
             </Text>
-            <TextField.Root placeholder="My new app" onInput={(e) => setName((e.target as HTMLInputElement).value)} />
+            <TextField.Root
+              placeholder="My new app"
+              onInput={(e) => setName((e.target as HTMLInputElement).value)}
+            />
           </label>
         </Flex>
 
@@ -41,7 +43,15 @@ export function CreateApplication({}: Props) {
 
         <Flex gap="3" mt="4" justify="end">
           <Dialog.Close>
-            <Button onClick={() => navigator.clipboard.writeText(codeSnippet(name, config.public.api))}>Copy</Button>
+            <Button
+              onClick={() =>
+                navigator.clipboard.writeText(
+                  codeSnippet(name, config.public.api),
+                )
+              }
+            >
+              Copy
+            </Button>
           </Dialog.Close>
         </Flex>
       </Dialog.Content>

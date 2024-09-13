@@ -35,7 +35,9 @@ describe("EnvironmentSelector", () => {
     window.localStorage.setItem(LAST_CHOSEN_ENVIRONMENT, "env_PROD");
     tests.render(<EnvironmentSelector />);
 
-    await tests.waitForElementToBeRemoved(tests.screen.getByTestId("IsLoading"));
+    await tests.waitForElementToBeRemoved(
+      tests.screen.getByTestId("IsLoading"),
+    );
 
     const trigger = tests.screen.getByRole("combobox");
     expect(tests.within(trigger).getByText("Production")).toBeInTheDocument();

@@ -1,4 +1,3 @@
-import { dates } from "@@/common/libs/dates";
 import { faker } from "@faker-js/faker";
 import { expect, test } from "@playwright/test";
 
@@ -15,7 +14,7 @@ test("Authentication/SignUp", async ({ page }) => {
     .email({ firstName: user.firstName, lastName: user.lastName })
     .toLowerCase()
     // Add timestamp to avoid collision
-    .replace("@", `+${dates().unix()}@`);
+    .replace("@", `+${new Date().getTime()}@`);
 
   await page.goto("http://localhost:3000/signup");
   await page.getByTestId("SignUpForm_Inp_FirstName").fill(user.firstName);
@@ -24,5 +23,7 @@ test("Authentication/SignUp", async ({ page }) => {
   await page.getByTestId("SignUpForm_Inp_Password").fill(user.password);
   await page.getByTestId("SignUpForm_Btn_CreateAccount").click();
   await page.waitForURL(/signin/);
-  await expect(page.getByTestId("SignInForm_Alert_AccountCreated")).toBeVisible();
+  await expect(
+    page.getByTestId("SignInForm_Alert_AccountCreated")
+  ).toBeVisible();
 });

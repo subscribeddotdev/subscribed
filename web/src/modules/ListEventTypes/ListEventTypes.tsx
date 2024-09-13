@@ -5,20 +5,16 @@ import { EventType, Pagination } from "@@/common/libs/backendapi/client";
 import { dates } from "@@/common/libs/dates";
 import { usePaths } from "@@/paths";
 import { Box, Table } from "@radix-ui/themes";
-import Link from "next/link";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import styles from "./ListEventTypes.module.css";
 
-interface Props {
-  data: EventType[];
-  pagination: Pagination;
-}
-
-export function ListEventTypes({ data: initialData, pagination: initialPagination }: Props) {
-  const [data, setData] = useState(initialData);
-  const [pagination, setPagination] = useState(initialPagination);
+export function ListEventTypes() {
+  const [data, setData] = useState<EventType[]>([]);
+  const [pagination, setPagination] = useState<Pagination>();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const paths = usePaths();
 
   const paginationHandler = useCallback(async (page: number) => {
     setLoading(true);
@@ -34,7 +30,10 @@ export function ListEventTypes({ data: initialData, pagination: initialPaginatio
     }
   }, []);
 
-  const paths = usePaths();
+  useEffect(() => {
+    paginationHandler(1);
+  }, [paginationHandler]);
+
   if (data.length === 0) {
     return <Alert>No event types have been created yet.</Alert>;
   }
@@ -60,7 +59,10 @@ export function ListEventTypes({ data: initialData, pagination: initialPaginatio
           {data.map((eventType) => (
             <Table.Row key={eventType.id}>
               <Table.RowHeaderCell>
-                <Link className={styles.link} href={paths.helpers.toEventType(eventType.id)}>
+                <Link
+                  className={styles.link}
+                  to={paths.helpers.toEventType(eventType.id)}
+                >
                   {eventType.name}
                 </Link>
               </Table.RowHeaderCell>
@@ -70,13 +72,21 @@ export function ListEventTypes({ data: initialData, pagination: initialPaginatio
                   ? `${eventType.description.substring(0, 67).trimEnd()}...`
                   : eventType.description}
               </Table.RowHeaderCell>
-              <Table.Cell>{dates(eventType.created_at).format("LL")}</Table.Cell>
+              <Table.Cell>
+                {dates(eventType.created_at).format("LL")}
+              </Table.Cell>
             </Table.Row>
           ))}
         </Table.Body>
       </Table.Root>
 
-      <TablePaginationControl pagination={pagination} loading={loading} handler={paginationHandler} />
+      {pagination && (
+        <TablePaginationControl
+          loading={loading}
+          pagination={pagination}
+          handler={paginationHandler}
+        />
+      )}
     </Box>
   );
 }

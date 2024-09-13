@@ -1,7 +1,7 @@
 import { SignInPayload } from "@@/common/libs/backendapi/client";
 import { LAST_CHOSEN_ENVIRONMENT } from "@@/constants";
-import Cookies from "js-cookie";
 import { useEffect, useState } from "react";
+import Cookies from "../../../node_modules/@types/js-cookie";
 
 interface SignedInUserDetails {
   id: string;
@@ -19,7 +19,7 @@ export function retrieveTokenFromTheClient() {
   return localStorage.getItem("sbs_token");
 }
 
-export function retrieveTokenFromCookies(token: string) {
+export function retrieveTokenFromCookies() {
   return Cookies.get("sbs_token");
 }
 

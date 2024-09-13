@@ -1,21 +1,21 @@
-import { useRouter } from "next/router";
+import { useParams } from "react-router-dom";
 
 export function getPaths(environment: string) {
   return {
-    dashboardHomepage: `/dashboard/${environment}`,
+    dashboardHomepage: `/${environment}`,
   };
 }
 
 export function usePaths() {
-  const router = useRouter();
-  const env = router.query.environment as string;
+  const params = useParams();
+  const env = params.environment as string;
   const paths = getPaths(env);
 
   return {
     urls: paths,
     helpers: {
-      toApplication: (id: string) => `/dashboard/${env}/applications/${id}`,
-      toEventType: (id: string) => `/dashboard/${env}/event-types/${id}`,
+      toApplication: (id: string) => `/${env}/applications/${id}`,
+      toEventType: (id: string) => `/${env}/event-types/${id}`,
     },
   };
 }

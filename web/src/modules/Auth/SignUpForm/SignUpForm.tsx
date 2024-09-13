@@ -1,30 +1,31 @@
 import { Alert } from "@@/common/components/Alert/Alert";
 import { Button } from "@@/common/components/Button/Button";
 import { Input } from "@@/common/components/Input/Input";
-import { createApiClients, getApiError } from "@@/common/libs/backendapi/browser";
+import {
+  createApiClients,
+  getApiError,
+} from "@@/common/libs/backendapi/browser";
 import { paths } from "@@/constants";
 import { Box, Flex, Grid, Heading, Link, Text } from "@radix-ui/themes";
 import { useFormik } from "formik";
-import { useRouter } from "next/router";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import * as yup from "yup";
 import styles from "./SignUpForm.module.css";
 
-interface Props {}
-
-export function SignUpForm({}: Props) {
+export function SignUpForm() {
   const [error, setError] = useState("");
-  const router = useRouter();
+  const navigate = useNavigate();
 
   const f = useFormik({
     validationSchema,
     validateOnChange: false,
     initialValues: { first_name: "", last_name: "", email: "", password: "" },
-    onSubmit: async (values, { setSubmitting }) => {
+    onSubmit: async (values) => {
       try {
         setError("");
         await createApiClients("").Auth.signUp(values);
-        await router.push(paths.signin + "?signup-succeeded=1");
+        navigate(paths.signin + "?signup-succeeded=1");
       } catch (error) {
         setError(getApiError(error));
       }

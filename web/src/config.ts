@@ -1,6 +1,8 @@
+const env = import.meta.env;
+
 export const config = {
-  env: process.env.NEXT_PUBLIC_APP_ENV,
+  env: env.NEXT_PUBLIC_APP_ENV,
   public: {
-    api: process.env.NEXT_PUBLIC_API || "",
+    api: env.VITE_APP_API || "",
   },
 };

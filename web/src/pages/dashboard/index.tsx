@@ -1,29 +1,30 @@
-import { Environment } from "@@/common/libs/backendapi/client";
-import { createApiClientsSRR } from "@@/common/libs/backendapi/ssr";
-import { logger } from "@@/common/libs/logger";
-import { DashboardSetup } from "@@/modules/DashboardSetup/DashboardSetup";
-import { GetServerSideProps } from "next";
+import { LayoutDashboard } from "@@/common/layouts/LayoutDashboard/LayoutDashboard";
+import { paths } from "@@/constants";
+import { retrieveTokenFromTheClient } from "@@/modules/Auth/token";
+import { Spinner } from "@radix-ui/themes";
+import { useEffect, useState } from "react";
+import { Outlet, useNavigate } from "react-router-dom";
 
-interface Props {
-  environments: Environment[];
-}
+export default function DashboardRoot() {
+  const [ready, setReady] = useState(false);
 
-export default function DashboardSetupPage({ environments }: Props) {
-  return <DashboardSetup environments={environments} />;
-}
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (!retrieveTokenFromTheClient()) {
+      navigate(paths.signin);
+      return;
+    }
 
-export const getServerSideProps: GetServerSideProps = async ({ req }) => {
-  try {
-    const clients = await createApiClientsSRR(req);
-    const { data } = await clients.Environments.getEnvironments();
+    setReady(true);
+  }, [navigate]);
 
-    return {
-      props: {
-        environments: data.data,
-      },
-    };
-  } catch (error) {
-    logger.error(error, "error rendering /dashboard page");
-    return { redirect: { permanent: false, destination: "/500" } };
+  if (!ready) {
+    return <Spinner />;
   }
-};
+
+  return (
+    <LayoutDashboard>
+      <Outlet />
+    </LayoutDashboard>
+  );
+}

@@ -1,7 +1,7 @@
 import { Link } from "@radix-ui/themes";
 import { RiArrowRightSLine } from "@remixicon/react";
-import { useRouter } from "next/router";
 import { useMemo } from "react";
+import { useLocation } from "react-router-dom";
 import styles from "./Breadcrumbs.module.css";
 
 interface Props {
@@ -11,11 +11,11 @@ interface Props {
 }
 
 export function Breadcrumbs({ variables = {}, renderFromIndex = 0 }: Props) {
-  const router = useRouter();
+  const location = useLocation();
   const items = useMemo(() => {
     const paths: { label: string; path: string }[] = [];
 
-    router.asPath
+    location.pathname
       .split("/")
       .filter((item) => item)
       .forEach((item, idx) => {
@@ -26,7 +26,7 @@ export function Breadcrumbs({ variables = {}, renderFromIndex = 0 }: Props) {
       });
 
     return paths;
-  }, [router, variables]);
+  }, [location, variables]);
 
   return (
     <ul className={styles.breadcrumb}>
@@ -41,7 +41,9 @@ export function Breadcrumbs({ variables = {}, renderFromIndex = 0 }: Props) {
               {item.label}
             </Link>
 
-            {idx !== items.length - 1 && <RiArrowRightSLine size="14" className={styles.breadcrumbIcon} />}
+            {idx !== items.length - 1 && (
+              <RiArrowRightSLine size="14" className={styles.breadcrumbIcon} />
+            )}
           </li>
         );
       })}

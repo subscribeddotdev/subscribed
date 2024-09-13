@@ -1,5 +1,11 @@
 import { Theme } from "@radix-ui/themes";
-import { render, screen, waitFor, waitForElementToBeRemoved, within } from "@testing-library/react";
+import {
+  render,
+  screen,
+  waitFor,
+  waitForElementToBeRemoved,
+  within,
+} from "@testing-library/react";
 
 function renderComponent(ui: React.ReactNode) {
   return render(<Theme>{ui}</Theme>);

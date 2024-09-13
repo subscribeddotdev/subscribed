@@ -60,7 +60,9 @@ export function ListApiKeys({ apiKeys }: Props) {
                 <Badge color="gray">{apiKey.masked_secret_key}</Badge>
               </Table.Cell>
               <Table.Cell>{dates(apiKey.created_at).fromNow()}</Table.Cell>
-              <Table.Cell>{apiKey.expires_at ? dates(apiKey.expires_at).fromNow() : "-"}</Table.Cell>
+              <Table.Cell>
+                {apiKey.expires_at ? dates(apiKey.expires_at).fromNow() : "-"}
+              </Table.Cell>
               <Table.Cell>
                 <DropdownMenu.Root>
                   <DropdownMenu.Trigger>

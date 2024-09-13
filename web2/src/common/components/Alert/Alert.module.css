@@ -1,0 +1,21 @@
+.root {
+  width: 100%;
+  position: relative;
+}
+
+.text {
+  width: 100%;
+  display: block;
+}
+
+.closeButton {
+  top: 50%;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  border-radius: 50%;
+  position: absolute;
+  right: var(--space-4);
+  transform: translateY(-50%);
+}

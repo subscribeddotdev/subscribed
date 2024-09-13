@@ -1,0 +1,15 @@
+.menuBtn {
+  padding: 0;
+  border: none;
+  cursor: pointer;
+  background-color: transparent;
+
+  &:active,
+  &:focus {
+    outline: none;
+  }
+}
+
+.menuItem {
+  cursor: pointer;
+}

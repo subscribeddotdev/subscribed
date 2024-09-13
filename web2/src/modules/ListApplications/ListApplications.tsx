@@ -5,24 +5,17 @@ import { Application, Pagination } from "@@/common/libs/backendapi/client";
 import { dates } from "@@/common/libs/dates";
 import { usePaths } from "@@/paths";
 import { Badge, Box, Table } from "@radix-ui/themes";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import styles from "./ListApplications.module.css";
 
-interface Props {
-  data: Application[];
-  pagination: Pagination;
-}
-
-export function ListApplications({
-  data: initialData,
-  pagination: initialPagination,
-}: Props) {
+export function ListApplications() {
   const params = useParams();
-  const [data, setData] = useState(initialData);
-  const [pagination, setPagination] = useState(initialPagination);
+  const [data, setData] = useState<Application[]>([]);
+  const [pagination, setPagination] = useState<Pagination>();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const paths = usePaths();
 
   const paginationHandler = useCallback(
     async (page: number) => {
@@ -45,7 +38,10 @@ export function ListApplications({
     [params]
   );
 
-  const paths = usePaths();
+  useEffect(() => {
+    paginationHandler(1);
+  }, [paginationHandler]);
+
   if (data.length === 0) {
     return (
       <Alert>No applications have been created for this environment.</Alert>
@@ -89,11 +85,13 @@ export function ListApplications({
         </Table.Body>
       </Table.Root>
 
-      <TablePaginationControl
-        pagination={pagination}
-        loading={loading}
-        handler={paginationHandler}
-      />
+      {pagination && (
+        <TablePaginationControl
+          loading={loading}
+          pagination={pagination}
+          handler={paginationHandler}
+        />
+      )}
     </Box>
   );
 }

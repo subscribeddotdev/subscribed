@@ -14,8 +14,8 @@ export function usePaths() {
   return {
     urls: paths,
     helpers: {
-      toApplication: (id: string) => `/dashboard/${env}/applications/${id}`,
-      toEventType: (id: string) => `/dashboard/${env}/event-types/${id}`,
+      toApplication: (id: string) => `/${env}/applications/${id}`,
+      toEventType: (id: string) => `/${env}/event-types/${id}`,
     },
   };
 }

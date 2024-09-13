@@ -9,8 +9,12 @@ import {
   Navigate,
   RouterProvider,
 } from "react-router-dom";
+import ApplicationPage from "./pages/Dashboard/ApplicationPage.tsx";
+import ApplicationsPage from "./pages/Dashboard/ApplicationsPage.tsx";
 import DashboardHomePage from "./pages/Dashboard/DashboardHomePage.tsx";
+import EventTypePage from "./pages/Dashboard/EventTypePage.tsx";
 import EventTypesPage from "./pages/Dashboard/EventTypesPage.tsx";
+import DashboardRoot from "./pages/Dashboard/index.tsx";
 import SignInPage from "./pages/signin.tsx";
 import SignUpPage from "./pages/signup.tsx";
 
@@ -20,11 +24,29 @@ const router = createBrowserRouter([
   { path: "/signup", element: <SignUpPage /> },
   {
     path: "/:environment",
-    element: <DashboardHomePage />,
-  },
-  {
-    path: "/:environment/event-types",
-    element: <EventTypesPage />,
+    element: <DashboardRoot />,
+    children: [
+      {
+        path: "",
+        element: <DashboardHomePage />,
+      },
+      {
+        path: "applications",
+        element: <ApplicationsPage />,
+      },
+      {
+        path: "applications/:appId",
+        element: <ApplicationPage />,
+      },
+      {
+        path: "event-types",
+        element: <EventTypesPage />,
+      },
+      {
+        path: "event-types/:eventTypeId",
+        element: <EventTypePage />,
+      },
+    ],
   },
 ]);
 

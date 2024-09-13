@@ -23,5 +23,6 @@
       "@@/*": ["./src/*"]
     }
   },
-  "include": ["src"]
+  "include": ["src"],
+  "exclude": ["src/common/libs/backendapi/client/**/*.ts", "**/*.test.*"]
 }

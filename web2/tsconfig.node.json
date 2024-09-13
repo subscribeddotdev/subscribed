@@ -22,5 +22,6 @@
       "@@/*": ["./src/*"]
     }
   },
-  "include": ["vite.config.ts"]
+  "include": ["vite.config.ts"],
+  "exclude": ["src/common/libs/backendapi/client/**/*.ts", "**/*.test.*"]
 }

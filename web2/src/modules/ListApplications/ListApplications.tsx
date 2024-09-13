@@ -25,7 +25,7 @@ export function ListApplications() {
         const resp = await apiClients().Applications.getApplications(
           params.environment as string,
           undefined,
-          page
+          page,
         );
         setData(resp.data.data);
         setPagination(resp.data.pagination);
@@ -35,7 +35,7 @@ export function ListApplications() {
         setLoading(false);
       }
     },
-    [params]
+    [params],
   );
 
   useEffect(() => {

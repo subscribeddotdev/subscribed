@@ -21,7 +21,7 @@ export function DashboardSetup({ environments }: Props) {
     }
 
     navigate(
-      getPaths(lastChosenEnvironment || environments[0].id).dashboardHomepage
+      getPaths(lastChosenEnvironment || environments[0].id).dashboardHomepage,
     );
   }, [navigate, environments]);
 

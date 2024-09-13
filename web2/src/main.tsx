@@ -9,6 +9,7 @@ import {
   Navigate,
   RouterProvider,
 } from "react-router-dom";
+import ApiKeysHome from "./pages/Dashboard/ApiKeysPage.tsx";
 import ApplicationPage from "./pages/Dashboard/ApplicationPage.tsx";
 import ApplicationsPage from "./pages/Dashboard/ApplicationsPage.tsx";
 import DashboardHomePage from "./pages/Dashboard/DashboardHomePage.tsx";
@@ -46,6 +47,10 @@ const router = createBrowserRouter([
         path: "event-types/:eventTypeId",
         element: <EventTypePage />,
       },
+      {
+        path: "api-keys",
+        element: <ApiKeysHome />,
+      },
     ],
   },
 ]);
@@ -57,5 +62,5 @@ createRoot(document.getElementById("root")!).render(
         <RouterProvider router={router} />
       </Theme>
     </HelmetProvider>
-  </StrictMode>
+  </StrictMode>,
 );

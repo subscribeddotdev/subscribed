@@ -1,6 +1,9 @@
 import { Alert } from "@@/common/components/Alert/Alert";
 import { Input } from "@@/common/components/Input/Input";
-import { createApiClients, getApiError } from "@@/common/libs/backendapi/browser";
+import {
+  createApiClients,
+  getApiError,
+} from "@@/common/libs/backendapi/browser";
 import { dates } from "@@/common/libs/dates";
 import { Button, Code, Dialog, Flex } from "@radix-ui/themes";
 import { useFormik } from "formik";
@@ -31,14 +34,16 @@ export function CreateApiKey({ onSuccess }: Props) {
     initialValues,
     validateOnChange: false,
     validationSchema,
-    onSubmit: async (values, {}) => {
+    onSubmit: async (values) => {
       try {
         setError("");
         const apiClient = createApiClients(retrieveTokenFromTheClient());
         const { data } = await apiClient.ApiKeys.createApiKey({
           name: values.name,
           environment_id: state.environmentId,
-          expires_at: values.expires_at ? dates(values.expires_at).toISOString() : null,
+          expires_at: values.expires_at
+            ? dates(values.expires_at).toISOString()
+            : null,
         });
 
         setApiKey(data.unmasked_api_key);
@@ -61,7 +66,14 @@ export function CreateApiKey({ onSuccess }: Props) {
           <Dialog.Title>New api key</Dialog.Title>
 
           <Flex direction="column" gap="2">
-            <Input label="Name" required name="name" id="name" onChange={f.handleChange} error={f.errors.name} />
+            <Input
+              label="Name"
+              required
+              name="name"
+              id="name"
+              onChange={f.handleChange}
+              error={f.errors.name}
+            />
             <Input
               type="date"
               id="expires_at"
@@ -78,7 +90,11 @@ export function CreateApiKey({ onSuccess }: Props) {
                 Cancel
               </Button>
             </Dialog.Close>
-            <Button loading={f.isSubmitting} disabled={f.isSubmitting} type="submit">
+            <Button
+              loading={f.isSubmitting}
+              disabled={f.isSubmitting}
+              type="submit"
+            >
               Create
             </Button>
           </Flex>
@@ -96,7 +112,8 @@ export function CreateApiKey({ onSuccess }: Props) {
           <Dialog.Title>Api key successfully created</Dialog.Title>
 
           <Alert color="amber" mb="4">
-            Please saved this api key before closing this window because we {"won't"} show it ever again.
+            Please saved this api key before closing this window because we{" "}
+            {"won't"} show it ever again.
           </Alert>
           <Code>{apiKey}</Code>
 

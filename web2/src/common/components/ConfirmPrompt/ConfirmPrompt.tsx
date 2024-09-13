@@ -9,7 +9,13 @@ interface Props {
   onOpenChange(status: boolean): void;
 }
 
-export function ConfirmPrompt({ onOpenChange, onConfirm, open, title, description }: Props) {
+export function ConfirmPrompt({
+  onOpenChange,
+  onConfirm,
+  open,
+  title,
+  description,
+}: Props) {
   const [doing, setDoing] = useState(false);
   const onConfirmHandler = useCallback(async () => {
     setDoing(true);
@@ -22,7 +28,9 @@ export function ConfirmPrompt({ onOpenChange, onConfirm, open, title, descriptio
     <AlertDialog.Root open={open} onOpenChange={onOpenChange}>
       <AlertDialog.Content maxWidth="450px">
         <AlertDialog.Title>{title}</AlertDialog.Title>
-        <AlertDialog.Description size="2">{description}</AlertDialog.Description>
+        <AlertDialog.Description size="2">
+          {description}
+        </AlertDialog.Description>
 
         <Flex gap="3" mt="4" justify="end">
           <AlertDialog.Cancel>
@@ -30,7 +38,13 @@ export function ConfirmPrompt({ onOpenChange, onConfirm, open, title, descriptio
               Cancel
             </Button>
           </AlertDialog.Cancel>
-          <Button loading={doing} disabled={doing} variant="solid" color="red" onClick={onConfirmHandler}>
+          <Button
+            loading={doing}
+            disabled={doing}
+            variant="solid"
+            color="red"
+            onClick={onConfirmHandler}
+          >
             Confirm
           </Button>
         </Flex>

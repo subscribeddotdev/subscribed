@@ -11,16 +11,16 @@ import { getPaths } from "@@/paths";
 import { Box, Flex, Heading, Link, Text } from "@radix-ui/themes";
 import { useFormik } from "formik";
 import { useCallback, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import * as yup from "yup";
 import { storeTokenOnTheClient, storeUserDetails } from "../token";
 import styles from "./SignInForm.module.css";
 
 export function SignInForm() {
   const [error, setError] = useState("");
-  const params = useParams();
+  const [query] = useSearchParams();
   const navigate = useNavigate();
-  const showAccountCreatedSuccessMsg = params["signup-succeeded"] === "1";
+  const showAccountCreatedSuccessMsg = query.get("signup-succeeded") === "1";
 
   const postSignIn = useCallback(async () => {
     const { data } = await apiClients().Environments.getEnvironments();

@@ -18,8 +18,9 @@ export function EnvironmentSelector() {
     async (newEnv: string) => {
       localStorage.setItem(LAST_CHOSEN_ENVIRONMENT, newEnv);
       navigate(location.pathname.replace(params.environment as string, newEnv));
+      navigate(0);
     },
-    [navigate, params, location]
+    [navigate, params, location],
   );
 
   useEffect(() => {

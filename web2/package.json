@@ -7,7 +7,18 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "start": "vite preview --port 3000",
+    "lint:css": "npx stylelint '**/*.css'",
+    "fmt": "npx prettier --check .",
+    "fmt:fix": "npx prettier -w .",
+    "init": "mkdir .openapi",
+    "test:unit": "jest",
+    "test:unit:ci": "jest --ci",
+    "e2e:server": "cd ../server; docker compose up -d",
+    "e2e": "playwright test",
+    "e2e:codegen": "npx playwright codegen",
+    "type-check": "tsc --noEmit",
+    "openapi": "npx @openapitools/openapi-generator-cli generate -i ../server/api//openapi.yml -g typescript-axios -o ./src/common/libs/backendapi/client"
   },
   "dependencies": {
     "@radix-ui/react-avatar": "^1.1.0",
@@ -32,6 +43,10 @@
   "devDependencies": {
     "@csstools/postcss-global-data": "^3.0.0",
     "@eslint/js": "^9.9.0",
+    "@faker-js/faker": "^9.0.0",
+    "@playwright/test": "^1.47.0",
+    "@testing-library/react": "^16.0.1",
+    "@types/jest": "^29.5.13",
     "@types/js-cookie": "^3.0.6",
     "@types/node": "^22.5.4",
     "@types/react": "^18.3.3",
@@ -41,8 +56,11 @@
     "eslint-plugin-react-hooks": "^5.1.0-rc.0",
     "eslint-plugin-react-refresh": "^0.4.9",
     "globals": "^15.9.0",
+    "jest-environment-jsdom": "^29.7.0",
     "postcss-normalize": "^10.0.1",
     "postcss-preset-env": "^10.0.1",
+    "stylelint": "^16.9.0",
+    "stylelint-config-standard": "^36.0.1",
     "typescript": "^5.5.3",
     "typescript-eslint": "^8.0.1",
     "vite": "^5.4.1"

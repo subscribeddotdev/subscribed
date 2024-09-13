@@ -36,6 +36,9 @@ jobs:
       - name: Codegen API Client
         run: npm run openapi
 
+      - name: Build
+        run: npm run build
+
       - name: Type check
         run: npm run type-check
 

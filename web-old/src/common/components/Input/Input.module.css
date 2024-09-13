@@ -1,6 +1,0 @@
-.input {
-  /* Fix radix's input issue */
-  input[type="date"] {
-    display: block;
-  }
-}

@@ -1,8 +1,0 @@
-.link {
-  color: var(--gray-12);
-  transition: text-decoration-color 0.25s;
-
-  &:hover {
-    text-decoration-color: var(--accent-9);
-  }
-}

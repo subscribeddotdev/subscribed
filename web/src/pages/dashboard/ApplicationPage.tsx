@@ -16,10 +16,8 @@ export default function ApplicationPage() {
     (async () => {
       try {
         const { data } = await apiClients().Applications.getApplicationById(
-          params.appId || "",
+          params.appId || ""
         );
-
-        console.log(data.data);
 
         setApp(data.data);
       } catch (error) {

@@ -24,5 +24,5 @@
     }
   },
   "include": ["src"],
-  "exclude": ["src/common/libs/backendapi/client/**/*.ts", "**/*.test.*"]
+  "exclude": ["src/common/libs/backendapi/client/**/*.ts", "src/**/*.test.tsx"]
 }

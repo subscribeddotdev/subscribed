@@ -1,4 +1,13 @@
 import "@@/common/styles/globals.css";
+import ApiKeysHome from "@@/pages/Dashboard/ApiKeysPage.tsx";
+import ApplicationPage from "@@/pages/Dashboard/ApplicationPage.tsx";
+import ApplicationsPage from "@@/pages/Dashboard/ApplicationsPage.tsx";
+import DashboardHomePage from "@@/pages/Dashboard/DashboardHomePage.tsx";
+import EventTypePage from "@@/pages/Dashboard/EventTypePage.tsx";
+import EventTypesPage from "@@/pages/Dashboard/EventTypesPage.tsx";
+import DashboardRoot from "@@/pages/Dashboard/index.tsx";
+import SignInPage from "@@/pages/signin.tsx";
+import SignUpPage from "@@/pages/signup.tsx";
 import { Theme } from "@radix-ui/themes";
 import "@radix-ui/themes/styles.css";
 import { StrictMode } from "react";
@@ -9,15 +18,6 @@ import {
   Navigate,
   RouterProvider,
 } from "react-router-dom";
-import ApiKeysHome from "./pages/Dashboard/ApiKeysPage.tsx";
-import ApplicationPage from "./pages/Dashboard/ApplicationPage.tsx";
-import ApplicationsPage from "./pages/Dashboard/ApplicationsPage.tsx";
-import DashboardHomePage from "./pages/Dashboard/DashboardHomePage.tsx";
-import EventTypePage from "./pages/Dashboard/EventTypePage.tsx";
-import EventTypesPage from "./pages/Dashboard/EventTypesPage.tsx";
-import DashboardRoot from "./pages/Dashboard/index.tsx";
-import SignInPage from "./pages/signin.tsx";
-import SignUpPage from "./pages/signup.tsx";
 
 const router = createBrowserRouter([
   { path: "/", element: <Navigate to="/signin" /> },
@@ -62,5 +62,5 @@ createRoot(document.getElementById("root")!).render(
         <RouterProvider router={router} />
       </Theme>
     </HelmetProvider>
-  </StrictMode>,
+  </StrictMode>
 );

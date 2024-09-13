@@ -30,7 +30,7 @@ export function MenuItem({ children, href, active = false }: MenuItemProps) {
 }
 
 function getMenuItems(environment: string) {
-  const basePath = `/dashboard/${environment}`;
+  const basePath = `/${environment}`;
 
   return [
     {

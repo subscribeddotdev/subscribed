@@ -2,13 +2,15 @@ import { Alert } from "@@/common/components/Alert/Alert";
 import { Button } from "@@/common/components/Button/Button";
 import { Input } from "@@/common/components/Input/Input";
 import {
+  apiClients,
   createApiClients,
   getApiError,
 } from "@@/common/libs/backendapi/browser";
-import { paths } from "@@/constants";
+import { LAST_CHOSEN_ENVIRONMENT, paths } from "@@/constants";
+import { getPaths } from "@@/paths";
 import { Box, Flex, Heading, Link, Text } from "@radix-ui/themes";
 import { useFormik } from "formik";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import * as yup from "yup";
 import { storeTokenOnTheClient, storeUserDetails } from "../token";
@@ -19,6 +21,21 @@ export function SignInForm() {
   const params = useParams();
   const navigate = useNavigate();
   const showAccountCreatedSuccessMsg = params["signup-succeeded"] === "1";
+
+  const postSignIn = useCallback(async () => {
+    const { data } = await apiClients().Environments.getEnvironments();
+
+    const lastChosenEnvironment =
+      localStorage.getItem(LAST_CHOSEN_ENVIRONMENT) || "";
+    if (!lastChosenEnvironment) {
+      localStorage.setItem(LAST_CHOSEN_ENVIRONMENT, data.data[0].id);
+    }
+
+    const url = getPaths(
+      lastChosenEnvironment || data.data[0].id
+    ).dashboardHomepage;
+    navigate(url);
+  }, [navigate]);
 
   const f = useFormik({
     validationSchema,
@@ -34,7 +51,7 @@ export function SignInForm() {
         storeTokenOnTheClient(data.token);
         storeUserDetails(data);
 
-        navigate(paths.dashboard);
+        await postSignIn();
       } catch (error) {
         setError(getApiError(error));
       }

@@ -9,6 +9,8 @@ import {
   Navigate,
   RouterProvider,
 } from "react-router-dom";
+import DashboardHomePage from "./pages/Dashboard/DashboardHomePage.tsx";
+import EventTypesPage from "./pages/Dashboard/EventTypesPage.tsx";
 import SignInPage from "./pages/signin.tsx";
 import SignUpPage from "./pages/signup.tsx";
 
@@ -16,6 +18,14 @@ const router = createBrowserRouter([
   { path: "/", element: <Navigate to="/signin" /> },
   { path: "/signin", element: <SignInPage /> },
   { path: "/signup", element: <SignUpPage /> },
+  {
+    path: "/:environment",
+    element: <DashboardHomePage />,
+  },
+  {
+    path: "/:environment/event-types",
+    element: <EventTypesPage />,
+  },
 ]);
 
 createRoot(document.getElementById("root")!).render(

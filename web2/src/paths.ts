@@ -2,7 +2,7 @@ import { useParams } from "react-router-dom";
 
 export function getPaths(environment: string) {
   return {
-    dashboardHomepage: `/dashboard/${environment}`,
+    dashboardHomepage: `/${environment}`,
   };
 }
 

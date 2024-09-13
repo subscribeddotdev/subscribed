@@ -19,7 +19,7 @@ export function retrieveTokenFromTheClient() {
   return localStorage.getItem("sbs_token");
 }
 
-export function retrieveTokenFromCookies(token: string) {
+export function retrieveTokenFromCookies() {
   return Cookies.get("sbs_token");
 }
 

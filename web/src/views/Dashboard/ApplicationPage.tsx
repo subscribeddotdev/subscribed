@@ -16,7 +16,7 @@ export default function ApplicationPage() {
     (async () => {
       try {
         const { data } = await apiClients().Applications.getApplicationById(
-          params.appId || ""
+          params.appId || "",
         );
 
         setApp(data.data);

@@ -32,7 +32,7 @@ export function SignInForm() {
     }
 
     const url = getPaths(
-      lastChosenEnvironment || data.data[0].id
+      lastChosenEnvironment || data.data[0].id,
     ).dashboardHomepage;
     navigate(url);
   }, [navigate]);

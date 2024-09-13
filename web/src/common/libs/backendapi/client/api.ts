@@ -610,7 +610,7 @@ export interface SignupRequest {
  * @export
  */
 export const ApiKeysApiAxiosParamCreator = function (
-  configuration?: Configuration
+  configuration?: Configuration,
 ) {
   return {
     /**
@@ -622,13 +622,13 @@ export const ApiKeysApiAxiosParamCreator = function (
      */
     createApiKey: async (
       createApiKeyRequest: CreateApiKeyRequest,
-      options: RawAxiosRequestConfig = {}
+      options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'createApiKeyRequest' is not null or undefined
       assertParamExists(
         "createApiKey",
         "createApiKeyRequest",
-        createApiKeyRequest
+        createApiKeyRequest,
       );
       const localVarPath = `/api-keys`;
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
@@ -663,7 +663,7 @@ export const ApiKeysApiAxiosParamCreator = function (
       localVarRequestOptions.data = serializeDataIfNeeded(
         createApiKeyRequest,
         localVarRequestOptions,
-        configuration
+        configuration,
       );
 
       return {
@@ -680,13 +680,13 @@ export const ApiKeysApiAxiosParamCreator = function (
      */
     destroyApiKey: async (
       apiKeyId: string,
-      options: RawAxiosRequestConfig = {}
+      options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'apiKeyId' is not null or undefined
       assertParamExists("destroyApiKey", "apiKeyId", apiKeyId);
       const localVarPath = `/api-keys/{apiKeyId}`.replace(
         `{${"apiKeyId"}}`,
-        encodeURIComponent(String(apiKeyId))
+        encodeURIComponent(String(apiKeyId)),
       );
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -730,7 +730,7 @@ export const ApiKeysApiAxiosParamCreator = function (
      */
     getAllApiKeys: async (
       environmentId: string,
-      options: RawAxiosRequestConfig = {}
+      options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'environmentId' is not null or undefined
       assertParamExists("getAllApiKeys", "environmentId", environmentId);
@@ -791,16 +791,16 @@ export const ApiKeysApiFp = function (configuration?: Configuration) {
      */
     async createApiKey(
       createApiKeyRequest: CreateApiKeyRequest,
-      options?: RawAxiosRequestConfig
+      options?: RawAxiosRequestConfig,
     ): Promise<
       (
         axios?: AxiosInstance,
-        basePath?: string
+        basePath?: string,
       ) => AxiosPromise<CreateApiKeyPayload>
     > {
       const localVarAxiosArgs = await localVarAxiosParamCreator.createApiKey(
         createApiKeyRequest,
-        options
+        options,
       );
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
       const localVarOperationServerBasePath =
@@ -812,7 +812,7 @@ export const ApiKeysApiFp = function (configuration?: Configuration) {
           localVarAxiosArgs,
           globalAxios,
           BASE_PATH,
-          configuration
+          configuration,
         )(axios, localVarOperationServerBasePath || basePath);
     },
     /**
@@ -824,13 +824,13 @@ export const ApiKeysApiFp = function (configuration?: Configuration) {
      */
     async destroyApiKey(
       apiKeyId: string,
-      options?: RawAxiosRequestConfig
+      options?: RawAxiosRequestConfig,
     ): Promise<
       (axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>
     > {
       const localVarAxiosArgs = await localVarAxiosParamCreator.destroyApiKey(
         apiKeyId,
-        options
+        options,
       );
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
       const localVarOperationServerBasePath =
@@ -842,7 +842,7 @@ export const ApiKeysApiFp = function (configuration?: Configuration) {
           localVarAxiosArgs,
           globalAxios,
           BASE_PATH,
-          configuration
+          configuration,
         )(axios, localVarOperationServerBasePath || basePath);
     },
     /**
@@ -854,16 +854,16 @@ export const ApiKeysApiFp = function (configuration?: Configuration) {
      */
     async getAllApiKeys(
       environmentId: string,
-      options?: RawAxiosRequestConfig
+      options?: RawAxiosRequestConfig,
     ): Promise<
       (
         axios?: AxiosInstance,
-        basePath?: string
+        basePath?: string,
       ) => AxiosPromise<GetAllApiKeysPayload>
     > {
       const localVarAxiosArgs = await localVarAxiosParamCreator.getAllApiKeys(
         environmentId,
-        options
+        options,
       );
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
       const localVarOperationServerBasePath =
@@ -875,7 +875,7 @@ export const ApiKeysApiFp = function (configuration?: Configuration) {
           localVarAxiosArgs,
           globalAxios,
           BASE_PATH,
-          configuration
+          configuration,
         )(axios, localVarOperationServerBasePath || basePath);
     },
   };
@@ -888,7 +888,7 @@ export const ApiKeysApiFp = function (configuration?: Configuration) {
 export const ApiKeysApiFactory = function (
   configuration?: Configuration,
   basePath?: string,
-  axios?: AxiosInstance
+  axios?: AxiosInstance,
 ) {
   const localVarFp = ApiKeysApiFp(configuration);
   return {
@@ -901,7 +901,7 @@ export const ApiKeysApiFactory = function (
      */
     createApiKey(
       createApiKeyRequest: CreateApiKeyRequest,
-      options?: RawAxiosRequestConfig
+      options?: RawAxiosRequestConfig,
     ): AxiosPromise<CreateApiKeyPayload> {
       return localVarFp
         .createApiKey(createApiKeyRequest, options)
@@ -916,7 +916,7 @@ export const ApiKeysApiFactory = function (
      */
     destroyApiKey(
       apiKeyId: string,
-      options?: RawAxiosRequestConfig
+      options?: RawAxiosRequestConfig,
     ): AxiosPromise<void> {
       return localVarFp
         .destroyApiKey(apiKeyId, options)
@@ -931,7 +931,7 @@ export const ApiKeysApiFactory = function (
      */
     getAllApiKeys(
       environmentId: string,
-      options?: RawAxiosRequestConfig
+      options?: RawAxiosRequestConfig,
     ): AxiosPromise<GetAllApiKeysPayload> {
       return localVarFp
         .getAllApiKeys(environmentId, options)
@@ -957,7 +957,7 @@ export class ApiKeysApi extends BaseAPI {
    */
   public createApiKey(
     createApiKeyRequest: CreateApiKeyRequest,
-    options?: RawAxiosRequestConfig
+    options?: RawAxiosRequestConfig,
   ) {
     return ApiKeysApiFp(this.configuration)
       .createApiKey(createApiKeyRequest, options)
@@ -998,7 +998,7 @@ export class ApiKeysApi extends BaseAPI {
  * @export
  */
 export const ApplicationsApiAxiosParamCreator = function (
-  configuration?: Configuration
+  configuration?: Configuration,
 ) {
   return {
     /**
@@ -1010,13 +1010,13 @@ export const ApplicationsApiAxiosParamCreator = function (
      */
     createApplication: async (
       createApplicationRequest: CreateApplicationRequest,
-      options: RawAxiosRequestConfig = {}
+      options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'createApplicationRequest' is not null or undefined
       assertParamExists(
         "createApplication",
         "createApplicationRequest",
-        createApplicationRequest
+        createApplicationRequest,
       );
       const localVarPath = `/applications`;
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
@@ -1038,7 +1038,7 @@ export const ApplicationsApiAxiosParamCreator = function (
       await setApiKeyToObject(
         localVarHeaderParameter,
         "x-api-key",
-        configuration
+        configuration,
       );
 
       localVarHeaderParameter["Content-Type"] = "application/json";
@@ -1054,7 +1054,7 @@ export const ApplicationsApiAxiosParamCreator = function (
       localVarRequestOptions.data = serializeDataIfNeeded(
         createApplicationRequest,
         localVarRequestOptions,
-        configuration
+        configuration,
       );
 
       return {
@@ -1071,13 +1071,13 @@ export const ApplicationsApiAxiosParamCreator = function (
      */
     getApplicationById: async (
       applicationID: string,
-      options: RawAxiosRequestConfig = {}
+      options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'applicationID' is not null or undefined
       assertParamExists("getApplicationById", "applicationID", applicationID);
       const localVarPath = `/applications/{applicationID}`.replace(
         `{${"applicationID"}}`,
-        encodeURIComponent(String(applicationID))
+        encodeURIComponent(String(applicationID)),
       );
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -1098,7 +1098,7 @@ export const ApplicationsApiAxiosParamCreator = function (
       await setApiKeyToObject(
         localVarHeaderParameter,
         "x-api-key",
-        configuration
+        configuration,
       );
 
       // authentication BearerAuth required
@@ -1132,7 +1132,7 @@ export const ApplicationsApiAxiosParamCreator = function (
       environmentID: string,
       limit?: number,
       page?: number,
-      options: RawAxiosRequestConfig = {}
+      options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'environmentID' is not null or undefined
       assertParamExists("getApplications", "environmentID", environmentID);
@@ -1156,7 +1156,7 @@ export const ApplicationsApiAxiosParamCreator = function (
       await setApiKeyToObject(
         localVarHeaderParameter,
         "x-api-key",
-        configuration
+        configuration,
       );
 
       // authentication BearerAuth required
@@ -1209,17 +1209,17 @@ export const ApplicationsApiFp = function (configuration?: Configuration) {
      */
     async createApplication(
       createApplicationRequest: CreateApplicationRequest,
-      options?: RawAxiosRequestConfig
+      options?: RawAxiosRequestConfig,
     ): Promise<
       (
         axios?: AxiosInstance,
-        basePath?: string
+        basePath?: string,
       ) => AxiosPromise<CreateApplicationPayload>
     > {
       const localVarAxiosArgs =
         await localVarAxiosParamCreator.createApplication(
           createApplicationRequest,
-          options
+          options,
         );
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
       const localVarOperationServerBasePath =
@@ -1231,7 +1231,7 @@ export const ApplicationsApiFp = function (configuration?: Configuration) {
           localVarAxiosArgs,
           globalAxios,
           BASE_PATH,
-          configuration
+          configuration,
         )(axios, localVarOperationServerBasePath || basePath);
     },
     /**
@@ -1243,17 +1243,17 @@ export const ApplicationsApiFp = function (configuration?: Configuration) {
      */
     async getApplicationById(
       applicationID: string,
-      options?: RawAxiosRequestConfig
+      options?: RawAxiosRequestConfig,
     ): Promise<
       (
         axios?: AxiosInstance,
-        basePath?: string
+        basePath?: string,
       ) => AxiosPromise<GetApplicationByIdPayload>
     > {
       const localVarAxiosArgs =
         await localVarAxiosParamCreator.getApplicationById(
           applicationID,
-          options
+          options,
         );
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
       const localVarOperationServerBasePath =
@@ -1265,7 +1265,7 @@ export const ApplicationsApiFp = function (configuration?: Configuration) {
           localVarAxiosArgs,
           globalAxios,
           BASE_PATH,
-          configuration
+          configuration,
         )(axios, localVarOperationServerBasePath || basePath);
     },
     /**
@@ -1281,18 +1281,18 @@ export const ApplicationsApiFp = function (configuration?: Configuration) {
       environmentID: string,
       limit?: number,
       page?: number,
-      options?: RawAxiosRequestConfig
+      options?: RawAxiosRequestConfig,
     ): Promise<
       (
         axios?: AxiosInstance,
-        basePath?: string
+        basePath?: string,
       ) => AxiosPromise<GetApplicationsPayload>
     > {
       const localVarAxiosArgs = await localVarAxiosParamCreator.getApplications(
         environmentID,
         limit,
         page,
-        options
+        options,
       );
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
       const localVarOperationServerBasePath =
@@ -1304,7 +1304,7 @@ export const ApplicationsApiFp = function (configuration?: Configuration) {
           localVarAxiosArgs,
           globalAxios,
           BASE_PATH,
-          configuration
+          configuration,
         )(axios, localVarOperationServerBasePath || basePath);
     },
   };
@@ -1317,7 +1317,7 @@ export const ApplicationsApiFp = function (configuration?: Configuration) {
 export const ApplicationsApiFactory = function (
   configuration?: Configuration,
   basePath?: string,
-  axios?: AxiosInstance
+  axios?: AxiosInstance,
 ) {
   const localVarFp = ApplicationsApiFp(configuration);
   return {
@@ -1330,7 +1330,7 @@ export const ApplicationsApiFactory = function (
      */
     createApplication(
       createApplicationRequest: CreateApplicationRequest,
-      options?: RawAxiosRequestConfig
+      options?: RawAxiosRequestConfig,
     ): AxiosPromise<CreateApplicationPayload> {
       return localVarFp
         .createApplication(createApplicationRequest, options)
@@ -1345,7 +1345,7 @@ export const ApplicationsApiFactory = function (
      */
     getApplicationById(
       applicationID: string,
-      options?: RawAxiosRequestConfig
+      options?: RawAxiosRequestConfig,
     ): AxiosPromise<GetApplicationByIdPayload> {
       return localVarFp
         .getApplicationById(applicationID, options)
@@ -1364,7 +1364,7 @@ export const ApplicationsApiFactory = function (
       environmentID: string,
       limit?: number,
       page?: number,
-      options?: RawAxiosRequestConfig
+      options?: RawAxiosRequestConfig,
     ): AxiosPromise<GetApplicationsPayload> {
       return localVarFp
         .getApplications(environmentID, limit, page, options)
@@ -1390,7 +1390,7 @@ export class ApplicationsApi extends BaseAPI {
    */
   public createApplication(
     createApplicationRequest: CreateApplicationRequest,
-    options?: RawAxiosRequestConfig
+    options?: RawAxiosRequestConfig,
   ) {
     return ApplicationsApiFp(this.configuration)
       .createApplication(createApplicationRequest, options)
@@ -1407,7 +1407,7 @@ export class ApplicationsApi extends BaseAPI {
    */
   public getApplicationById(
     applicationID: string,
-    options?: RawAxiosRequestConfig
+    options?: RawAxiosRequestConfig,
   ) {
     return ApplicationsApiFp(this.configuration)
       .getApplicationById(applicationID, options)
@@ -1428,7 +1428,7 @@ export class ApplicationsApi extends BaseAPI {
     environmentID: string,
     limit?: number,
     page?: number,
-    options?: RawAxiosRequestConfig
+    options?: RawAxiosRequestConfig,
   ) {
     return ApplicationsApiFp(this.configuration)
       .getApplications(environmentID, limit, page, options)
@@ -1441,7 +1441,7 @@ export class ApplicationsApi extends BaseAPI {
  * @export
  */
 export const AuthApiAxiosParamCreator = function (
-  configuration?: Configuration
+  configuration?: Configuration,
 ) {
   return {
     /**
@@ -1453,7 +1453,7 @@ export const AuthApiAxiosParamCreator = function (
      */
     signIn: async (
       signinRequest: SigninRequest,
-      options: RawAxiosRequestConfig = {}
+      options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'signinRequest' is not null or undefined
       assertParamExists("signIn", "signinRequest", signinRequest);
@@ -1486,7 +1486,7 @@ export const AuthApiAxiosParamCreator = function (
       localVarRequestOptions.data = serializeDataIfNeeded(
         signinRequest,
         localVarRequestOptions,
-        configuration
+        configuration,
       );
 
       return {
@@ -1503,7 +1503,7 @@ export const AuthApiAxiosParamCreator = function (
      */
     signUp: async (
       signupRequest: SignupRequest,
-      options: RawAxiosRequestConfig = {}
+      options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'signupRequest' is not null or undefined
       assertParamExists("signUp", "signupRequest", signupRequest);
@@ -1536,7 +1536,7 @@ export const AuthApiAxiosParamCreator = function (
       localVarRequestOptions.data = serializeDataIfNeeded(
         signupRequest,
         localVarRequestOptions,
-        configuration
+        configuration,
       );
 
       return {
@@ -1563,13 +1563,13 @@ export const AuthApiFp = function (configuration?: Configuration) {
      */
     async signIn(
       signinRequest: SigninRequest,
-      options?: RawAxiosRequestConfig
+      options?: RawAxiosRequestConfig,
     ): Promise<
       (axios?: AxiosInstance, basePath?: string) => AxiosPromise<SignInPayload>
     > {
       const localVarAxiosArgs = await localVarAxiosParamCreator.signIn(
         signinRequest,
-        options
+        options,
       );
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
       const localVarOperationServerBasePath =
@@ -1580,7 +1580,7 @@ export const AuthApiFp = function (configuration?: Configuration) {
           localVarAxiosArgs,
           globalAxios,
           BASE_PATH,
-          configuration
+          configuration,
         )(axios, localVarOperationServerBasePath || basePath);
     },
     /**
@@ -1592,13 +1592,13 @@ export const AuthApiFp = function (configuration?: Configuration) {
      */
     async signUp(
       signupRequest: SignupRequest,
-      options?: RawAxiosRequestConfig
+      options?: RawAxiosRequestConfig,
     ): Promise<
       (axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>
     > {
       const localVarAxiosArgs = await localVarAxiosParamCreator.signUp(
         signupRequest,
-        options
+        options,
       );
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
       const localVarOperationServerBasePath =
@@ -1609,7 +1609,7 @@ export const AuthApiFp = function (configuration?: Configuration) {
           localVarAxiosArgs,
           globalAxios,
           BASE_PATH,
-          configuration
+          configuration,
         )(axios, localVarOperationServerBasePath || basePath);
     },
   };
@@ -1622,7 +1622,7 @@ export const AuthApiFp = function (configuration?: Configuration) {
 export const AuthApiFactory = function (
   configuration?: Configuration,
   basePath?: string,
-  axios?: AxiosInstance
+  axios?: AxiosInstance,
 ) {
   const localVarFp = AuthApiFp(configuration);
   return {
@@ -1635,7 +1635,7 @@ export const AuthApiFactory = function (
      */
     signIn(
       signinRequest: SigninRequest,
-      options?: RawAxiosRequestConfig
+      options?: RawAxiosRequestConfig,
     ): AxiosPromise<SignInPayload> {
       return localVarFp
         .signIn(signinRequest, options)
@@ -1650,7 +1650,7 @@ export const AuthApiFactory = function (
      */
     signUp(
       signupRequest: SignupRequest,
-      options?: RawAxiosRequestConfig
+      options?: RawAxiosRequestConfig,
     ): AxiosPromise<void> {
       return localVarFp
         .signUp(signupRequest, options)
@@ -1700,7 +1700,7 @@ export class AuthApi extends BaseAPI {
  * @export
  */
 export const EndpointsApiAxiosParamCreator = function (
-  configuration?: Configuration
+  configuration?: Configuration,
 ) {
   return {
     /**
@@ -1714,7 +1714,7 @@ export const EndpointsApiAxiosParamCreator = function (
     addEndpoint: async (
       applicationID: string,
       addEndpointRequest: AddEndpointRequest,
-      options: RawAxiosRequestConfig = {}
+      options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'applicationID' is not null or undefined
       assertParamExists("addEndpoint", "applicationID", applicationID);
@@ -1722,11 +1722,11 @@ export const EndpointsApiAxiosParamCreator = function (
       assertParamExists(
         "addEndpoint",
         "addEndpointRequest",
-        addEndpointRequest
+        addEndpointRequest,
       );
       const localVarPath = `/applications/{applicationID}/endpoints`.replace(
         `{${"applicationID"}}`,
-        encodeURIComponent(String(applicationID))
+        encodeURIComponent(String(applicationID)),
       );
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -1760,7 +1760,7 @@ export const EndpointsApiAxiosParamCreator = function (
       localVarRequestOptions.data = serializeDataIfNeeded(
         addEndpointRequest,
         localVarRequestOptions,
-        configuration
+        configuration,
       );
 
       return {
@@ -1790,14 +1790,14 @@ export const EndpointsApiFp = function (configuration?: Configuration) {
     async addEndpoint(
       applicationID: string,
       addEndpointRequest: AddEndpointRequest,
-      options?: RawAxiosRequestConfig
+      options?: RawAxiosRequestConfig,
     ): Promise<
       (axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>
     > {
       const localVarAxiosArgs = await localVarAxiosParamCreator.addEndpoint(
         applicationID,
         addEndpointRequest,
-        options
+        options,
       );
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
       const localVarOperationServerBasePath =
@@ -1809,7 +1809,7 @@ export const EndpointsApiFp = function (configuration?: Configuration) {
           localVarAxiosArgs,
           globalAxios,
           BASE_PATH,
-          configuration
+          configuration,
         )(axios, localVarOperationServerBasePath || basePath);
     },
   };
@@ -1822,7 +1822,7 @@ export const EndpointsApiFp = function (configuration?: Configuration) {
 export const EndpointsApiFactory = function (
   configuration?: Configuration,
   basePath?: string,
-  axios?: AxiosInstance
+  axios?: AxiosInstance,
 ) {
   const localVarFp = EndpointsApiFp(configuration);
   return {
@@ -1837,7 +1837,7 @@ export const EndpointsApiFactory = function (
     addEndpoint(
       applicationID: string,
       addEndpointRequest: AddEndpointRequest,
-      options?: RawAxiosRequestConfig
+      options?: RawAxiosRequestConfig,
     ): AxiosPromise<void> {
       return localVarFp
         .addEndpoint(applicationID, addEndpointRequest, options)
@@ -1865,7 +1865,7 @@ export class EndpointsApi extends BaseAPI {
   public addEndpoint(
     applicationID: string,
     addEndpointRequest: AddEndpointRequest,
-    options?: RawAxiosRequestConfig
+    options?: RawAxiosRequestConfig,
   ) {
     return EndpointsApiFp(this.configuration)
       .addEndpoint(applicationID, addEndpointRequest, options)
@@ -1878,7 +1878,7 @@ export class EndpointsApi extends BaseAPI {
  * @export
  */
 export const EnvironmentsApiAxiosParamCreator = function (
-  configuration?: Configuration
+  configuration?: Configuration,
 ) {
   return {
     /**
@@ -1888,7 +1888,7 @@ export const EnvironmentsApiAxiosParamCreator = function (
      * @throws {RequiredError}
      */
     getEnvironments: async (
-      options: RawAxiosRequestConfig = {}
+      options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       const localVarPath = `/environments`;
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
@@ -1942,16 +1942,15 @@ export const EnvironmentsApiFp = function (configuration?: Configuration) {
      * @throws {RequiredError}
      */
     async getEnvironments(
-      options?: RawAxiosRequestConfig
+      options?: RawAxiosRequestConfig,
     ): Promise<
       (
         axios?: AxiosInstance,
-        basePath?: string
+        basePath?: string,
       ) => AxiosPromise<GetAllEnvironmentsPayload>
     > {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.getEnvironments(
-        options
-      );
+      const localVarAxiosArgs =
+        await localVarAxiosParamCreator.getEnvironments(options);
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
       const localVarOperationServerBasePath =
         operationServerMap["EnvironmentsApi.getEnvironments"]?.[
@@ -1962,7 +1961,7 @@ export const EnvironmentsApiFp = function (configuration?: Configuration) {
           localVarAxiosArgs,
           globalAxios,
           BASE_PATH,
-          configuration
+          configuration,
         )(axios, localVarOperationServerBasePath || basePath);
     },
   };
@@ -1975,7 +1974,7 @@ export const EnvironmentsApiFp = function (configuration?: Configuration) {
 export const EnvironmentsApiFactory = function (
   configuration?: Configuration,
   basePath?: string,
-  axios?: AxiosInstance
+  axios?: AxiosInstance,
 ) {
   const localVarFp = EnvironmentsApiFp(configuration);
   return {
@@ -1986,7 +1985,7 @@ export const EnvironmentsApiFactory = function (
      * @throws {RequiredError}
      */
     getEnvironments(
-      options?: RawAxiosRequestConfig
+      options?: RawAxiosRequestConfig,
     ): AxiosPromise<GetAllEnvironmentsPayload> {
       return localVarFp
         .getEnvironments(options)
@@ -2021,7 +2020,7 @@ export class EnvironmentsApi extends BaseAPI {
  * @export
  */
 export const EventTypesApiAxiosParamCreator = function (
-  configuration?: Configuration
+  configuration?: Configuration,
 ) {
   return {
     /**
@@ -2033,13 +2032,13 @@ export const EventTypesApiAxiosParamCreator = function (
      */
     createEventType: async (
       createEventTypeRequest: CreateEventTypeRequest,
-      options: RawAxiosRequestConfig = {}
+      options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'createEventTypeRequest' is not null or undefined
       assertParamExists(
         "createEventType",
         "createEventTypeRequest",
-        createEventTypeRequest
+        createEventTypeRequest,
       );
       const localVarPath = `/event-types`;
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
@@ -2074,7 +2073,7 @@ export const EventTypesApiAxiosParamCreator = function (
       localVarRequestOptions.data = serializeDataIfNeeded(
         createEventTypeRequest,
         localVarRequestOptions,
-        configuration
+        configuration,
       );
 
       return {
@@ -2091,13 +2090,13 @@ export const EventTypesApiAxiosParamCreator = function (
      */
     getEventTypeById: async (
       eventTypeID: string,
-      options: RawAxiosRequestConfig = {}
+      options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'eventTypeID' is not null or undefined
       assertParamExists("getEventTypeById", "eventTypeID", eventTypeID);
       const localVarPath = `/event-types/{eventTypeID}`.replace(
         `{${"eventTypeID"}}`,
-        encodeURIComponent(String(eventTypeID))
+        encodeURIComponent(String(eventTypeID)),
       );
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -2118,7 +2117,7 @@ export const EventTypesApiAxiosParamCreator = function (
       await setApiKeyToObject(
         localVarHeaderParameter,
         "x-api-key",
-        configuration
+        configuration,
       );
 
       // authentication BearerAuth required
@@ -2150,7 +2149,7 @@ export const EventTypesApiAxiosParamCreator = function (
     getEventTypes: async (
       limit?: number,
       page?: number,
-      options: RawAxiosRequestConfig = {}
+      options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       const localVarPath = `/event-types`;
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
@@ -2172,7 +2171,7 @@ export const EventTypesApiAxiosParamCreator = function (
       await setApiKeyToObject(
         localVarHeaderParameter,
         "x-api-key",
-        configuration
+        configuration,
       );
 
       // authentication BearerAuth required
@@ -2221,16 +2220,16 @@ export const EventTypesApiFp = function (configuration?: Configuration) {
      */
     async createEventType(
       createEventTypeRequest: CreateEventTypeRequest,
-      options?: RawAxiosRequestConfig
+      options?: RawAxiosRequestConfig,
     ): Promise<
       (
         axios?: AxiosInstance,
-        basePath?: string
+        basePath?: string,
       ) => AxiosPromise<CreateEventTypePayload>
     > {
       const localVarAxiosArgs = await localVarAxiosParamCreator.createEventType(
         createEventTypeRequest,
-        options
+        options,
       );
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
       const localVarOperationServerBasePath =
@@ -2242,7 +2241,7 @@ export const EventTypesApiFp = function (configuration?: Configuration) {
           localVarAxiosArgs,
           globalAxios,
           BASE_PATH,
-          configuration
+          configuration,
         )(axios, localVarOperationServerBasePath || basePath);
     },
     /**
@@ -2254,11 +2253,11 @@ export const EventTypesApiFp = function (configuration?: Configuration) {
      */
     async getEventTypeById(
       eventTypeID: string,
-      options?: RawAxiosRequestConfig
+      options?: RawAxiosRequestConfig,
     ): Promise<
       (
         axios?: AxiosInstance,
-        basePath?: string
+        basePath?: string,
       ) => AxiosPromise<GetEventTypeByIdPayload>
     > {
       const localVarAxiosArgs =
@@ -2273,7 +2272,7 @@ export const EventTypesApiFp = function (configuration?: Configuration) {
           localVarAxiosArgs,
           globalAxios,
           BASE_PATH,
-          configuration
+          configuration,
         )(axios, localVarOperationServerBasePath || basePath);
     },
     /**
@@ -2287,17 +2286,17 @@ export const EventTypesApiFp = function (configuration?: Configuration) {
     async getEventTypes(
       limit?: number,
       page?: number,
-      options?: RawAxiosRequestConfig
+      options?: RawAxiosRequestConfig,
     ): Promise<
       (
         axios?: AxiosInstance,
-        basePath?: string
+        basePath?: string,
       ) => AxiosPromise<GetEventTypesPayload>
     > {
       const localVarAxiosArgs = await localVarAxiosParamCreator.getEventTypes(
         limit,
         page,
-        options
+        options,
       );
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
       const localVarOperationServerBasePath =
@@ -2309,7 +2308,7 @@ export const EventTypesApiFp = function (configuration?: Configuration) {
           localVarAxiosArgs,
           globalAxios,
           BASE_PATH,
-          configuration
+          configuration,
         )(axios, localVarOperationServerBasePath || basePath);
     },
   };
@@ -2322,7 +2321,7 @@ export const EventTypesApiFp = function (configuration?: Configuration) {
 export const EventTypesApiFactory = function (
   configuration?: Configuration,
   basePath?: string,
-  axios?: AxiosInstance
+  axios?: AxiosInstance,
 ) {
   const localVarFp = EventTypesApiFp(configuration);
   return {
@@ -2335,7 +2334,7 @@ export const EventTypesApiFactory = function (
      */
     createEventType(
       createEventTypeRequest: CreateEventTypeRequest,
-      options?: RawAxiosRequestConfig
+      options?: RawAxiosRequestConfig,
     ): AxiosPromise<CreateEventTypePayload> {
       return localVarFp
         .createEventType(createEventTypeRequest, options)
@@ -2350,7 +2349,7 @@ export const EventTypesApiFactory = function (
      */
     getEventTypeById(
       eventTypeID: string,
-      options?: RawAxiosRequestConfig
+      options?: RawAxiosRequestConfig,
     ): AxiosPromise<GetEventTypeByIdPayload> {
       return localVarFp
         .getEventTypeById(eventTypeID, options)
@@ -2367,7 +2366,7 @@ export const EventTypesApiFactory = function (
     getEventTypes(
       limit?: number,
       page?: number,
-      options?: RawAxiosRequestConfig
+      options?: RawAxiosRequestConfig,
     ): AxiosPromise<GetEventTypesPayload> {
       return localVarFp
         .getEventTypes(limit, page, options)
@@ -2393,7 +2392,7 @@ export class EventTypesApi extends BaseAPI {
    */
   public createEventType(
     createEventTypeRequest: CreateEventTypeRequest,
-    options?: RawAxiosRequestConfig
+    options?: RawAxiosRequestConfig,
   ) {
     return EventTypesApiFp(this.configuration)
       .createEventType(createEventTypeRequest, options)
@@ -2410,7 +2409,7 @@ export class EventTypesApi extends BaseAPI {
    */
   public getEventTypeById(
     eventTypeID: string,
-    options?: RawAxiosRequestConfig
+    options?: RawAxiosRequestConfig,
   ) {
     return EventTypesApiFp(this.configuration)
       .getEventTypeById(eventTypeID, options)
@@ -2429,7 +2428,7 @@ export class EventTypesApi extends BaseAPI {
   public getEventTypes(
     limit?: number,
     page?: number,
-    options?: RawAxiosRequestConfig
+    options?: RawAxiosRequestConfig,
   ) {
     return EventTypesApiFp(this.configuration)
       .getEventTypes(limit, page, options)
@@ -2442,7 +2441,7 @@ export class EventTypesApi extends BaseAPI {
  * @export
  */
 export const HealthApiAxiosParamCreator = function (
-  configuration?: Configuration
+  configuration?: Configuration,
 ) {
   return {
     /**
@@ -2451,7 +2450,7 @@ export const HealthApiAxiosParamCreator = function (
      * @throws {RequiredError}
      */
     healthCheck: async (
-      options: RawAxiosRequestConfig = {}
+      options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       const localVarPath = `/health`;
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
@@ -2499,13 +2498,12 @@ export const HealthApiFp = function (configuration?: Configuration) {
      * @throws {RequiredError}
      */
     async healthCheck(
-      options?: RawAxiosRequestConfig
+      options?: RawAxiosRequestConfig,
     ): Promise<
       (axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>
     > {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.healthCheck(
-        options
-      );
+      const localVarAxiosArgs =
+        await localVarAxiosParamCreator.healthCheck(options);
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
       const localVarOperationServerBasePath =
         operationServerMap["HealthApi.healthCheck"]?.[
@@ -2516,7 +2514,7 @@ export const HealthApiFp = function (configuration?: Configuration) {
           localVarAxiosArgs,
           globalAxios,
           BASE_PATH,
-          configuration
+          configuration,
         )(axios, localVarOperationServerBasePath || basePath);
     },
   };
@@ -2529,7 +2527,7 @@ export const HealthApiFp = function (configuration?: Configuration) {
 export const HealthApiFactory = function (
   configuration?: Configuration,
   basePath?: string,
-  axios?: AxiosInstance
+  axios?: AxiosInstance,
 ) {
   const localVarFp = HealthApiFp(configuration);
   return {
@@ -2571,7 +2569,7 @@ export class HealthApi extends BaseAPI {
  * @export
  */
 export const MessagesApiAxiosParamCreator = function (
-  configuration?: Configuration
+  configuration?: Configuration,
 ) {
   return {
     /**
@@ -2585,7 +2583,7 @@ export const MessagesApiAxiosParamCreator = function (
     sendMessage: async (
       applicationID: string,
       sendMessageRequest: SendMessageRequest,
-      options: RawAxiosRequestConfig = {}
+      options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'applicationID' is not null or undefined
       assertParamExists("sendMessage", "applicationID", applicationID);
@@ -2593,11 +2591,11 @@ export const MessagesApiAxiosParamCreator = function (
       assertParamExists(
         "sendMessage",
         "sendMessageRequest",
-        sendMessageRequest
+        sendMessageRequest,
       );
       const localVarPath = `/applications/{applicationID}/messages`.replace(
         `{${"applicationID"}}`,
-        encodeURIComponent(String(applicationID))
+        encodeURIComponent(String(applicationID)),
       );
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -2618,7 +2616,7 @@ export const MessagesApiAxiosParamCreator = function (
       await setApiKeyToObject(
         localVarHeaderParameter,
         "x-api-key",
-        configuration
+        configuration,
       );
 
       localVarHeaderParameter["Content-Type"] = "application/json";
@@ -2634,7 +2632,7 @@ export const MessagesApiAxiosParamCreator = function (
       localVarRequestOptions.data = serializeDataIfNeeded(
         sendMessageRequest,
         localVarRequestOptions,
-        configuration
+        configuration,
       );
 
       return {
@@ -2663,14 +2661,14 @@ export const MessagesApiFp = function (configuration?: Configuration) {
     async sendMessage(
       applicationID: string,
       sendMessageRequest: SendMessageRequest,
-      options?: RawAxiosRequestConfig
+      options?: RawAxiosRequestConfig,
     ): Promise<
       (axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>
     > {
       const localVarAxiosArgs = await localVarAxiosParamCreator.sendMessage(
         applicationID,
         sendMessageRequest,
-        options
+        options,
       );
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
       const localVarOperationServerBasePath =
@@ -2682,7 +2680,7 @@ export const MessagesApiFp = function (configuration?: Configuration) {
           localVarAxiosArgs,
           globalAxios,
           BASE_PATH,
-          configuration
+          configuration,
         )(axios, localVarOperationServerBasePath || basePath);
     },
   };
@@ -2695,7 +2693,7 @@ export const MessagesApiFp = function (configuration?: Configuration) {
 export const MessagesApiFactory = function (
   configuration?: Configuration,
   basePath?: string,
-  axios?: AxiosInstance
+  axios?: AxiosInstance,
 ) {
   const localVarFp = MessagesApiFp(configuration);
   return {
@@ -2710,7 +2708,7 @@ export const MessagesApiFactory = function (
     sendMessage(
       applicationID: string,
       sendMessageRequest: SendMessageRequest,
-      options?: RawAxiosRequestConfig
+      options?: RawAxiosRequestConfig,
     ): AxiosPromise<void> {
       return localVarFp
         .sendMessage(applicationID, sendMessageRequest, options)
@@ -2738,7 +2736,7 @@ export class MessagesApi extends BaseAPI {
   public sendMessage(
     applicationID: string,
     sendMessageRequest: SendMessageRequest,
-    options?: RawAxiosRequestConfig
+    options?: RawAxiosRequestConfig,
   ) {
     return MessagesApiFp(this.configuration)
       .sendMessage(applicationID, sendMessageRequest, options)

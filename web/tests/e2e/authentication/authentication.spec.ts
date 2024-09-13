@@ -24,6 +24,6 @@ test("Authentication/SignUp", async ({ page }) => {
   await page.getByTestId("SignUpForm_Btn_CreateAccount").click();
   await page.waitForURL(/signin/);
   await expect(
-    page.getByTestId("SignInForm_Alert_AccountCreated")
+    page.getByTestId("SignInForm_Alert_AccountCreated"),
   ).toBeVisible();
 });

@@ -19,6 +19,7 @@ import {
   RouterProvider,
 } from "react-router-dom";
 import { config } from "./config";
+import { CreateEventTypePage } from "./views/Dashboard/CreateEventTypePage";
 
 const basePath = config.basePath;
 
@@ -47,6 +48,10 @@ const router = createBrowserRouter([
         element: <EventTypesPage />,
       },
       {
+        path: "event-types/create",
+        element: <CreateEventTypePage />,
+      },
+      {
         path: "event-types/:eventTypeId",
         element: <EventTypePage />,
       },
@@ -65,5 +70,5 @@ createRoot(document.getElementById("root")!).render(
         <RouterProvider router={router} />
       </Theme>
     </HelmetProvider>
-  </StrictMode>,
+  </StrictMode>
 );

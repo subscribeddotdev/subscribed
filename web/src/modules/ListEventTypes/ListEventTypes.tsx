@@ -67,7 +67,6 @@ export function ListEventTypes() {
                 </Link>
               </Table.RowHeaderCell>
               <Table.RowHeaderCell>
-                {eventType.description.length}
                 {eventType.description.length > 70
                   ? `${eventType.description.substring(0, 67).trimEnd()}...`
                   : eventType.description}

@@ -1,0 +1,9 @@
+version: 3
+
+tasks:
+  docker:build:
+    cmds:
+      - docker build -t subscribed .
+  docker:run:
+    cmds:
+      - docker run -p 8090:8090 --rm --env-file ./.env.docker subscribed

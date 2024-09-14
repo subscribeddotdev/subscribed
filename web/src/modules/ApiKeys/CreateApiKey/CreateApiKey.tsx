@@ -67,10 +67,10 @@ export function CreateApiKey({ onSuccess }: Props) {
 
           <Flex direction="column" gap="2">
             <Input
-              label="Name"
               required
-              name="name"
               id="name"
+              name="name"
+              label="Name"
               onChange={f.handleChange}
               error={f.errors.name}
             />

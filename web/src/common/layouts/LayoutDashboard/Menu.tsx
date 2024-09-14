@@ -62,7 +62,7 @@ export function MenuList() {
   const location = useLocation();
   const menuItems = useMemo(
     () => getMenuItems(params.environment as string),
-    [params]
+    [params],
   );
 
   return (

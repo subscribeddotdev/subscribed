@@ -36,7 +36,7 @@ func TestMain(m *testing.M) {
 	// Wait for the backend to be spun up
 	waitfor := wait_for.NewWaitFor(logs.New())
 	waitfor.Do(func() error {
-		req, err := http.Get(fmt.Sprintf("http://localhost:%s/health", os.Getenv("HTTP_PORT")))
+		req, err := http.Get(fmt.Sprintf("http://localhost:%s/health", os.Getenv("SBS_HTTP_PORT")))
 		if err != nil {
 			return err
 		}
@@ -50,7 +50,7 @@ func TestMain(m *testing.M) {
 	waitfor.Wait()
 
 	var err error
-	db, err = postgres.Connect(os.Getenv("DATABASE_URL"))
+	db, err = postgres.Connect(os.Getenv("SBS_DATABASE_URL"))
 	if err != nil {
 		panic(err)
 	}
@@ -65,7 +65,7 @@ func TestMain(m *testing.M) {
 
 func getClient(t *testing.T) *client.ClientWithResponses {
 	cli, err := client.NewClientWithResponses(
-		fmt.Sprintf("http://localhost:%s", os.Getenv("HTTP_PORT")),
+		fmt.Sprintf("http://localhost:%s", os.Getenv("SBS_HTTP_PORT")),
 	)
 	require.NoError(t, err)
 
@@ -74,7 +74,7 @@ func getClient(t *testing.T) *client.ClientWithResponses {
 
 func getClientWithToken(t *testing.T, token string) *client.ClientWithResponses {
 	cli, err := client.NewClientWithResponses(
-		fmt.Sprintf("http://localhost:%s", os.Getenv("HTTP_PORT")),
+		fmt.Sprintf("http://localhost:%s", os.Getenv("SBS_HTTP_PORT")),
 		client.WithRequestEditorFn(func(ctx context.Context, req *http.Request) error {
 			if token != "" {
 				req.Header.Set(echo.HeaderAuthorization, fmt.Sprintf("Bearer %s", token))
@@ -89,7 +89,7 @@ func getClientWithToken(t *testing.T, token string) *client.ClientWithResponses 
 
 func getClientWithApiKey(t *testing.T, key string) *client.ClientWithResponses {
 	cli, err := client.NewClientWithResponses(
-		fmt.Sprintf("http://localhost:%s", os.Getenv("HTTP_PORT")),
+		fmt.Sprintf("http://localhost:%s", os.Getenv("SBS_HTTP_PORT")),
 		client.WithRequestEditorFn(func(ctx context.Context, req *http.Request) error {
 			if key == "" {
 				return errors.New("api key is missing")

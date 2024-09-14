@@ -65,7 +65,7 @@ func (w *WaitFor) Wait() {
 func Run() {
 	w := NewWaitFor(logs.New())
 	w.Do(func() error {
-		db, err := postgres.Connect(os.Getenv("DATABASE_URL"))
+		db, err := postgres.Connect(os.Getenv("SBS_DATABASE_URL"))
 		if err != nil {
 			return err
 		}
@@ -74,7 +74,7 @@ func Run() {
 	}, "postgres", time.Second*30)
 
 	w.Do(func() error {
-		_, err := amqp091.Dial(os.Getenv("AMQP_URL"))
+		_, err := amqp091.Dial(os.Getenv("SBS_AMQP_URL"))
 		if err != nil {
 			return err
 		}

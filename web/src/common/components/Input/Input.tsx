@@ -73,5 +73,5 @@ export const Input = forwardRef<HTMLInputElement, Props>(
         )}
       </Flex>
     );
-  }
+  },
 );

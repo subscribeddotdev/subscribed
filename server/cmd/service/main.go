@@ -36,13 +36,13 @@ import (
 )
 
 type Config struct {
-	DatabaseUrl        string `envconfig:"DATABASE_URL" required:"true"`
-	Port               int    `envconfig:"HTTP_PORT" required:"true"`
-	ProductionMode     bool   `envconfig:"PRODUCTION_MODE" required:"true"`
-	AllowedCorsOrigin  string `envconfig:"HTTP_ALLOWED_CORS" required:"true"`
-	AmqpURL            string `envconfig:"AMQP_URL" required:"true"`
-	HttpJwtSecret      string `envconfig:"HTTP_JWT_SECRET" required:"true"`
-	WebFrontendEnabled bool   `envconfig:"WEB_FRONTEND_ENABLED" required:"true"`
+	DatabaseUrl        string `envconfig:"SBS_DATABASE_URL" required:"true"`
+	Port               int    `envconfig:"SBS_HTTP_PORT" required:"true"`
+	ProductionMode     bool   `envconfig:"SBS_PRODUCTION_MODE" required:"true"`
+	AllowedCorsOrigin  string `envconfig:"SBS_HTTP_ALLOWED_CORS" required:"true"`
+	AmqpURL            string `envconfig:"SBS_AMQP_URL" required:"true"`
+	HttpJwtSecret      string `envconfig:"SBS_HTTP_JWT_SECRET" required:"true"`
+	WebFrontendEnabled bool   `envconfig:"SBS_WEB_FRONTEND_ENABLED" required:"true"`
 }
 
 func main() {

@@ -34,7 +34,7 @@ func TestMain(m *testing.M) {
 	wait_for.Run()
 
 	var err error
-	db, err = postgres.Connect(os.Getenv("DATABASE_URL"))
+	db, err = postgres.Connect(os.Getenv("SBS_DATABASE_URL"))
 	if err != nil {
 		log.Println(err)
 		os.Exit(1)

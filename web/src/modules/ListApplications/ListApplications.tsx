@@ -5,22 +5,17 @@ import { Application, Pagination } from "@@/common/libs/backendapi/client";
 import { dates } from "@@/common/libs/dates";
 import { usePaths } from "@@/paths";
 import { Badge, Box, Table } from "@radix-ui/themes";
-import Link from "next/link";
-import { useRouter } from "next/router";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { Link, useParams } from "react-router-dom";
 import styles from "./ListApplications.module.css";
 
-interface Props {
-  data: Application[];
-  pagination: Pagination;
-}
-
-export function ListApplications({ data: initialData, pagination: initialPagination }: Props) {
-  const router = useRouter();
-  const [data, setData] = useState(initialData);
-  const [pagination, setPagination] = useState(initialPagination);
+export function ListApplications() {
+  const params = useParams();
+  const [data, setData] = useState<Application[]>([]);
+  const [pagination, setPagination] = useState<Pagination>();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const paths = usePaths();
 
   const paginationHandler = useCallback(
     async (page: number) => {
@@ -28,7 +23,7 @@ export function ListApplications({ data: initialData, pagination: initialPaginat
       setError("");
       try {
         const resp = await apiClients().Applications.getApplications(
-          router.query.environment as string,
+          params.environment as string,
           undefined,
           page,
         );
@@ -40,12 +35,17 @@ export function ListApplications({ data: initialData, pagination: initialPaginat
         setLoading(false);
       }
     },
-    [router],
+    [params],
   );
 
-  const paths = usePaths();
+  useEffect(() => {
+    paginationHandler(1);
+  }, [paginationHandler]);
+
   if (data.length === 0) {
-    return <Alert>No applications have been created for this environment.</Alert>;
+    return (
+      <Alert>No applications have been created for this environment.</Alert>
+    );
   }
 
   return (
@@ -69,7 +69,10 @@ export function ListApplications({ data: initialData, pagination: initialPaginat
           {data.map((app) => (
             <Table.Row key={app.id}>
               <Table.RowHeaderCell>
-                <Link className={styles.link} href={paths.helpers.toApplication(app.id)}>
+                <Link
+                  className={styles.link}
+                  to={paths.helpers.toApplication(app.id)}
+                >
                   {app.name}
                 </Link>
               </Table.RowHeaderCell>
@@ -82,7 +85,13 @@ export function ListApplications({ data: initialData, pagination: initialPaginat
         </Table.Body>
       </Table.Root>
 
-      <TablePaginationControl pagination={pagination} loading={loading} handler={paginationHandler} />
+      {pagination && (
+        <TablePaginationControl
+          loading={loading}
+          pagination={pagination}
+          handler={paginationHandler}
+        />
+      )}
     </Box>
   );
 }

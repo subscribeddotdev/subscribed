@@ -2,14 +2,14 @@ import { apiClients } from "@@/common/libs/backendapi/browser";
 import { Environment } from "@@/common/libs/backendapi/client";
 import { LAST_CHOSEN_ENVIRONMENT } from "@@/constants";
 import { Callout, Select } from "@radix-ui/themes";
-import { useRouter } from "next/router";
 import { useCallback, useEffect, useState } from "react";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import styles from "./EnvironmentSelector.module.css";
 
-interface Props {}
-
-export function EnvironmentSelector({}: Props) {
-  const router = useRouter();
+export function EnvironmentSelector() {
+  const navigate = useNavigate();
+  const params = useParams();
+  const location = useLocation();
   const [error, setError] = useState<unknown>();
   const [envs, setEnvs] = useState<Environment[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -17,9 +17,10 @@ export function EnvironmentSelector({}: Props) {
   const onEnvChange = useCallback(
     async (newEnv: string) => {
       localStorage.setItem(LAST_CHOSEN_ENVIRONMENT, newEnv);
-      await router.push(router.asPath.replace(router.query.environment as string, newEnv));
+      navigate(location.pathname.replace(params.environment as string, newEnv));
+      navigate(0);
     },
-    [router],
+    [navigate, params, location],
   );
 
   useEffect(() => {
@@ -41,10 +42,13 @@ export function EnvironmentSelector({}: Props) {
       {isLoading && <span hidden data-testid="IsLoading"></span>}
       <Select.Root
         data-loading={isLoading}
-        defaultValue={router.query.environment as string}
+        defaultValue={params.environment as string}
         onValueChange={onEnvChange}
       >
-        <Select.Trigger data-testid="EnvSelector_Trigger" className={styles.trigger} />
+        <Select.Trigger
+          data-testid="EnvSelector_Trigger"
+          className={styles.trigger}
+        />
         <Select.Content>
           <Select.Group>
             <Select.Label>Environments</Select.Label>
@@ -59,7 +63,9 @@ export function EnvironmentSelector({}: Props) {
 
       {error && (
         <Callout.Root color="red" mt="2">
-          <Callout.Text>Unable to fetch environments. Please refresh the page.</Callout.Text>
+          <Callout.Text>
+            Unable to fetch environments. Please refresh the page.
+          </Callout.Text>
         </Callout.Root>
       )}
     </>

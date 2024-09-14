@@ -1,8 +1,6 @@
 import { PropsWithChildren } from "react";
 import styles from "./LayoutAuth.module.css";
 
-interface Props extends PropsWithChildren {}
-
-export function LayoutAuth({ children }: Props) {
+export function LayoutAuth({ children }: PropsWithChildren) {
   return <div className={styles.root}>{children}</div>;
 }

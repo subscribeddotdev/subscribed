@@ -1,20 +1,18 @@
 import { paths } from "@@/constants";
 import { Avatar, DropdownMenu, Flex, Text } from "@radix-ui/themes";
-import { useRouter } from "next/router";
 import { useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import { clearTokenFromCurrentSession, useUserDetails } from "../Auth/token";
 import styles from "./UserMenu.module.css";
 
-interface Props {}
-
-export function UserMenu({}: Props) {
-  const router = useRouter();
+export function UserMenu() {
+  const navigate = useNavigate();
   const user = useUserDetails();
 
   const onLogout = useCallback(async () => {
     clearTokenFromCurrentSession();
-    await router.push(paths.signin);
-  }, [router]);
+    navigate(paths.signin);
+  }, [navigate]);
 
   if (!user.details) {
     return null;
@@ -25,7 +23,12 @@ export function UserMenu({}: Props) {
       <DropdownMenu.Root>
         <DropdownMenu.Trigger>
           <button className={styles.menuBtn}>
-            <Avatar size="1" radius="full" src="" fallback={user.details?.firstName.charAt(0)} />
+            <Avatar
+              size="1"
+              radius="full"
+              src=""
+              fallback={user.details?.firstName.charAt(0)}
+            />
           </button>
         </DropdownMenu.Trigger>
         <DropdownMenu.Content>

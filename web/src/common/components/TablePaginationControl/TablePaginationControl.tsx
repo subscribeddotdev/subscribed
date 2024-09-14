@@ -9,7 +9,11 @@ interface Props {
   handler(page: number): void;
 }
 
-export function TablePaginationControl({ pagination, loading, handler }: Props) {
+export function TablePaginationControl({
+  pagination,
+  loading,
+  handler,
+}: Props) {
   return (
     <Flex mt="4" justify="between" align="center">
       <Text size="2" color="gray">
@@ -33,7 +37,9 @@ export function TablePaginationControl({ pagination, loading, handler }: Props) 
           variant="outline"
           loading={loading}
           onClick={() => handler(pagination.current_page + 1)}
-          disabled={loading || pagination.current_page === pagination.total_pages}
+          disabled={
+            loading || pagination.current_page === pagination.total_pages
+          }
         >
           <RiArrowRightSLine />
         </Button>

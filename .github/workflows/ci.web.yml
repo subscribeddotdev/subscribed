@@ -33,19 +33,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-        # As described on https://nextjs.org/docs/pages/building-your-application/deploying/ci-build-caching#github-actions
-      - name: Cache
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.npm
-            ${{ github.workspace }}/.next/cache
-          key: ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-${{ hashFiles('**/*.js', '**/*.jsx', '**/*.ts', '**/*.tsx') }}
-          restore-keys: |
-            ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-
-
-      - name: Generate API Client from OpenAPI
+      - name: Codegen API Client
         run: npm run openapi
+
+      - name: Build
+        run: npm run build
 
       - name: Type check
         run: npm run type-check
@@ -56,8 +48,10 @@ jobs:
       - name: Lint (css)
         run: npm run lint:css
 
-      - name: Check code formatting
+      - name: Code fmt
         run: npm run fmt
 
-      - name: Test
-        run: npm run test:unit
+      # TODO: setup Vite w/ Jest
+      # https://dev.to/michaeljota/how-to-add-jest-into-your-vite-project-with-ts-5d21
+      # - name: Test
+      #   run: npm run test:unit

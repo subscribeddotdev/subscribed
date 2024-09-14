@@ -31,7 +31,12 @@ export function LayoutDashboard({ children, breadcrumbs }: Props) {
           <UserMenu />
         </header>
         <div className={styles.content}>
-          {!!breadcrumbs && <Breadcrumbs renderFromIndex={2} variables={breadcrumbs.variables} />}
+          {!!breadcrumbs && (
+            <Breadcrumbs
+              renderFromIndex={2}
+              variables={breadcrumbs.variables}
+            />
+          )}
           {children}
         </div>
       </main>

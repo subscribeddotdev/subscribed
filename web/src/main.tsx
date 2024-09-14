@@ -64,5 +64,5 @@ createRoot(document.getElementById("root")!).render(
         <RouterProvider router={router} />
       </Theme>
     </HelmetProvider>
-  </StrictMode>
+  </StrictMode>,
 );

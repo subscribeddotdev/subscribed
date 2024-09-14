@@ -1,4 +1,5 @@
 import { classnames } from "@@/common/libs/classnames";
+import { config } from "@@/config";
 import {
   RiCheckboxMultipleFill,
   RiGitRepositoryPrivateLine,
@@ -30,26 +31,26 @@ export function MenuItem({ children, href, active = false }: MenuItemProps) {
 }
 
 function getMenuItems(environment: string) {
-  const basePath = `${import.meta.env.BASE_URL}/${environment}`;
+  const rootPath = `${config.basePath}/${environment}`;
 
   return [
     {
-      path: basePath,
+      path: rootPath,
       label: "Getting started",
       icon: <RiHome5Line size="18" />,
     },
     {
-      path: `${basePath}/applications`,
+      path: `${rootPath}/applications`,
       label: "Applications",
       icon: <RiCheckboxMultipleFill size="18" />,
     },
     {
-      path: `${basePath}/event-types`,
+      path: `${rootPath}/event-types`,
       label: "Event types",
       icon: <RiStackLine size="18" />,
     },
     {
-      path: `${basePath}/api-keys`,
+      path: `${rootPath}/api-keys`,
       label: "API keys",
       icon: <RiGitRepositoryPrivateLine size="18" />,
     },

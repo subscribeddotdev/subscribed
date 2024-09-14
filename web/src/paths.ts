@@ -1,10 +1,9 @@
 import { useParams } from "react-router-dom";
-
-const basePath = import.meta.env.BASE_URL;
+import { config } from "./config";
 
 export function getPaths(environment: string) {
   return {
-    dashboardHomepage: `${basePath}/${environment}`,
+    dashboardHomepage: `${config.basePath}/${environment}`,
   };
 }
 
@@ -16,8 +15,10 @@ export function usePaths() {
   return {
     urls: paths,
     helpers: {
-      toApplication: (id: string) => `${basePath}/${env}/applications/${id}`,
-      toEventType: (id: string) => `${basePath}/${env}/event-types/${id}`,
+      toApplication: (id: string) =>
+        `${config.basePath}/${env}/applications/${id}`,
+      toEventType: (id: string) =>
+        `${config.basePath}/${env}/event-types/${id}`,
     },
   };
 }

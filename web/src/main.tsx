@@ -18,8 +18,9 @@ import {
   Navigate,
   RouterProvider,
 } from "react-router-dom";
+import { config } from "./config";
 
-const basePath = import.meta.env.BASE_URL;
+const basePath = config.basePath;
 
 const router = createBrowserRouter([
   { path: `${basePath}`, element: <Navigate to={`${basePath}/signin`} /> },

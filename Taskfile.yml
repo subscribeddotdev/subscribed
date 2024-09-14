@@ -1,6 +1,16 @@
 version: 3
 
 tasks:
+  server:
+    dir: ./server
+    cmds:
+      - docker compose up -d
+
+  web:
+    dir: ./web
+    cmds:
+      - npm run dev
+
   docker:build:
     cmds:
       - docker build -t subscribed .

@@ -30,7 +30,7 @@ export function MenuItem({ children, href, active = false }: MenuItemProps) {
 }
 
 function getMenuItems(environment: string) {
-  const basePath = `/${environment}`;
+  const basePath = `${import.meta.env.BASE_URL}/${environment}`;
 
   return [
     {
@@ -61,7 +61,7 @@ export function MenuList() {
   const location = useLocation();
   const menuItems = useMemo(
     () => getMenuItems(params.environment as string),
-    [params],
+    [params]
   );
 
   return (

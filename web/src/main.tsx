@@ -19,12 +19,14 @@ import {
   RouterProvider,
 } from "react-router-dom";
 
+const basePath = import.meta.env.BASE_URL;
+
 const router = createBrowserRouter([
-  { path: "/", element: <Navigate to="/signin" /> },
-  { path: "/signin", element: <SignInPage /> },
-  { path: "/signup", element: <SignUpPage /> },
+  { path: `${basePath}`, element: <Navigate to={`${basePath}/signin`} /> },
+  { path: `${basePath}/signin`, element: <SignInPage /> },
+  { path: `${basePath}/signup`, element: <SignUpPage /> },
   {
-    path: "/:environment",
+    path: `${basePath}/:environment`,
     element: <DashboardRoot />,
     children: [
       {
@@ -62,5 +64,5 @@ createRoot(document.getElementById("root")!).render(
         <RouterProvider router={router} />
       </Theme>
     </HelmetProvider>
-  </StrictMode>,
+  </StrictMode>
 );

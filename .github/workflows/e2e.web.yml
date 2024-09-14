@@ -59,7 +59,7 @@ jobs:
       # If the Playwright browser binaries weren't able to be restored, we tell
       # paywright to install everything for us.
       - name: Install Playwright's dependencies
-        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        # if: steps.playwright-cache.outputs.cache-hit != 'true'
         run: npx playwright install --with-deps
 
       - name: Run server

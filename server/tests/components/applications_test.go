@@ -1,7 +1,6 @@
 package components_test
 
 import (
-	"fmt"
 	"net/http"
 	"testing"
 
@@ -65,12 +64,4 @@ func TestApplications(t *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, http.StatusNotFound, resp.StatusCode())
 	})
-}
-
-func TestSeed(t *testing.T) {
-	ff := fixture.NewFactory(t, ctx, db)
-	for i := 0; i < 10; i++ {
-		a := ff.NewApplication().WithEnvironmentID("env_01J771YWRSYNZ246JJ48ECE2XW").Save()
-		fmt.Println(a.ID)
-	}
 }

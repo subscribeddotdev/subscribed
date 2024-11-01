@@ -11,7 +11,7 @@ info:
   version: 0.0.1
 externalDocs:
   description: https://github.com/subscribeddotdev/subscribed-backend/README.md
-  url: https://github.com/subscribeddotdev/subscribed-backend
+  url: https://github.com/subscribeddotdev/subscribed
 servers:
   - url: http://localhost:8080
 paths:
@@ -21,10 +21,10 @@ paths:
         - Health
       operationId: healthCheck
       responses:
-        '200':
+        "200":
           description: OK
         default:
-          $ref: '#/components/responses/DefaultError'
+          $ref: "#/components/responses/DefaultError"
   /applications:
     post:
       tags:
@@ -38,37 +38,37 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateApplicationRequest'
+              $ref: "#/components/schemas/CreateApplicationRequest"
       responses:
-        '201':
+        "201":
           description: Created
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CreateApplicationPayload'
+                $ref: "#/components/schemas/CreateApplicationPayload"
         default:
-          $ref: '#/components/responses/DefaultError'
+          $ref: "#/components/responses/DefaultError"
     get:
       tags:
         - Applications
       operationId: getApplications
       summary: Returns a list of applications based on the org_id and environment_id
       parameters:
-        - $ref: '#/components/parameters/environmentId'
-        - $ref: '#/components/parameters/paginationParamLimit'
-        - $ref: '#/components/parameters/paginationParamPage'
+        - $ref: "#/components/parameters/environmentId"
+        - $ref: "#/components/parameters/paginationParamLimit"
+        - $ref: "#/components/parameters/paginationParamPage"
       security:
-        - ApiKeyAuth: [ ]
-        - BearerAuth: [ ]
+        - ApiKeyAuth: []
+        - BearerAuth: []
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GetApplicationsPayload'
+                $ref: "#/components/schemas/GetApplicationsPayload"
         default:
-          $ref: '#/components/responses/DefaultError'
+          $ref: "#/components/responses/DefaultError"
   /applications/{applicationID}:
     get:
       tags:
@@ -76,21 +76,21 @@ paths:
       operationId: getApplicationById
       summary: Returns an application
       security:
-        - ApiKeyAuth: [ ]
-        - BearerAuth: [ ]
+        - ApiKeyAuth: []
+        - BearerAuth: []
       parameters:
-        - $ref: '#/components/parameters/applicationId'
+        - $ref: "#/components/parameters/applicationId"
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GetApplicationByIdPayload'
-        '404':
-          $ref: '#/components/responses/NotFoundError'
+                $ref: "#/components/schemas/GetApplicationByIdPayload"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
         default:
-          $ref: '#/components/responses/DefaultError'
+          $ref: "#/components/responses/DefaultError"
   /applications/{applicationID}/endpoints:
     post:
       tags:
@@ -98,7 +98,7 @@ paths:
       operationId: addEndpoint
       summary: Add an endpoint to an application
       security:
-        - BearerAuth: [ ]
+        - BearerAuth: []
       parameters:
         - name: applicationID
           in: path
@@ -110,12 +110,12 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/AddEndpointRequest'
+              $ref: "#/components/schemas/AddEndpointRequest"
       responses:
-        '201':
+        "201":
           description: CREATED
         default:
-          $ref: '#/components/responses/DefaultError'
+          $ref: "#/components/responses/DefaultError"
   /applications/{applicationID}/messages:
     post:
       tags:
@@ -125,18 +125,18 @@ paths:
       security:
         - ApiKeyAuth: []
       parameters:
-        - $ref: '#/components/parameters/applicationId'
+        - $ref: "#/components/parameters/applicationId"
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/SendMessageRequest'
+              $ref: "#/components/schemas/SendMessageRequest"
       responses:
-        '201':
+        "201":
           description: CREATED
         default:
-          $ref: '#/components/responses/DefaultError'
+          $ref: "#/components/responses/DefaultError"
   /api-keys:
     get:
       tags:
@@ -144,7 +144,7 @@ paths:
       operationId: getAllApiKeys
       summary: Get all api keys
       security:
-        - BearerAuth: [ ]
+        - BearerAuth: []
       parameters:
         - name: environment_id
           in: query
@@ -152,36 +152,36 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GetAllApiKeysPayload'
+                $ref: "#/components/schemas/GetAllApiKeysPayload"
         default:
-          $ref: '#/components/responses/DefaultError'
+          $ref: "#/components/responses/DefaultError"
     post:
       tags:
         - ApiKeys
       operationId: createApiKey
       summary: Create a new api key
       security:
-        - BearerAuth: [ ]
+        - BearerAuth: []
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateApiKeyRequest'
+              $ref: "#/components/schemas/CreateApiKeyRequest"
       responses:
-        '201':
+        "201":
           description: CREATED
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CreateApiKeyPayload'
+                $ref: "#/components/schemas/CreateApiKeyPayload"
         default:
-          $ref: '#/components/responses/DefaultError'
+          $ref: "#/components/responses/DefaultError"
   /api-keys/{apiKeyId}:
     delete:
       tags:
@@ -189,7 +189,7 @@ paths:
       operationId: destroyApiKey
       summary: Destroy a new api key given an id
       security:
-        - BearerAuth: [ ]
+        - BearerAuth: []
       parameters:
         - name: apiKeyId
           in: path
@@ -197,10 +197,10 @@ paths:
             type: string
           required: true
       responses:
-        '204':
+        "204":
           description: DELETED
         default:
-          $ref: '#/components/responses/DefaultError'
+          $ref: "#/components/responses/DefaultError"
   /event-types:
     post:
       tags:
@@ -208,42 +208,42 @@ paths:
       operationId: createEventType
       summary: Creates a new event type
       security:
-      - BearerAuth: [ ]
+        - BearerAuth: []
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateEventTypeRequest'
+              $ref: "#/components/schemas/CreateEventTypeRequest"
       responses:
-        '201':
+        "201":
           description: Created
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CreateEventTypePayload'
+                $ref: "#/components/schemas/CreateEventTypePayload"
         default:
-          $ref: '#/components/responses/DefaultError'
+          $ref: "#/components/responses/DefaultError"
     get:
       tags:
         - EventTypes
       operationId: getEventTypes
       summary: Get event types by org_id
       security:
-        - BearerAuth: [ ]
-        - ApiKeyAuth: [ ]
+        - BearerAuth: []
+        - ApiKeyAuth: []
       parameters:
-        - $ref: '#/components/parameters/paginationParamLimit'
-        - $ref: '#/components/parameters/paginationParamPage'
+        - $ref: "#/components/parameters/paginationParamLimit"
+        - $ref: "#/components/parameters/paginationParamPage"
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GetEventTypesPayload'
+                $ref: "#/components/schemas/GetEventTypesPayload"
         default:
-          $ref: '#/components/responses/DefaultError'
+          $ref: "#/components/responses/DefaultError"
   /event-types/{eventTypeID}:
     get:
       tags:
@@ -257,17 +257,17 @@ paths:
           schema:
             type: string
       security:
-        - BearerAuth: [ ]
-        - ApiKeyAuth: [ ]
+        - BearerAuth: []
+        - ApiKeyAuth: []
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GetEventTypeByIdPayload'
+                $ref: "#/components/schemas/GetEventTypeByIdPayload"
         default:
-          $ref: '#/components/responses/DefaultError'
+          $ref: "#/components/responses/DefaultError"
   /signup:
     post:
       tags:
@@ -279,12 +279,12 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/SignupRequest'
+              $ref: "#/components/schemas/SignupRequest"
       responses:
-        '201':
+        "201":
           description: CREATED
         default:
-          $ref: '#/components/responses/DefaultError'
+          $ref: "#/components/responses/DefaultError"
   /signin:
     post:
       tags:
@@ -296,16 +296,16 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/SigninRequest'
+              $ref: "#/components/schemas/SigninRequest"
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SignInPayload'
+                $ref: "#/components/schemas/SignInPayload"
         default:
-          $ref: '#/components/responses/DefaultError'
+          $ref: "#/components/responses/DefaultError"
   /environments:
     get:
       tags:
@@ -313,25 +313,25 @@ paths:
       operationId: getEnvironments
       summary: Get all environments
       security:
-        - BearerAuth: [ ]
+        - BearerAuth: []
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GetAllEnvironmentsPayload'
+                $ref: "#/components/schemas/GetAllEnvironmentsPayload"
         default:
-          $ref: '#/components/responses/DefaultError'
+          $ref: "#/components/responses/DefaultError"
 
 components:
   parameters:
     applicationId:
-        name: applicationID
-        in: path
-        required: true
-        schema:
-          type: string
+      name: applicationID
+      in: path
+      required: true
+      schema:
+        type: string
     environmentId:
       name: environmentID
       in: query
@@ -370,7 +370,7 @@ components:
         last_name:
           type: string
     SigninRequest:
-      required: [ email, password ]
+      required: [email, password]
       type: object
       properties:
         email:
@@ -392,7 +392,7 @@ components:
           type: string
     # Endpoints
     AddEndpointRequest:
-      required: [ url ]
+      required: [url]
       properties:
         url:
           type: string
@@ -416,32 +416,32 @@ components:
           type: string
           format: date-time
     CreateApplicationRequest:
-      required: [ name ]
+      required: [name]
       properties:
         name:
           type: string
     CreateApplicationPayload:
-        required: [ id ]
-        properties:
-          id:
-            type: string
+      required: [id]
+      properties:
+        id:
+          type: string
     GetApplicationsPayload:
       required: [pagination, data]
       properties:
         pagination:
-          $ref: '#/components/schemas/Pagination'
+          $ref: "#/components/schemas/Pagination"
         data:
           type: array
           items:
-            $ref: '#/components/schemas/Application'
+            $ref: "#/components/schemas/Application"
     GetApplicationByIdPayload:
-      required: [ data ]
+      required: [data]
       properties:
         data:
-            $ref: '#/components/schemas/Application'
+          $ref: "#/components/schemas/Application"
     # Messages
     SendMessageRequest:
-      required: [ payload ]
+      required: [payload]
       properties:
         event_type_id:
           type: string
@@ -479,24 +479,24 @@ components:
           type: string
           format: date-time
     CreateEventTypePayload:
-      required: [ id ]
+      required: [id]
       properties:
         id:
           type: string
     GetEventTypesPayload:
-      required: [ pagination, data ]
+      required: [pagination, data]
       properties:
         pagination:
-          $ref: '#/components/schemas/Pagination'
+          $ref: "#/components/schemas/Pagination"
         data:
           type: array
           items:
-            $ref: '#/components/schemas/EventType'
+            $ref: "#/components/schemas/EventType"
     GetEventTypeByIdPayload:
-      required: [ data ]
+      required: [data]
       properties:
         data:
-          $ref: '#/components/schemas/EventType'
+          $ref: "#/components/schemas/EventType"
     # API Keys
     CreateApiKeyRequest:
       required: [name, environment_id]
@@ -515,7 +515,15 @@ components:
         unmasked_api_key:
           type: string
     ApiKey:
-      required: [id, name, masked_secret_key, organization_id, environment_id, created_at]
+      required:
+        [
+          id,
+          name,
+          masked_secret_key,
+          organization_id,
+          environment_id,
+          created_at,
+        ]
       properties:
         id:
           type: string
@@ -534,12 +542,12 @@ components:
           type: string
           format: date-time
     GetAllApiKeysPayload:
-      required: [ data ]
+      required: [data]
       properties:
         data:
           type: array
           items:
-            $ref: '#/components/schemas/ApiKey'
+            $ref: "#/components/schemas/ApiKey"
     # Environments
     Environment:
       required: [id, name, organization_id, name, type, created_at]
@@ -567,7 +575,7 @@ components:
         data:
           type: array
           items:
-            $ref: '#/components/schemas/Environment'
+            $ref: "#/components/schemas/Environment"
     # Generic models
     Pagination:
       required: [total, per_page, current_page, total_pages]
@@ -599,29 +607,29 @@ components:
           description: Error custom error code such as 'email_in_use'
   responses:
     UnauthorizedError:
-      description: 'Usually causes by an authentication token missing'
+      description: "Usually causes by an authentication token missing"
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ErrorResponse'
+            $ref: "#/components/schemas/ErrorResponse"
     DefaultSuccess:
-      description: 'Default message when an operation succeeds'
+      description: "Default message when an operation succeeds"
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/GenericResponse'
+            $ref: "#/components/schemas/GenericResponse"
     NotFoundError:
-      description: 'Item not found'
+      description: "Item not found"
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ErrorResponse'
+            $ref: "#/components/schemas/ErrorResponse"
     DefaultError:
-      description: 'A generic error response'
+      description: "A generic error response"
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ErrorResponse'
+            $ref: "#/components/schemas/ErrorResponse"
   securitySchemes:
     BearerAuth:
       type: http

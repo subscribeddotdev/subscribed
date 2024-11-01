@@ -84,6 +84,11 @@ func (e *EventType) CreatedAt() time.Time {
 	return e.createdAt
 }
 
+func (e *EventType) Archive() {
+	archivedAt := time.Now()
+	e.archivedAt = &archivedAt
+}
+
 func UnMarshallEventType(
 	id EventTypeID,
 	orgID string,

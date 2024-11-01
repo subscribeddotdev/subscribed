@@ -201,6 +201,9 @@ type ApplicationId = string
 // EnvironmentId defines model for environmentId.
 type EnvironmentId = string
 
+// EventTypeID defines model for eventTypeID.
+type EventTypeID = string
+
 // PaginationParamLimit defines model for paginationParamLimit.
 type PaginationParamLimit = int
 
@@ -377,6 +380,9 @@ type ClientInterface interface {
 
 	// GetEventTypeById request
 	GetEventTypeById(ctx context.Context, eventTypeID string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// ArchiveEventType request
+	ArchiveEventType(ctx context.Context, eventTypeID EventTypeID, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// HealthCheck request
 	HealthCheck(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -586,6 +592,18 @@ func (c *Client) CreateEventType(ctx context.Context, body CreateEventTypeJSONRe
 
 func (c *Client) GetEventTypeById(ctx context.Context, eventTypeID string, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetEventTypeByIdRequest(c.Server, eventTypeID)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) ArchiveEventType(ctx context.Context, eventTypeID EventTypeID, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewArchiveEventTypeRequest(c.Server, eventTypeID)
 	if err != nil {
 		return nil, err
 	}
@@ -1186,6 +1204,40 @@ func NewGetEventTypeByIdRequest(server string, eventTypeID string) (*http.Reques
 	return req, nil
 }
 
+// NewArchiveEventTypeRequest generates requests for ArchiveEventType
+func NewArchiveEventTypeRequest(server string, eventTypeID EventTypeID) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "eventTypeID", runtime.ParamLocationPath, eventTypeID)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/event-types/%s/archive", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 // NewHealthCheckRequest generates requests for HealthCheck
 func NewHealthCheckRequest(server string) (*http.Request, error) {
 	var err error
@@ -1381,6 +1433,9 @@ type ClientWithResponsesInterface interface {
 
 	// GetEventTypeByIdWithResponse request
 	GetEventTypeByIdWithResponse(ctx context.Context, eventTypeID string, reqEditors ...RequestEditorFn) (*GetEventTypeByIdResponse, error)
+
+	// ArchiveEventTypeWithResponse request
+	ArchiveEventTypeWithResponse(ctx context.Context, eventTypeID EventTypeID, reqEditors ...RequestEditorFn) (*ArchiveEventTypeResponse, error)
 
 	// HealthCheckWithResponse request
 	HealthCheckWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*HealthCheckResponse, error)
@@ -1670,6 +1725,28 @@ func (r GetEventTypeByIdResponse) StatusCode() int {
 	return 0
 }
 
+type ArchiveEventTypeResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSONDefault  *DefaultError
+}
+
+// Status returns HTTPResponse.Status
+func (r ArchiveEventTypeResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r ArchiveEventTypeResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
 type HealthCheckResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -1883,6 +1960,15 @@ func (c *ClientWithResponses) GetEventTypeByIdWithResponse(ctx context.Context, 
 		return nil, err
 	}
 	return ParseGetEventTypeByIdResponse(rsp)
+}
+
+// ArchiveEventTypeWithResponse request returning *ArchiveEventTypeResponse
+func (c *ClientWithResponses) ArchiveEventTypeWithResponse(ctx context.Context, eventTypeID EventTypeID, reqEditors ...RequestEditorFn) (*ArchiveEventTypeResponse, error) {
+	rsp, err := c.ArchiveEventType(ctx, eventTypeID, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseArchiveEventTypeResponse(rsp)
 }
 
 // HealthCheckWithResponse request returning *HealthCheckResponse
@@ -2310,6 +2396,32 @@ func ParseGetEventTypeByIdResponse(rsp *http.Response) (*GetEventTypeByIdRespons
 	return response, nil
 }
 
+// ParseArchiveEventTypeResponse parses an HTTP response from a ArchiveEventTypeWithResponse call
+func ParseArchiveEventTypeResponse(rsp *http.Response) (*ArchiveEventTypeResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ArchiveEventTypeResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest DefaultError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
+}
+
 // ParseHealthCheckResponse parses an HTTP response from a HealthCheckWithResponse call
 func ParseHealthCheckResponse(rsp *http.Response) (*HealthCheckResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
@@ -2398,39 +2510,40 @@ func ParseSignUpResponse(rsp *http.Response) (*SignUpResponse, error) {
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
+	"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",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

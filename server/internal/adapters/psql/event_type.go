@@ -90,6 +90,46 @@ func (e EventTypeRepository) ByID(ctx context.Context, orgID string, id domain.E
 	return mapRowToEventType(row), nil
 }
 
+func (e EventTypeRepository) Update(
+	ctx context.Context,
+	orgId string,
+	id domain.EventTypeID,
+	updaterFn func(e *domain.EventType) error,
+) error {
+	row, err := models.EventTypes(
+		models.EventTypeWhere.ID.EQ(id.String()),
+		models.EventTypeWhere.OrgID.EQ(orgId),
+	).One(ctx, e.db)
+	if errors.Is(err, sql.ErrNoRows) {
+		return domain.ErrEventTypeNotFound
+	}
+	if err != nil {
+		return fmt.Errorf("error querying event type by id: %w", err)
+	}
+
+	eventType := mapRowToEventType(row)
+
+	err = updaterFn(eventType)
+	if err != nil {
+		return err
+	}
+
+	row.ArchivedAt = null.TimeFromPtr(eventType.ArchivedAt())
+	row.Schema = null.StringFrom(eventType.Schema())
+	row.SchemaExample = null.StringFrom(eventType.SchemaExample())
+	row.Description = null.StringFrom(eventType.Description())
+
+	_, err = row.Update(ctx, e.db, boil.Columns{
+		Kind: 0,
+		Cols: []string{"archived_at", "schema", "schema_example", "description"},
+	})
+	if err != nil {
+		return fmt.Errorf("error updating event type '%s': %v", id, err)
+	}
+
+	return nil
+}
+
 func mapRowsToEventTypes(rows []*models.EventType) []domain.EventType {
 	eventTypes := make([]domain.EventType, len(rows))
 	for i, row := range rows {

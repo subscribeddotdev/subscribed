@@ -96,6 +96,7 @@ func run(logger *logs.Logger) error {
 		return err
 	}
 	defer func() { _ = subscriber.Close() }()
+
 	eventPublisher, err := events.NewPublisher(publisher)
 	if err != nil {
 		return err
@@ -121,7 +122,8 @@ func run(logger *logs.Logger) error {
 			SendMessage: observability.NewCommandDecorator[command.SendMessage](command.NewSendMessageHandler(txProvider, endpointRepo), logger),
 
 			// Event types
-			CreateEventType: observability.NewCommandWithResultDecorator[command.CreateEventType, domain.EventTypeID](command.NewCreateEventTypeHandler(eventTypeRepo), logger),
+			CreateEventType:  observability.NewCommandWithResultDecorator[command.CreateEventType, domain.EventTypeID](command.NewCreateEventTypeHandler(eventTypeRepo), logger),
+			ArchiveEventType: observability.NewCommandDecorator[command.ArchiveEventType](command.NewArchiveEventTypeHandler(eventTypeRepo), logger),
 
 			// API Keys
 			CreateApiKey:  observability.NewCommandWithResultDecorator[command.CreateApiKey, *domain.ApiKey](command.NewCreateApiKeyHandler(apiKeyRepo, envRepo), logger),

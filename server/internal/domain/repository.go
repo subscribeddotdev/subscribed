@@ -28,6 +28,7 @@ type ApplicationRepository interface {
 type EventTypeRepository interface {
 	Insert(ctx context.Context, eventType *EventType) error
 	ByID(ctx context.Context, orgID string, id EventTypeID) (*EventType, error)
+	Update(ctx context.Context, orgId string, id EventTypeID, fn func(e *EventType) error) error
 }
 
 type EndpointRepository interface {

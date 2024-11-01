@@ -389,6 +389,10 @@ func (h handlers) GetEventTypeById(c echo.Context, eventTypeID string) error {
 	})
 }
 
+func (h handlers) ArchiveEventType(c echo.Context, eventTypeID EventTypeID) error {
+	return c.NoContent(http.StatusNoContent)
+}
+
 func (h handlers) resolveJwtClaimsFromCtx(c echo.Context) (*jwtCustomClaims, error) {
 	claims, ok := c.Get("user_claims").(*jwtCustomClaims)
 	if !ok {
